@@ -25,7 +25,7 @@ const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
           <div
             className={cn(
               "absolute inset-0 rounded-full transition-colors",
-              checked ? "bg-[#2C365D]" : "bg-gray-200"
+              checked ? "bg-[#2C365D]" : "bg-gray-200 dark:bg-gray-600"
             )}
           />
           <span
@@ -40,13 +40,13 @@ const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
             {label && (
               <label
                 htmlFor={switchId}
-                className="text-sm font-medium text-gray-900 cursor-pointer"
+                className="text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer"
               >
                 {label}
               </label>
             )}
             {helperText && (
-              <p className="mt-1 text-sm text-gray-600">{helperText}</p>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{helperText}</p>
             )}
           </div>
         )}

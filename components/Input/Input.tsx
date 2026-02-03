@@ -17,7 +17,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={inputId}
-            className="mb-2 block text-sm font-medium text-gray-900"
+            className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100"
           >
             {label}
           </label>
@@ -27,10 +27,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           id={inputId}
           ref={ref}
           className={cn(
-            "flex h-10 w-full rounded-lg border bg-white px-3 py-2 text-sm transition-colors",
+            "flex h-10 w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-900 transition-colors dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder:text-gray-400",
             "file:border-0 file:bg-transparent file:text-sm file:font-medium",
             "placeholder:text-gray-400",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2C365D] focus-visible:ring-offset-2",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2C365D] focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800",
             "disabled:cursor-not-allowed disabled:opacity-50",
             error
               ? "border-[#C40000] focus-visible:ring-[#C40000]"
@@ -43,7 +43,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <p
             className={cn(
               "mt-2 text-sm",
-              error ? "text-[#C40000]" : "text-gray-600"
+              error ? "text-[#C40000]" : "text-gray-600 dark:text-gray-400"
             )}
           >
             {helperText}
