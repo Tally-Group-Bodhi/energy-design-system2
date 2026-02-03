@@ -43,19 +43,34 @@ export default function TallyAcquirePage() {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       {/* Top App Bar */}
-      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-white px-6 dark:bg-gray-950/90">
+      <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-white px-6 dark:border-gray-800 dark:bg-gray-950/90">
+        {/* Left: Logo */}
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center">
+            {/* Light mode logo */}
             <Image
               src="/TallyAcquire.svg"
               alt="Tally Acquire"
-              width={98}
-              height={30}
-              className="h-6 w-auto"
+              width={140}
+              height={40}
+              className="h-8 w-auto block dark:hidden"
+              priority
+            />
+            {/* Dark mode logo */}
+            <Image
+              src="/TallyAcquire_darkmode.svg"
+              alt="Tally Acquire"
+              width={140}
+              height={40}
+              className="h-8 w-auto hidden dark:block"
               priority
             />
           </Link>
-          <div className="relative hidden w-80 md:block">
+        </div>
+
+        {/* Center: Search */}
+        <div className="flex flex-1 justify-center">
+          <div className="relative hidden w-full max-w-md md:block">
             <Icon
               name="search"
               size={20}
@@ -68,6 +83,8 @@ export default function TallyAcquirePage() {
             />
           </div>
         </div>
+
+        {/* Right: Actions */}
         <div className="flex items-center gap-3">
           <button
             type="button"

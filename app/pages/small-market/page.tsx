@@ -98,25 +98,25 @@ function StatusCard({ label, value, icon, variant = "default" }: { label: string
   return (
     <div className={cn(
       "flex items-center gap-3 rounded-lg border p-4 shadow-none",
-      variant === "success" ? "border-[#008000]/20 bg-[#D1FAE5]/30" : 
-      variant === "info" ? "border-[#0074C4]/20 bg-[#DBEAFE]/30" : 
-      "border-border bg-card"
+      variant === "success" ? "border-[#008000]/20 bg-[#D1FAE5]/30 dark:border-emerald-500/30 dark:bg-emerald-500/10" : 
+      variant === "info" ? "border-[#0074C4]/20 bg-[#DBEAFE]/30 dark:border-blue-500/30 dark:bg-blue-500/10" : 
+      "border-border bg-card dark:border-gray-800 dark:bg-gray-900/40"
     )}>
       <div className={cn(
         "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
-        variant === "success" ? "bg-[#008000]/10" :
-        variant === "info" ? "bg-[#0074C4]/10" :
-        "bg-gray-100"
+        variant === "success" ? "bg-[#008000]/10 dark:bg-emerald-500/20" :
+        variant === "info" ? "bg-[#0074C4]/10 dark:bg-blue-500/20" :
+        "bg-gray-100 dark:bg-gray-800"
       )}>
         <Icon name={icon} size={20} className={cn(
-          variant === "success" ? "text-[#008000]" :
-          variant === "info" ? "text-[#0074C4]" :
-          "text-gray-600"
+          variant === "success" ? "text-[#008000] dark:text-emerald-300" :
+          variant === "info" ? "text-[#0074C4] dark:text-blue-300" :
+          "text-gray-600 dark:text-gray-300"
         )} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="mt-0.5 text-sm font-semibold text-gray-900">{value}</p>
+        <p className="text-xs text-muted-foreground dark:text-gray-400">{label}</p>
+        <p className="mt-0.5 text-sm font-semibold text-gray-900 dark:text-gray-100">{value}</p>
       </div>
     </div>
   );
@@ -132,31 +132,45 @@ export default function SmallMarketPage() {
   const collapseAll = () => setCardOpenState(() => Object.fromEntries(DETAILS_CARD_TITLES.map((t) => [t, false])));
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       {/* App Bar */}
-      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-white px-6">
+      <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-white px-6 dark:border-gray-800 dark:bg-gray-950/90">
+        {/* Left: Logo */}
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center">
             <Image
               src="/TallyPlus.svg"
               alt="Tally+"
-              width={82}
-              height={30}
-              className="h-6 w-auto"
+              width={140}
+              height={40}
+              className="h-8 w-auto"
               priority
             />
           </Link>
-          <div className="relative hidden w-80 md:block">
-            <Icon name="search" size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        </div>
+
+        {/* Center: Search */}
+        <div className="flex flex-1 justify-center">
+          <div className="relative hidden w-full max-w-md md:block">
+            <Icon
+              name="search"
+              size={20}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+            />
             <input
               type="search"
               placeholder="Search"
-              className="h-10 w-full rounded-lg border border-border bg-gray-50 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2C365D] focus:outline-none focus:ring-1 focus:ring-[#2C365D]"
+              className="h-10 w-full rounded-lg border border-border bg-gray-50 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2C365D] focus:outline-none focus:ring-1 focus:ring-[#2C365D] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
             />
           </div>
         </div>
+
+        {/* Right: Actions */}
         <div className="flex items-center gap-3">
-          <button type="button" className="rounded p-2 text-gray-500 hover:bg-gray-100">
+          <button
+            type="button"
+            className="rounded p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/80"
+          >
             <Icon name="grid_view" size={20} />
           </button>
           <Avatar className="h-9 w-9">
@@ -167,7 +181,7 @@ export default function SmallMarketPage() {
 
       <div className="flex min-w-0 flex-1 overflow-hidden">
       {/* Left Navigation Bar */}
-      <aside className="flex w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-white">
+      <aside className="flex w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-white dark:border-gray-800 dark:bg-gray-950">
         <div className="min-h-0 flex-1 overflow-y-auto">
         <nav className="flex flex-col p-2">
           {LEFT_NAV_ITEMS.map((item) => (
@@ -178,21 +192,26 @@ export default function SmallMarketPage() {
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors",
                 activeNavId === item.id
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                  ? "bg-gray-100 text-gray-900 dark:bg-[#7c8cb8]/20 dark:text-[#7c8cb8]"
+                  : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-gray-100"
               )}
             >
               <Icon
                 name={item.icon as "home"}
                 size={20}
-                className={cn("font-extralight transition-colors", activeNavId === item.id ? "text-gray-900" : "text-gray-500 group-hover:text-gray-900")}
+                className={cn(
+                  "font-extralight transition-colors",
+                  activeNavId === item.id
+                    ? "text-gray-900 dark:text-[#7c8cb8]"
+                    : "text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100"
+                )}
               />
               <span className="leading-tight">{item.label}</span>
             </button>
           ))}
         </nav>
         </div>
-        <div className="shrink-0 border-t border-border p-3">
+        <div className="shrink-0 border-t border-border p-3 dark:border-gray-800">
           <Image src="/PoweredByTallyBadgeDark.svg" alt="Powered by Tally" width={120} height={29} className="w-[120px] h-auto" />
         </div>
       </aside>
@@ -202,29 +221,42 @@ export default function SmallMarketPage() {
         <div className="mx-auto max-w-[1600px] px-6 py-6">
         {/* Breadcrumb */}
         <Breadcrumb className="mb-4">
-          <BreadcrumbList className="items-center gap-1.5 text-sm text-gray-700">
+          <BreadcrumbList className="items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/" className="flex items-center text-gray-700 transition-colors hover:text-gray-900">
-                  <Icon name="home" size={18} />
+                <Link
+                  href="/"
+                  className="flex items-center text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                >
+                  <Icon name="home" size={18} className="text-gray-600 dark:text-gray-400" />
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="text-gray-400 [&>svg]:size-4" />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/pages" className="text-gray-700 transition-colors hover:text-gray-900">Customers</Link>
+                <Link
+                  href="/pages"
+                  className="text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                >
+                  Customers
+                </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="text-gray-400 [&>svg]:size-4" />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/pages/small-market" className="text-gray-700 transition-colors hover:text-gray-900">Tally+ Small Market Accounts</Link>
+                <Link
+                  href="/pages/small-market"
+                  className="text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                >
+                  Tally+ Small Market Accounts
+                </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="text-gray-400 [&>svg]:size-4" />
             <BreadcrumbItem>
-              <BreadcrumbPage className="rounded bg-gray-100 px-2.5 py-1 font-normal text-gray-900">
+              <BreadcrumbPage className="rounded bg-gray-100 px-2.5 py-1 font-normal text-gray-900 dark:bg-gray-800 dark:text-gray-100">
                 104063774 - Shirley Anderson
               </BreadcrumbPage>
             </BreadcrumbItem>
@@ -235,7 +267,7 @@ export default function SmallMarketPage() {
         <div className="mb-4">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
                 104063774 - Shirley Anderson
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
@@ -277,20 +309,26 @@ export default function SmallMarketPage() {
 
         {/* Tabs */}
         <Tabs value={tabValue} onValueChange={setTabValue} className="mb-6">
-          <TabsList className="mb-6 h-10 flex-nowrap justify-start gap-1 rounded-lg bg-gray-100 p-1 text-gray-600">
+          <TabsList className="mb-6 h-10 flex-nowrap justify-start gap-1 rounded-lg bg-gray-100 p-1 text-gray-600 dark:bg-gray-800 dark:text-gray-200">
             {TAB_CONFIG.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                className="text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:text-gray-200 dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-gray-100"
+              >
+                {tab.label}
+              </TabsTrigger>
             ))}
           </TabsList>
 
           {/* Details Tab */}
           <TabsContent value="details" className="mt-0">
             <div className="mb-4 flex flex-wrap items-center gap-3">
-              <h2 className="text-lg font-semibold text-gray-900">Account Details</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Account Details</h2>
               <button
                 type="button"
                 onClick={allCardsOpen ? collapseAll : expandAll}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
                 aria-label={allCardsOpen ? "Collapse all" : "Expand all"}
               >
                 {allCardsOpen ? (
@@ -350,11 +388,11 @@ export default function SmallMarketPage() {
                       <Input label="Invoice Template" defaultValue="Standard Residential" />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-900">
+                      <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
                         Custom Invoice Message
                       </label>
                       <textarea
-                        className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2C365D] focus-visible:ring-offset-2"
+                        className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2C365D] focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                         rows={3}
                         defaultValue="The Australian Government and your State Government require us to provide you with information about energy rebates and concessions."
                       />
@@ -388,25 +426,25 @@ export default function SmallMarketPage() {
                   open={cardOpenState["Contact Information"]}
                   onOpenChange={(open) => setCardOpenState((prev) => ({ ...prev, "Contact Information": open }))}
                 >
-                  <div className="mb-4 flex items-center justify-between rounded-lg border border-border bg-gray-50 p-4">
+                  <div className="mb-4 flex items-center justify-between rounded-lg border border-border bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
                     <div>
-                      <p className="text-sm font-semibold text-gray-900">Mr Shirley Anderson</p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Mr Shirley Anderson</p>
                       <p className="mt-1 text-xs text-muted-foreground">Primary Contact since 14 Apr 2025</p>
                     </div>
                     <Badge variant="info">Primary</Badge>
                   </div>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     <div className="flex items-center gap-2">
-                      <Icon name="phone" size={18} className="text-gray-500" />
-                      <span className="text-sm text-gray-900">0491 579 760</span>
+                      <Icon name="phone" size={18} className="text-gray-500 dark:text-gray-400" />
+                      <span className="text-sm text-gray-900 dark:text-gray-100">0491 579 760</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Icon name="email" size={18} className="text-gray-500" />
-                      <span className="text-sm text-gray-900">shirley.anderson@email.com</span>
+                      <Icon name="email" size={18} className="text-gray-500 dark:text-gray-400" />
+                      <span className="text-sm text-gray-900 dark:text-gray-100">shirley.anderson@email.com</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Icon name="badge" size={18} className="text-gray-500" />
-                      <span className="text-sm text-gray-900">31680432</span>
+                      <Icon name="badge" size={18} className="text-gray-500 dark:text-gray-400" />
+                      <span className="text-sm text-gray-900 dark:text-gray-100">31680432</span>
                     </div>
                   </div>
                 </CollapsibleCard>
@@ -417,24 +455,24 @@ export default function SmallMarketPage() {
                   onOpenChange={(open) => setCardOpenState((prev) => ({ ...prev, "Service Address": open }))}
                 >
                   <div className="space-y-4">
-                    <div className="rounded-lg border border-border bg-gray-50 p-4">
+                    <div className="rounded-lg border border-border bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="text-xs font-medium text-muted-foreground">Service Address</p>
-                          <p className="mt-1 text-sm font-medium text-gray-900">1 Lee Walk</p>
-                          <p className="text-sm text-gray-900">Cranbourne, VIC 3977</p>
+                          <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">1 Lee Walk</p>
+                          <p className="text-sm text-gray-900 dark:text-gray-100">Cranbourne, VIC 3977</p>
                         </div>
                         <button className="text-[#2C365D] hover:text-[#2C365D]/80">
                           <Icon name="edit" size={18} />
                         </button>
                       </div>
                     </div>
-                    <div className="rounded-lg border border-border bg-gray-50 p-4">
+                    <div className="rounded-lg border border-border bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="text-xs font-medium text-muted-foreground">Postal Address</p>
-                          <p className="mt-1 text-sm font-medium text-gray-900">666-678 Lygon Street</p>
-                          <p className="text-sm text-gray-900">Carlton North, VIC 3054</p>
+                          <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">666-678 Lygon Street</p>
+                          <p className="text-sm text-gray-900 dark:text-gray-100">Carlton North, VIC 3054</p>
                         </div>
                         <button className="text-[#2C365D] hover:text-[#2C365D]/80">
                           <Icon name="edit" size={18} />
@@ -454,19 +492,19 @@ export default function SmallMarketPage() {
               {/* Sidebar - Account Events */}
               <div className="lg:col-span-4">
                 <Card className="shadow-none">
-                  <CardHeader className="border-b border-border pb-4">
-                    <CardTitle className="text-base font-bold text-gray-900">Account Events</CardTitle>
+                  <CardHeader className="border-b border-border pb-4 dark:border-gray-700">
+                    <CardTitle className="text-base font-bold text-gray-900 dark:text-gray-100">Account Events</CardTitle>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <div className="divide-y divide-border">
+                    <div className="divide-y divide-border dark:divide-gray-700">
                       {ACCOUNT_EVENTS.map((event) => (
                         <div key={event.id} className="p-4">
                           <div className="flex items-start gap-3">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C365D]/10">
-                              <Icon name="event" size={16} className="text-[#2C365D]" />
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2C365D]/10 dark:bg-[#7c8cb8]/20">
+                              <Icon name="event" size={16} className="text-[#2C365D] dark:text-[#7c8cb8]" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium text-gray-900">{event.event}</p>
+                              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{event.event}</p>
                               <p className="mt-1 text-xs text-muted-foreground">
                                 {event.date} • Performed by {event.performer}
                               </p>
@@ -487,7 +525,7 @@ export default function SmallMarketPage() {
               <Card className="shadow-none">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-bold text-gray-900">Recent Bills</CardTitle>
+                    <CardTitle className="text-base font-bold text-gray-900 dark:text-gray-100">Recent Bills</CardTitle>
                     <Button variant="outline" size="sm">
                       <Icon name="download" size={16} className="mr-1" />
                       Export
@@ -497,7 +535,7 @@ export default function SmallMarketPage() {
                 <CardContent className="px-0 pb-0">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-gray-50">
+                      <TableRow className="bg-gray-50 dark:bg-gray-800/60">
                         <TableHead className="pl-6">Invoice ID</TableHead>
                         <TableHead>Issue Date</TableHead>
                         <TableHead>Due Date</TableHead>
@@ -508,7 +546,7 @@ export default function SmallMarketPage() {
                     <TableBody>
                       {RECENT_BILLS.map((bill) => (
                         <TableRow key={bill.id}>
-                          <TableCell className="pl-6 font-medium text-gray-900">{bill.id}</TableCell>
+                          <TableCell className="pl-6 font-medium text-gray-900 dark:text-gray-100">{bill.id}</TableCell>
                           <TableCell>{bill.date}</TableCell>
                           <TableCell>{bill.dueDate}</TableCell>
                           <TableCell className="font-medium">{bill.amount}</TableCell>
@@ -531,12 +569,12 @@ export default function SmallMarketPage() {
             <div className="space-y-6">
               <Card className="shadow-none">
                 <CardHeader className="pb-4">
-                  <CardTitle className="text-base font-bold text-gray-900">Usage History</CardTitle>
+                  <CardTitle className="text-base font-bold text-gray-900 dark:text-gray-100">Usage History</CardTitle>
                 </CardHeader>
                 <CardContent className="px-0 pb-0">
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-gray-50">
+                      <TableRow className="bg-gray-50 dark:bg-gray-800/60">
                         <TableHead className="pl-6">Period</TableHead>
                         <TableHead>Electricity</TableHead>
                         <TableHead>Gas</TableHead>
@@ -546,7 +584,7 @@ export default function SmallMarketPage() {
                     <TableBody>
                       {USAGE_DATA.map((usage) => (
                         <TableRow key={usage.period}>
-                          <TableCell className="pl-6 font-medium text-gray-900">{usage.period}</TableCell>
+                          <TableCell className="pl-6 font-medium text-gray-900 dark:text-gray-100">{usage.period}</TableCell>
                           <TableCell>{usage.electricity}</TableCell>
                           <TableCell>{usage.gas}</TableCell>
                           <TableCell className="pr-6 font-medium">{usage.cost}</TableCell>
@@ -562,7 +600,7 @@ export default function SmallMarketPage() {
           {/* Other Tabs */}
           {TAB_CONFIG.filter((t) => !["details", "financial", "usage"].includes(t.value)).map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="mt-0">
-              <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground shadow-none">
+              <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground shadow-none dark:border-gray-700 dark:bg-gray-900/40">
                 <p className="capitalize">{tab.label} content would go here.</p>
               </div>
             </TabsContent>

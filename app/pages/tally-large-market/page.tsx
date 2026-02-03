@@ -113,31 +113,45 @@ export default function TallyLargeMarketPage() {
   const collapseAll = () => setCardOpenState(() => Object.fromEntries(OVERVIEW_CARD_TITLES.map((t) => [t, false])));
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       {/* App Bar */}
-      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-white px-6">
+      <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-white px-6 dark:border-gray-800 dark:bg-gray-950/90">
+        {/* Left: Logo */}
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center">
             <Image
               src="/TallyCIS_Test.svg"
               alt="Tally CIS"
-              width={82}
-              height={30}
-              className="h-6 w-auto"
+              width={140}
+              height={40}
+              className="h-8 w-auto"
               priority
             />
           </Link>
-          <div className="relative hidden w-80 md:block">
-            <Icon name="search" size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        </div>
+
+        {/* Center: Search */}
+        <div className="flex flex-1 justify-center">
+          <div className="relative hidden w-full max-w-md md:block">
+            <Icon
+              name="search"
+              size={20}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+            />
             <input
               type="search"
               placeholder="Search"
-              className="h-10 w-full rounded-lg border border-border bg-gray-50 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2C365D] focus:outline-none focus:ring-1 focus:ring-[#2C365D]"
+              className="h-10 w-full rounded-lg border border-border bg-gray-50 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2C365D] focus:outline-none focus:ring-1 focus:ring-[#2C365D] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
             />
           </div>
         </div>
+
+        {/* Right: Actions */}
         <div className="flex items-center gap-3">
-          <button type="button" className="rounded p-2 text-gray-500 hover:bg-gray-100">
+          <button
+            type="button"
+            className="rounded p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/80"
+          >
             <Icon name="grid_view" size={20} />
           </button>
           <Avatar className="h-9 w-9">
@@ -148,7 +162,7 @@ export default function TallyLargeMarketPage() {
 
       <div className="flex min-w-0 flex-1 overflow-hidden">
         {/* Left Navigation Bar */}
-        <aside className="flex w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-white">
+        <aside className="flex w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-white dark:border-gray-800 dark:bg-gray-950">
           <div className="min-h-0 flex-1 overflow-y-auto">
           <nav className="flex flex-col p-2">
             {LEFT_NAV_ITEMS.map((item) => (
@@ -159,28 +173,38 @@ export default function TallyLargeMarketPage() {
                 className={cn(
                   "group flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors",
                   activeNavId === item.id
-                    ? "bg-gray-100 text-gray-900"
-                    : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+                    ? "bg-gray-100 text-gray-900 dark:bg-[#7c8cb8]/20 dark:text-[#7c8cb8]"
+                    : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100"
                 )}
               >
                 <div className="flex min-w-0 flex-1 items-center gap-3">
                   <Icon
                     name={item.icon as "dashboard"}
                     size={20}
-                    className={cn("shrink-0 font-extralight transition-colors", activeNavId === item.id ? "text-gray-900" : "text-gray-500 group-hover:text-gray-900")}
+                    className={cn(
+                      "shrink-0 font-extralight transition-colors",
+                      activeNavId === item.id
+                        ? "text-gray-900 dark:text-[#7c8cb8]"
+                        : "text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100"
+                    )}
                   />
                   <span className="truncate">{item.label}</span>
                 </div>
                 <Icon
                   name="expand_more"
                   size={18}
-                  className={cn("shrink-0 font-extralight transition-colors", activeNavId === item.id ? "text-gray-900" : "text-gray-500 group-hover:text-gray-900")}
+                  className={cn(
+                    "shrink-0 font-extralight transition-colors",
+                    activeNavId === item.id
+                      ? "text-gray-900 dark:text-[#7c8cb8]"
+                      : "text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100"
+                  )}
                 />
               </button>
             ))}
           </nav>
           </div>
-          <div className="shrink-0 border-t border-border p-3">
+          <div className="shrink-0 border-t border-border p-3 dark:border-gray-800">
             <Image src="/PoweredByTallyBadgeDark.svg" alt="Powered by Tally" width={120} height={29} className="w-[120px] h-auto" />
           </div>
         </aside>
@@ -189,36 +213,45 @@ export default function TallyLargeMarketPage() {
         <div className="min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto max-w-[1600px] px-6 py-6">
         <Breadcrumb className="mb-4">
-          <BreadcrumbList className="items-center gap-1.5 text-sm text-gray-700">
+          <BreadcrumbList className="items-center gap-1.5 text-sm text-gray-700 dark:text-gray-200">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/" className="flex items-center text-gray-700 transition-colors hover:text-gray-900">
-                  <Icon name="home" size={18} />
+                <Link
+                  href="/"
+                  className="flex items-center text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                >
+                  <Icon name="home" size={18} className="text-gray-600 dark:text-gray-400" />
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="text-gray-400 [&>svg]:size-4" />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/pages" className="text-gray-700 transition-colors hover:text-gray-900">Customers</Link>
+                  <Link
+                  href="/pages"
+                  className="text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100"
+                >Customers</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="text-gray-400 [&>svg]:size-4" />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/pages/tally-large-market" className="text-gray-700 transition-colors hover:text-gray-900">Accounts</Link>
+                  <Link
+                  href="/pages/tally-large-market"
+                  className="text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100"
+                >Accounts</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="text-gray-400 [&>svg]:size-4" />
             <BreadcrumbItem>
-              <BreadcrumbPage className="rounded bg-gray-100 px-2.5 py-1 font-normal text-gray-900">
+              <BreadcrumbPage className="rounded bg-gray-100 px-2.5 py-1 font-normal text-gray-900 dark:bg-gray-800 dark:text-gray-100">
                 QB00171824 - Masked_Name_44D550D62
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
-        <h1 className="mb-6 text-2xl font-bold tracking-tight text-gray-900">
+        <h1 className="mb-6 text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
           QB00171824 - Masked_Name_44D550D62
         </h1>
 
@@ -226,16 +259,16 @@ export default function TallyLargeMarketPage() {
           {/* Small screens only: dropdown (hide from md up) */}
           <div className="mb-4 flex md:hidden">
             <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex h-10 w-full items-center justify-between rounded-lg border border-border bg-gray-100 px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C365D] focus:ring-offset-2">
+              <DropdownMenuTrigger className="inline-flex h-10 w-full items-center justify-between rounded-lg border border-border bg-gray-100 px-3 py-2 text-left text-sm font-medium text-gray-700 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2C365D] focus:ring-offset-2 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
                 <span>{currentTabLabel}</span>
-                <Icon name="expand_more" size={20} className="text-gray-500" />
+                <Icon name="expand_more" size={20} className="text-gray-500 dark:text-gray-400" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="min-w-[12rem] max-h-[min(70vh,20rem)] overflow-y-auto">
                 {TAB_CONFIG.map((tab) => (
                   <DropdownMenuItem
                     key={tab.value}
                     onClick={() => setTabValue(tab.value)}
-                    className={cn(tab.value === tabValue && "bg-gray-100 font-medium text-[#2C365D]")}
+                    className={cn(tab.value === tabValue && "bg-gray-100 font-medium text-[#2C365D] dark:bg-gray-800 dark:text-[#7c8cb8]")}
                   >
                     {tab.label}
                   </DropdownMenuItem>
@@ -245,16 +278,24 @@ export default function TallyLargeMarketPage() {
           </div>
           {/* Md up to just below xl: 5 tabs + More (hidden on small and on xl+) */}
           <div className="mb-4 hidden md:block xl:hidden">
-            <TabsList className="h-10 flex-nowrap justify-start gap-1 overflow-visible rounded-lg bg-gray-100 p-1 text-gray-600">
+            <TabsList className="h-10 flex-nowrap justify-start gap-1 overflow-visible rounded-lg bg-gray-100 p-1 text-gray-600 dark:bg-gray-800 dark:text-gray-200">
               {TABS_VISIBLE_ON_MD.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:text-gray-200 dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-gray-100"
+                >
+                  {tab.label}
+                </TabsTrigger>
               ))}
               <DropdownMenu>
                 <div className="relative z-10">
                   <DropdownMenuTrigger
                     className={cn(
-                      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2C365D] focus-visible:ring-offset-2",
-                      isTabInMore(tabValue) ? "bg-white text-[#2C365D] shadow-sm" : "text-gray-600 hover:text-gray-900"
+                      "inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium ring-offset-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2C365D] focus-visible:ring-offset-2 dark:ring-offset-gray-900",
+                      isTabInMore(tabValue)
+                        ? "bg-white text-[#2C365D] shadow-sm dark:bg-gray-900 dark:text-[#7c8cb8]"
+                        : "text-gray-600 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100"
                     )}
                     aria-label="More tabs"
                   >
@@ -266,7 +307,7 @@ export default function TallyLargeMarketPage() {
                       <DropdownMenuItem
                         key={tab.value}
                         onClick={() => setTabValue(tab.value)}
-                        className={cn(tab.value === tabValue && "bg-gray-100 font-medium text-[#2C365D]")}
+                    className={cn(tab.value === tabValue && "bg-gray-100 font-medium text-[#2C365D] dark:bg-gray-800 dark:text-[#7c8cb8]")}
                       >
                         {tab.label}
                       </DropdownMenuItem>
@@ -278,20 +319,26 @@ export default function TallyLargeMarketPage() {
           </div>
           {/* Xl and up only: all tabs (hidden below xl) */}
           <div className="mb-4 hidden xl:block">
-            <TabsList className="h-10 flex-nowrap justify-start gap-1 overflow-hidden rounded-lg bg-gray-100 p-1 text-gray-600">
+            <TabsList className="h-10 flex-nowrap justify-start gap-1 overflow-hidden rounded-lg bg-gray-100 p-1 text-gray-600 dark:bg-gray-800 dark:text-gray-200">
               {TAB_CONFIG.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="text-gray-700 data-[state=active]:bg-white data-[state=active]:text-gray-900 dark:text-gray-200 dark:data-[state=active]:bg-gray-900 dark:data-[state=active]:text-gray-100"
+                >
+                  {tab.label}
+                </TabsTrigger>
               ))}
             </TabsList>
           </div>
 
           <TabsContent value="overview" className="mt-0">
             <div className="mb-4 flex flex-wrap items-center gap-3">
-              <h2 className="text-lg font-semibold text-gray-900">Overview</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Overview</h2>
               <button
                 type="button"
                 onClick={allCardsOpen ? collapseAll : expandAll}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-200 dark:hover:text-gray-100"
                 aria-label={allCardsOpen ? "Collapse all" : "Expand all"}
               >
                 {allCardsOpen ? (
@@ -391,15 +438,23 @@ export default function TallyLargeMarketPage() {
 
               <div className="flex min-w-0 flex-col">
                 <Card className="flex w-full min-w-0 flex-col shadow-none">
-                  <CardHeader className="w-full space-y-0 border-b border-border pb-4">
-                    <CardTitle className="text-base font-bold text-gray-900">Interactions</CardTitle>
+                  <CardHeader className="w-full space-y-0 border-b border-border pb-4 dark:border-gray-800">
+                    <CardTitle className="text-base font-bold text-gray-900 dark:text-gray-100">Interactions</CardTitle>
                     <div className="mt-3 w-full">
-                      <div className="relative flex w-full min-w-0 items-center overflow-visible rounded-lg border border-border bg-white">
+                      <div className="relative flex w-full min-w-0 items-center overflow-visible rounded-lg border border-border bg-white dark:border-gray-700 dark:bg-gray-900">
                         <div className="flex shrink-0 items-center py-2 pl-3 pr-4">
-                          <Icon name="search" size={20} className="text-gray-500" />
+                          <Icon name="search" size={20} className="text-gray-500 dark:text-gray-400" />
                         </div>
-                        <Input placeholder="Search" className="h-10 min-w-0 flex-1 rounded-none border-0 bg-transparent pl-0 pr-12 text-sm !border-0 shadow-none outline-none focus-visible:ring-0" />
-                        <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-gray-500 hover:bg-gray-100" title="Filter" aria-label="Filter">
+                        <Input
+                          placeholder="Search"
+                          className="h-10 min-w-0 flex-1 rounded-none border-0 bg-transparent pl-0 pr-12 text-sm !border-0 shadow-none outline-none focus-visible:ring-0"
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                          title="Filter"
+                          aria-label="Filter"
+                        >
                           <Icon name="tune" size={20} />
                         </button>
                       </div>
@@ -407,22 +462,26 @@ export default function TallyLargeMarketPage() {
                   </CardHeader>
                   <CardContent className="flex flex-col gap-3 pt-4">
                     {INTERACTIONS.map((item) => (
-                      <div key={item.id} className="flex flex-col gap-3 rounded-lg bg-gray-100 p-4">
+                      <div key={item.id} className="flex flex-col gap-3 rounded-lg bg-gray-100 p-4 dark:bg-gray-900/40">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-gray-900">{item.title}</p>
-                            <p className="mt-0.5 text-sm text-gray-600">{item.category}</p>
-                            <Button variant="outline" size="sm" className="mt-2 rounded-lg border-border bg-white font-normal text-gray-900 hover:bg-gray-50">
+                            <p className="font-semibold text-gray-900 dark:text-gray-100">{item.title}</p>
+                            <p className="mt-0.5 text-sm text-gray-600 dark:text-gray-400">{item.category}</p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="mt-2 rounded-lg border-border bg-white font-normal text-gray-900 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:hover:bg-gray-800"
+                            >
                               <Icon name="add" size={16} className="mr-1" /> Add
                             </Button>
                           </div>
                           <div className="flex shrink-0 flex-col items-end text-right">
-                            <span className="text-sm font-medium text-gray-900">{item.user}</span>
-                            <span className="mt-0.5 text-xs text-gray-500">{item.time}</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{item.user}</span>
+                            <span className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">{item.time}</span>
                           </div>
                         </div>
-                        <div className="flex items-center justify-end gap-2 border-t border-border pt-2">
-                          <span className="text-sm font-medium text-gray-900">2 interactions</span>
+                        <div className="flex items-center justify-end gap-2 border-t border-border pt-2 dark:border-gray-700">
+                          <span className="text-sm font-medium text-gray-900 dark:text-gray-100">2 interactions</span>
                           <span className="rounded bg-[#0074C4] px-2 py-0.5 text-xs font-medium text-white">11223344</span>
                         </div>
                       </div>
@@ -435,7 +494,7 @@ export default function TallyLargeMarketPage() {
 
           {TAB_CONFIG.filter((t) => t.value !== "overview").map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="mt-0">
-              <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground">
+              <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground dark:border-gray-700 dark:bg-gray-900/40">
                 <p className="capitalize">{tab.label} content would go here.</p>
               </div>
             </TabsContent>

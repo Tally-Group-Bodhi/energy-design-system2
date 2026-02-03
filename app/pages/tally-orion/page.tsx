@@ -75,9 +75,10 @@ export default function TallyOrionPage() {
   const collapseAll = () => setCardOpenState(() => Object.fromEntries(SECTION_CARD_TITLES.map((t) => [t, false])));
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50">
+    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       {/* Top Header */}
-      <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-white px-6">
+      <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-white px-6 dark:border-gray-800 dark:bg-gray-950/90">
+        {/* Left: Logo */}
         <div className="flex items-center gap-4">
           <Link href="/" className="flex items-center">
             <Image
@@ -89,17 +90,27 @@ export default function TallyOrionPage() {
               priority
             />
           </Link>
-          <div className="relative hidden w-80 md:block">
-            <Icon name="search" size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        </div>
+
+        {/* Center: Search */}
+        <div className="flex flex-1 justify-center">
+          <div className="relative hidden w-full max-w-md md:block">
+            <Icon
+              name="search"
+              size={20}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
+            />
             <input
               type="search"
               placeholder="Search"
-              className="h-10 w-full rounded-lg border border-border bg-gray-50 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2C365D] focus:outline-none focus:ring-1 focus:ring-[#2C365D]"
+              className="h-10 w-full rounded-lg border border-border bg-gray-50 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#2C365D] focus:outline-none focus:ring-1 focus:ring-[#2C365D] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
             />
           </div>
         </div>
+
+        {/* Right: Actions */}
         <div className="flex items-center gap-3">
-          <button type="button" className="rounded p-2 text-gray-500 hover:bg-gray-100">
+          <button type="button" className="rounded p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800/80">
             <Icon name="grid_view" size={20} />
           </button>
           <Avatar className="h-9 w-9">
@@ -110,24 +121,42 @@ export default function TallyOrionPage() {
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left Sidebar */}
-        <aside className="flex w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-white">
+        <aside className="flex w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-white dark:border-gray-800 dark:bg-gray-950">
           <div className="min-h-0 flex-1 overflow-y-auto">
           <nav className="flex flex-col p-2">
             {NAV_ITEMS.map((item) =>
               item.subItems ? (
                 <Collapsible key={item.label} open={item.active && contactExpanded} onOpenChange={(o) => item.active && setContactExpanded(o)}>
                   <CollapsibleTrigger className={cn(
-                    "group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900",
-                    item.active && "bg-gray-100 text-gray-900"
+                    "group flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+                    item.active && "bg-gray-100 text-gray-900 dark:bg-[#7c8cb8]/20 dark:text-[#7c8cb8]"
                   )}>
                     <div className="flex items-center gap-3">
-                      <Icon name={item.icon as "home"} size={20} className={cn("font-extralight transition-colors", item.active ? "text-gray-900" : "text-gray-500 group-hover:text-gray-900")} />
+                      <Icon
+                        name={item.icon as "home"}
+                        size={20}
+                        className={cn(
+                          "font-extralight transition-colors",
+                          item.active
+                            ? "text-gray-900 dark:text-[#7c8cb8]"
+                            : "text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100"
+                        )}
+                      />
                       {item.label}
                     </div>
-                    <Icon name={contactExpanded ? "expand_less" : "expand_more"} size={18} className={cn("font-extralight transition-colors", item.active ? "text-gray-900" : "text-gray-500 group-hover:text-gray-900")} />
+                    <Icon
+                      name={contactExpanded ? "expand_less" : "expand_more"}
+                      size={18}
+                      className={cn(
+                        "font-extralight transition-colors",
+                        item.active
+                          ? "text-gray-900 dark:text-[#7c8cb8]"
+                          : "text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100"
+                      )}
+                    />
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-border pl-3">
+                    <div className="ml-4 mt-1 space-y-0.5 border-l-2 border-border pl-3 dark:border-gray-700">
                       {item.subItems.map((sub) => (
                         <Link
                           key={sub}
@@ -135,8 +164,8 @@ export default function TallyOrionPage() {
                           className={cn(
                             "block rounded px-2 py-1.5 text-sm",
                             sub === "Details"
-                              ? "border-l-2 border-[#2C365D] bg-[#2C365D]/10 -ml-[2px] pl-[10px] font-medium text-[#2C365D]"
-                              : "text-gray-500 transition-colors hover:text-gray-900"
+                              ? "border-l-2 border-[#2C365D] bg-[#2C365D]/10 -ml-[2px] pl-[10px] font-medium text-[#2C365D] dark:border-[#7c8cb8] dark:bg-[#7c8cb8]/20 dark:text-[#7c8cb8]"
+                              : "text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
                           )}
                         >
                           {sub}
@@ -150,28 +179,39 @@ export default function TallyOrionPage() {
                   key={item.label}
                   href="#"
                   className={cn(
-                    "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900",
-                    item.active ? "bg-gray-100 text-gray-900" : "text-gray-500"
+                    "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-gray-800 dark:hover:text-gray-100",
+                    item.active
+                      ? "bg-gray-100 text-gray-900 dark:bg-[#7c8cb8]/20 dark:text-[#7c8cb8]"
+                      : "text-gray-500 dark:text-gray-300"
                   )}
                 >
-                  <Icon name={item.icon as "home"} size={20} className={cn("font-extralight transition-colors", item.active ? "text-gray-900" : "text-gray-500 group-hover:text-gray-900")} />
+                  <Icon
+                    name={item.icon as "home"}
+                    size={20}
+                    className={cn(
+                      "font-extralight transition-colors",
+                      item.active
+                        ? "text-gray-900 dark:text-[#7c8cb8]"
+                        : "text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100"
+                    )}
+                  />
                   {item.label}
                 </Link>
               )
             )}
           </nav>
           </div>
-          <div className="shrink-0 border-t border-border p-3">
+          <div className="shrink-0 border-t border-border p-3 dark:border-gray-800">
             <Image src="/PoweredByTallyBadgeDark.svg" alt="Powered by Tally" width={120} height={29} className="w-[120px] h-auto" />
           </div>
         </aside>
 
         {/* Main Content */}
-        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-gray-50">
+        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-gray-50 dark:bg-gray-900">
           {/* Info Bar - anchored to main content */}
-          <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-b border-border bg-gray-100 px-6 py-3">
-            <div className="flex items-center gap-2 text-gray-900">
-              <Icon name="home" size={18} className="text-gray-600" />
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-b border-border bg-gray-100 px-6 py-3 dark:border-gray-800 dark:bg-gray-900/70">
+            <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">
+              <Icon name="home" size={18} className="text-gray-600 dark:text-gray-400" />
               <span className="font-medium">Adam Landry (108382)</span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -213,25 +253,25 @@ export default function TallyOrionPage() {
           <div className="min-h-0 flex-1 overflow-y-auto">
             <div className="mx-auto max-w-[1600px] px-6 py-6">
             <Breadcrumb className="mb-4">
-              <BreadcrumbList className="items-center gap-1.5 text-sm text-gray-700">
+              <BreadcrumbList className="items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300">
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link href="/pages" className="text-gray-700 hover:text-gray-900">Pages</Link>
+                    <Link href="/pages" className="text-gray-700 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100">Pages</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="text-gray-400 [&>svg]:size-4" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage className="font-normal text-gray-900">Adam Landry (108382) - Contact Details</BreadcrumbPage>
+                  <BreadcrumbPage className="font-normal text-gray-900 dark:text-gray-100">Adam Landry (108382) - Contact Details</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
 
             <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900">Adam Landry (108382)</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">Adam Landry (108382)</h1>
               <button
                 type="button"
                 onClick={allCardsOpen ? collapseAll : expandAll}
-                className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900"
+                className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
                 aria-label={allCardsOpen ? "Collapse all" : "Expand all"}
               >
                 {allCardsOpen ? (
@@ -266,7 +306,7 @@ export default function TallyOrionPage() {
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="bg-blue-50">
+                        <TableRow className="bg-blue-50 dark:bg-gray-800/60">
                           <TableHead className="w-10 pl-4"><Checkbox /></TableHead>
                           <TableHead>Pending Contact</TableHead>
                           <TableHead>Contact Identifier</TableHead>
@@ -304,7 +344,7 @@ export default function TallyOrionPage() {
 
               {/* Content Tabs */}
               <Tabs value={contentTab} onValueChange={setContentTab}>
-                <TabsList className="mb-4 h-10 flex-nowrap justify-start gap-1 rounded-lg bg-gray-100 p-1 text-gray-600">
+                <TabsList className="mb-4 h-10 flex-nowrap justify-start gap-1 rounded-lg bg-gray-100 p-1 text-gray-600 dark:bg-gray-800 dark:text-gray-300">
                   <TabsTrigger value="address">Address</TabsTrigger>
                   <TabsTrigger value="phone">Phone</TabsTrigger>
                   <TabsTrigger value="identification">Identification</TabsTrigger>
@@ -327,7 +367,7 @@ export default function TallyOrionPage() {
                       </div>
                       <Table>
                         <TableHeader>
-                          <TableRow className="bg-gray-100">
+                          <TableRow className="bg-gray-100 dark:bg-gray-800/60">
                             <TableHead>Address Type</TableHead>
                             <TableHead>Street Address</TableHead>
                             <TableHead>Suburb</TableHead>
