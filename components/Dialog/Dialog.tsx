@@ -84,10 +84,10 @@ const DialogTrigger = React.forwardRef<
   const { setOpen } = React.useContext(DialogContext);
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement, {
+    return React.cloneElement(children as React.ReactElement<any>, {
       ref,
       onClick: () => setOpen(true),
-    });
+    } as React.Attributes & { onClick: () => void });
   }
 
   return (
@@ -201,10 +201,10 @@ const DialogClose = React.forwardRef<HTMLButtonElement, DialogCloseProps>(
     const { setOpen } = React.useContext(DialogContext);
 
     if (asChild && React.isValidElement(children)) {
-      return React.cloneElement(children as React.ReactElement, {
+      return React.cloneElement(children as React.ReactElement<any>, {
         ref,
         onClick: () => setOpen(false),
-      });
+      } as React.Attributes & { onClick: () => void });
     }
 
     return (

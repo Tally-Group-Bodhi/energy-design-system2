@@ -56,12 +56,12 @@ const CollapsibleTrigger = React.forwardRef<
   const { open, setOpen } = React.useContext(CollapsibleContext);
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement, {
+    return React.cloneElement(children as React.ReactElement<any>, {
       ref,
       onClick: () => setOpen(!open),
       "aria-expanded": open,
       "aria-controls": `collapsible-content`,
-    });
+    } as React.Attributes & { onClick: () => void; "aria-expanded": boolean; "aria-controls": string });
   }
 
   return (

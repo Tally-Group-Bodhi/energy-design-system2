@@ -58,11 +58,11 @@ const PopoverTrigger = React.forwardRef<
   const { open, setOpen } = React.useContext(PopoverContext);
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement, {
+    return React.cloneElement(children as React.ReactElement<any>, {
       ref,
       onClick: () => setOpen(!open),
       "aria-expanded": open,
-    });
+    } as React.Attributes & { onClick: () => void; "aria-expanded": boolean });
   }
 
   return (

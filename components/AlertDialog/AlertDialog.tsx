@@ -85,10 +85,10 @@ const AlertDialogTrigger = React.forwardRef<
   const { setOpen } = React.useContext(AlertDialogContext);
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement, {
+    return React.cloneElement(children as React.ReactElement<any>, {
       ref,
       onClick: () => setOpen(true),
-    });
+    } as React.Attributes & { onClick: () => void });
   }
 
   return (

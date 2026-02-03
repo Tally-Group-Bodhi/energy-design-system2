@@ -11,7 +11,7 @@ export interface ButtonProps
     | "warning"
     | "error"
     | "info";
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "icon";
   fullWidth?: boolean;
 }
 
@@ -48,6 +48,7 @@ export default function Button({
     sm: "px-3 py-1.5 text-sm rounded-md",
     md: "px-4 py-2 text-base rounded-lg",
     lg: "px-6 py-3 text-lg rounded-lg",
+    icon: "size-9 p-0 rounded-md",
   };
 
   const widthStyles = fullWidth ? "w-full" : "";

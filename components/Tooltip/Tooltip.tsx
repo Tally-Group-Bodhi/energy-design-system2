@@ -40,11 +40,11 @@ const TooltipTrigger = React.forwardRef<
   const { setOpen } = React.useContext(TooltipContext);
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement, {
+    return React.cloneElement(children as React.ReactElement<any>, {
       ref,
       onMouseEnter: () => setOpen(true),
       onMouseLeave: () => setOpen(false),
-    });
+    } as React.Attributes & { onMouseEnter: () => void; onMouseLeave: () => void });
   }
 
   return (

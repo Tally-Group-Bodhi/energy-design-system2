@@ -69,11 +69,11 @@ const DropdownMenuTrigger = React.forwardRef<
   const { open, setOpen } = React.useContext(DropdownMenuContext);
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement, {
+    return React.cloneElement(children as React.ReactElement<any>, {
       ref,
       onClick: () => setOpen(!open),
       "aria-expanded": open,
-    });
+    } as React.Attributes & { onClick: () => void; "aria-expanded": boolean });
   }
 
   return (

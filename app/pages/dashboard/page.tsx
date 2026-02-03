@@ -398,7 +398,7 @@ export default function DashboardPage() {
                             borderRadius: "8px",
                             border: "1px solid #E5E7EB",
                           }}
-                          formatter={(value: number) => [`${value.toLocaleString()} kWh`, ""]}
+                          formatter={(value: number | undefined) => [`${(value ?? 0).toLocaleString()} kWh`, ""]}
                         />
                         <Legend />
                         <Area
@@ -464,7 +464,7 @@ export default function DashboardPage() {
                             borderRadius: "8px",
                             border: "1px solid #E5E7EB",
                           }}
-                          formatter={(value: number) => [`$${value.toLocaleString()}`, ""]}
+                          formatter={(value: number | undefined) => [`$${(value ?? 0).toLocaleString()}`, ""]}
                         />
                       </PieChart>
                     </ResponsiveContainer>
@@ -671,7 +671,7 @@ export default function DashboardPage() {
                             borderRadius: "8px",
                             border: "1px solid #E5E7EB",
                           }}
-                          formatter={(value: number) => [`${value} kWh`, "Usage"]}
+                          formatter={(value: number | undefined) => [`${value ?? 0} kWh`, "Usage"]}
                         />
                         <Bar
                           dataKey="usage"
@@ -810,7 +810,7 @@ export default function DashboardPage() {
                           borderRadius: "8px",
                           border: "1px solid #E5E7EB",
                         }}
-                        formatter={(value: number) => [`$${value.toLocaleString()}`, ""]}
+                        formatter={(value: number | undefined) => [`$${(value ?? 0).toLocaleString()}`, ""]}
                       />
                       <Legend />
                       <Line

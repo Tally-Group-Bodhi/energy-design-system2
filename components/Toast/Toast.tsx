@@ -226,6 +226,5 @@ export {
   ToastClose,
   ToastTitle,
   ToastDescription,
-  useToast,
 };
 

@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils";
 
 export interface CollapsibleCardProps {
   title: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   defaultOpen?: boolean;
   /** Controlled: open state (use with onOpenChange) */
   open?: boolean;
@@ -36,7 +36,7 @@ export interface CollapsibleCardProps {
 
 export default function CollapsibleCard({
   title,
-  children,
+  children = null,
   defaultOpen = true,
   open: controlledOpen,
   onOpenChange,

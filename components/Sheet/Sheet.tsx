@@ -86,10 +86,10 @@ const SheetTrigger = React.forwardRef<
   const { setOpen } = React.useContext(SheetContext);
 
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement, {
+    return React.cloneElement(children as React.ReactElement<any>, {
       ref,
       onClick: () => setOpen(true),
-    });
+    } as React.Attributes & { onClick: () => void });
   }
 
   return (
@@ -213,10 +213,10 @@ const SheetClose = React.forwardRef<HTMLButtonElement, SheetCloseProps>(
     const { setOpen } = React.useContext(SheetContext);
 
     if (asChild && React.isValidElement(children)) {
-      return React.cloneElement(children as React.ReactElement, {
+      return React.cloneElement(children as React.ReactElement<any>, {
         ref,
         onClick: () => setOpen(false),
-      });
+      } as React.Attributes & { onClick: () => void });
     }
 
     return (

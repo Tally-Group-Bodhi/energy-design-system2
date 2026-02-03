@@ -2,7 +2,9 @@ import React from "react";
 import { cn } from "@/lib/utils";
 
 export interface TableProps
-  extends React.TableHTMLAttributes<HTMLTableElement> {}
+  extends React.TableHTMLAttributes<HTMLTableElement> {
+  disableWrapper?: boolean;
+}
 
 export interface TableHeaderProps
   extends React.HTMLAttributes<HTMLTableSectionElement> {}
@@ -26,14 +28,20 @@ export interface TableCaptionProps
   extends React.HTMLAttributes<HTMLTableCaptionElement> {}
 
 const Table = React.forwardRef<HTMLTableElement, TableProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, disableWrapper, ...props }, ref) => {
+    const table = (
+      <table
+        ref={ref}
+        className={cn("w-full caption-bottom text-sm", className)}
+        {...props}
+      />
+    );
+    if (disableWrapper) {
+      return table;
+    }
     return (
       <div className="relative w-full overflow-auto">
-        <table
-          ref={ref}
-          className={cn("w-full caption-bottom text-sm", className)}
-          {...props}
-        />
+        {table}
       </div>
     );
   }

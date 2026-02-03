@@ -69,15 +69,15 @@ const BreadcrumbLink = React.forwardRef<
   BreadcrumbLinkProps
 >(({ className, asChild, children, ...props }, ref) => {
   if (asChild && React.isValidElement(children)) {
-    return React.cloneElement(children as React.ReactElement, {
+    return React.cloneElement(children as React.ReactElement<any>, {
       ref,
       className: cn(
         "transition-colors hover:text-gray-900",
         className,
-        (children as React.ReactElement).props?.className
+        (children as React.ReactElement<{ className?: string }>).props?.className
       ),
       ...props,
-    });
+    } as React.Attributes & { className?: string });
   }
 
   return (
