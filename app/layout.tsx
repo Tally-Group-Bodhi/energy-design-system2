@@ -42,6 +42,7 @@ const navigationSections = [
       { label: "Tally Large Market", href: "/pages/tally-large-market" },
       { label: "Tally Glass", href: "/pages/tally-glass" },
       { label: "Tally Orion", href: "/pages/tally-orion" },
+      { label: "Tally Acquire", href: "/pages/tally-acquire" },
     ],
   },
   {

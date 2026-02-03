@@ -39,6 +39,18 @@ const SERVICE_TAGS = [
   { label: "Ombudsman", className: "bg-amber-700/20 text-amber-900" },
 ];
 
+// Compact navigation items – aligned with Tally Small Market left nav
+const COMPACT_NAV_ITEMS = [
+  { id: "dashboard", label: "Dashboard", icon: "home" },
+  { id: "tasks", label: "Tasks & Exceptions", icon: "notifications" },
+  { id: "market", label: "Market", icon: "store" },
+  { id: "adjustments", label: "Adjustments", icon: "tune" },
+  { id: "metering", label: "Metering Services Registry", icon: "table_chart" },
+  { id: "reports", label: "Reports", icon: "assessment" },
+  { id: "products", label: "Products", icon: "inventory_2" },
+  { id: "maintenance", label: "Maintenance", icon: "build" },
+];
+
 const SERVICES = [
   { address: "1/123 Smith St, Fitzroy, VIC, 3066", account: "10111521616108", status: "OPEN", balance: "-$144.74 Credit", tags: ["Vulnerable", "Hardship"] },
   { address: "2/456 Jones Rd, Carlton, VIC, 3053", account: "10111521616109", status: "CLOSED TRANSFERRED", balance: "$144.74 Owing", tags: ["Life Support"] },
@@ -104,6 +116,7 @@ export default function TallyGlassPage() {
   const [servicesOpen, setServicesOpen] = useState(true);
   const [paymentOpen, setPaymentOpen] = useState(true);
   const [cardOpenState, setCardOpenState] = useState<Record<string, boolean>>(INITIAL_CARD_OPEN);
+  const [activeNavId, setActiveNavId] = useState("dashboard");
 
   const allCardsOpen = OVERVIEW_CARD_TITLES.every((t) => cardOpenState[t]);
   const expandAll = () => setCardOpenState(() => Object.fromEntries(OVERVIEW_CARD_TITLES.map((t) => [t, true])));
@@ -140,7 +153,28 @@ export default function TallyGlassPage() {
 
       {/* 3-Column Layout */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar */}
+        {/* Compact Navigation Bar */}
+        <aside className="flex w-16 shrink-0 flex-col items-center border-r border-border bg-white py-4">
+          <nav className="flex flex-1 flex-col items-center gap-2">
+            {COMPACT_NAV_ITEMS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveNavId(item.id)}
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900",
+                  activeNavId === item.id && "bg-gray-100 text-gray-900"
+                )}
+                aria-label={item.label}
+                aria-pressed={activeNavId === item.id}
+              >
+                <Icon name={item.icon as "home"} size={20} className="font-extralight" />
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        {/* Left Sidebar – Ronald Thomas details */}
         <aside className="flex w-80 shrink-0 flex-col overflow-hidden border-r border-border bg-white">
           <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="space-y-4 p-4">
@@ -254,9 +288,6 @@ export default function TallyGlassPage() {
               </CollapsibleContent>
             </Collapsible>
           </div>
-          </div>
-          <div className="shrink-0 border-t border-border p-3">
-            <Image src="/PoweredByTallyBadgeDark.svg" alt="Powered by Tally" width={120} height={29} className="w-[120px] h-auto" />
           </div>
         </aside>
 

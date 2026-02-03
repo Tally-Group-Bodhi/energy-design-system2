@@ -48,6 +48,13 @@ const pages = [
     icon: "contact_page",
     tags: ["Tables", "Tabs", "Contacts"],
   },
+  {
+    title: "Tally Acquire",
+    description: "Admin dashboard with system warnings and quick links to configuration areas",
+    href: "/pages/tally-acquire",
+    icon: "admin_panel_settings",
+    tags: ["Dashboard", "Admin", "Tiles"],
+  },
 ];
 
 export default function PagesIndex() {
