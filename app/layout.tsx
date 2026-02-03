@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Sidebar from "@/components/Sidebar/Sidebar";
+import ThemeModeSwitch from "@/components/ThemeModeSwitch/ThemeModeSwitch";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,6 +18,18 @@ const navigationSections = [
       { label: "Layout Grid", href: "/foundation/layout-grid" },
       { label: "Logo", href: "/foundation/logo" },
       { label: "Typography", href: "/foundation/typography" },
+      { label: "Panes", href: "/foundation/materials" },
+    ],
+  },
+  {
+    title: "Brands",
+    items: [
+      { label: "Tally Group", href: "/foundation/brands/tally-group" },
+      { label: "Tally Small Markets", href: "/foundation/brands/tally-small-markets" },
+      { label: "Tally Large Market", href: "/foundation/brands/tally-large-market" },
+      { label: "Tally Sales & Acquisition", href: "/foundation/brands/tally-sales-acquisition" },
+      { label: "Tally Digital", href: "/foundation/brands/tally-digital" },
+      { label: "Tally CRM", href: "/foundation/brands/tally-crm" },
     ],
   },
   {
@@ -42,11 +55,11 @@ const navigationSections = [
       { label: "Button Group", href: "/components/button-group" },
       { label: "Card", href: "/components/card" },
       { label: "Charts", href: "/components/charts" },
+      { label: "Chart Widgets", href: "/components/electricity-usage-widget" },
       { label: "Checkbox", href: "/components/checkbox" },
       { label: "Collapsible", href: "/components/collapsible" },
       { label: "Dialog", href: "/components/dialog" },
       { label: "Dropdown Menu", href: "/components/dropdown-menu" },
-      { label: "Electricity Usage Widget", href: "/components/electricity-usage-widget" },
       { label: "Input", href: "/components/input" },
       { label: "Popover", href: "/components/popover" },
       { label: "Progress", href: "/components/progress" },
@@ -82,7 +95,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@100..900&family=Inter:wght@100..900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@100..900&display=swap"
           rel="stylesheet"
         />
         <link
@@ -91,6 +104,9 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
+        <div className="fixed right-6 top-6 z-50">
+          <ThemeModeSwitch />
+        </div>
         <div className="flex">
           <Sidebar sections={navigationSections} />
           <main className="flex-1">{children}</main>

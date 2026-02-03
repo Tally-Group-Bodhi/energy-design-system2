@@ -59,7 +59,7 @@ export default function FormsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-4xl px-6 py-6">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <Breadcrumb className="mb-4">
           <BreadcrumbList className="items-center gap-1.5 text-sm text-gray-700">
             <BreadcrumbItem>

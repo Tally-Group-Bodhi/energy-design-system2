@@ -7,12 +7,30 @@ import {
   Area,
   XAxis,
   YAxis,
+  ZAxis,
   CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  ScatterChart,
+  Scatter,
+  Tooltip,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { dataVisualizationColors } from "@/lib/tokens/colors";
 
 const CHART_COLOR = dataVisualizationColors.dataASolid.hex;
+const CHART_COLORS = [
+  dataVisualizationColors.dataASolid.hex,
+  dataVisualizationColors.dataBSolid.hex,
+  dataVisualizationColors.dataCSolid.hex,
+  dataVisualizationColors.dataDSolid.hex,
+];
+
+const CHART_TOOLTIP_STYLE = {
+  contentStyle: { borderRadius: "8px", border: "1px solid #E5E7EB", background: "#fff" },
+  cursor: { fill: "transparent" as const },
+};
 
 export type ElectricityUsageWidgetSize =
   | "x-small"
@@ -52,6 +70,8 @@ export interface ElectricityUsageWidgetProps
   dotData?: { col: number; row: number; size: number }[];
   /** Month labels for chart x-axis – large, x-large (e.g. ["Jun","Jul",…]) */
   chartMonths?: string[];
+  /** Chart type for small/medium/large/x-large: area (default), pie, bubble, heatmap, funnel */
+  chartType?: "area" | "pie" | "bubble" | "heatmap" | "funnel";
 }
 
 const DEFAULT_DOTS: { col: number; row: number; size: number }[] = [
@@ -74,6 +94,34 @@ const DEFAULT_DOTS: { col: number; row: number; size: number }[] = [
 
 const DEFAULT_MONTHS = ["Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+const PIE_DATA = [
+  { name: "A", value: 40 },
+  { name: "B", value: 30 },
+  { name: "C", value: 20 },
+  { name: "D", value: 10 },
+];
+
+const BUBBLE_DATA = [
+  { x: 20, y: 30, z: 50 },
+  { x: 40, y: 50, z: 80 },
+  { x: 60, y: 25, z: 40 },
+  { x: 80, y: 45, z: 60 },
+];
+
+/** 3 rows x 6 cols, values 0–100 */
+const HEATMAP_GRID = [
+  [40, 65, 30, 80, 55, 70],
+  [55, 45, 75, 50, 60, 35],
+  [25, 70, 50, 45, 80, 65],
+];
+
+const FUNNEL_DATA = [
+  { name: "Visit", value: 100 },
+  { name: "Lead", value: 60 },
+  { name: "Quote", value: 30 },
+  { name: "Close", value: 10 },
+];
+
 /** Convert dot/bubble data to Recharts area chart data (name, value) per month/col. */
 function dotDataToAreaData(
   dotData: { col: number; row: number; size: number }[],
@@ -90,6 +138,123 @@ function dotDataToAreaData(
     name,
     value: Math.round((byCol[i] ?? 0) / max * 100),
   }));
+}
+
+type ChartType = "area" | "pie" | "bubble" | "heatmap" | "funnel";
+
+function WidgetChartContent({
+  chartType,
+  areaData,
+  months,
+  compact,
+  showAxes,
+}: {
+  chartType: ChartType;
+  areaData: { name: string; value: number }[];
+  months: string[];
+  compact?: boolean;
+  showAxes?: boolean;
+}) {
+  const margin = compact ? { top: 4, right: 4, bottom: 4, left: 4 } : { top: 8, right: 8, bottom: 8, left: 8 };
+  const fontSize = compact ? 8 : 10;
+
+  if (chartType === "pie") {
+    return (
+      <PieChart margin={margin}>
+        <Tooltip {...CHART_TOOLTIP_STYLE} formatter={(value: number, name: string) => [`${value}`, name]} />
+        <Pie
+          data={PIE_DATA}
+          cx="50%"
+          cy="50%"
+          innerRadius={compact ? 20 : 40}
+          outerRadius={compact ? 36 : 60}
+          paddingAngle={1}
+          dataKey="value"
+        >
+          {PIE_DATA.map((_, i) => (
+            <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+          ))}
+        </Pie>
+      </PieChart>
+    );
+  }
+
+  if (chartType === "bubble") {
+    const bubbleRadiusRange = compact ? [4, 18] : [8, 32];
+    return (
+      <ScatterChart margin={margin}>
+        <Tooltip
+          {...CHART_TOOLTIP_STYLE}
+          formatter={(value: number, _n: string, props: { payload?: { x?: number; y?: number; z?: number } }) => {
+            const p = props.payload;
+            return [p ? `x: ${p.x}, y: ${p.y}, z: ${p.z}` : value, "Point"];
+          }}
+        />
+        <XAxis dataKey="x" type="number" domain={[0, 100]} hide />
+        <YAxis dataKey="y" type="number" domain={[0, 60]} hide />
+        <ZAxis dataKey="z" type="number" range={bubbleRadiusRange} />
+        <Scatter name="Bubble" data={BUBBLE_DATA} fill={CHART_COLOR} />
+      </ScatterChart>
+    );
+  }
+
+  if (chartType === "heatmap") {
+    return (
+      <div className="flex h-full w-full flex-col gap-0.5 p-1">
+        {HEATMAP_GRID.map((row, ri) => (
+          <div key={ri} className="flex flex-1 gap-0.5">
+            {row.map((val, ci) => (
+              <div
+                key={ci}
+                className="flex-1 rounded-sm"
+                style={{
+                  backgroundColor: `rgba(44, 54, 93, ${val / 100})`,
+                }}
+                title={`${val}`}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (chartType === "funnel") {
+    const maxVal = Math.max(...FUNNEL_DATA.map((d) => d.value), 1);
+    return (
+      <div className="flex h-full w-full flex-col justify-center gap-0.5 px-1 py-2">
+        {FUNNEL_DATA.map((d, i) => (
+          <div key={d.name} className="flex items-center gap-1">
+            <div
+              className="h-2 flex-shrink-0 rounded-full bg-[#2C365D]"
+              style={{ width: `${(d.value / maxVal) * 100}%`, minWidth: 4 }}
+            />
+            {!compact && (
+              <span className="truncate text-[10px] text-[#595767]">{d.name}</span>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // area (default)
+  return (
+    <AreaChart data={areaData} margin={margin}>
+      <Tooltip {...CHART_TOOLTIP_STYLE} formatter={(value: number, name: string) => [value, name ?? "Value"]} />
+      <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+      <XAxis dataKey="name" hide={!showAxes} stroke="#6B7280" fontSize={fontSize} tickLine={false} />
+      <YAxis hide={!showAxes} stroke="#6B7280" fontSize={fontSize} tickLine={false} width={showAxes ? 24 : 0} domain={[0, "auto"]} />
+      <Area
+        type="monotone"
+        dataKey="value"
+        stroke={CHART_COLOR}
+        fill={CHART_COLOR}
+        fillOpacity={0.4}
+        strokeWidth={compact ? 1.5 : 2}
+      />
+    </AreaChart>
+  );
 }
 
 function ChangeBadge({
@@ -170,6 +335,7 @@ const ElectricityUsageWidget = React.forwardRef<
       yearly,
       dotData = DEFAULT_DOTS,
       chartMonths = DEFAULT_MONTHS,
+      chartType = "area",
       className,
       ...props
     },
@@ -230,25 +396,24 @@ const ElectricityUsageWidget = React.forwardRef<
             )}
           </div>
           <div className="relative flex min-w-0 w-[92px] shrink-0 items-center justify-center py-2.5 pr-2 pl-1">
-            <div className="h-[84px] w-full min-w-0 overflow-hidden">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={dotDataToAreaData(dotData, (chartMonths.length ? chartMonths : DEFAULT_MONTHS).slice(0, 5))}
-                  margin={{ top: 4, right: 4, bottom: 4, left: 4 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="name" hide />
-                  <YAxis hide domain={[0, "auto"]} />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke={CHART_COLOR}
-                    fill={CHART_COLOR}
-                    fillOpacity={0.4}
-                    strokeWidth={1.5}
+            <div className="h-[84px] w-full min-w-0 overflow-hidden outline-none [&_*]:outline-none [&_*]:focus:outline-none">
+              {chartType === "heatmap" || chartType === "funnel" ? (
+                <WidgetChartContent
+                  chartType={chartType}
+                  areaData={dotDataToAreaData(dotData, (chartMonths.length ? chartMonths : DEFAULT_MONTHS).slice(0, 5))}
+                  months={(chartMonths.length ? chartMonths : DEFAULT_MONTHS).slice(0, 5)}
+                  compact
+                />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <WidgetChartContent
+                    chartType={chartType}
+                    areaData={dotDataToAreaData(dotData, (chartMonths.length ? chartMonths : DEFAULT_MONTHS).slice(0, 5))}
+                    months={(chartMonths.length ? chartMonths : DEFAULT_MONTHS).slice(0, 5)}
+                    compact
                   />
-                </AreaChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>
@@ -286,28 +451,24 @@ const ElectricityUsageWidget = React.forwardRef<
             )}
           </div>
           <div className="min-h-0 flex-1 px-2 pb-2 pt-2">
-            <div className="h-full w-full min-h-[80px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart
-                  data={dotDataToAreaData(
-                    dotData,
-                    (chartMonths.length ? chartMonths : DEFAULT_MONTHS).slice(0, 8)
-                  )}
-                  margin={{ top: 8, right: 8, bottom: 8, left: 8 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                  <XAxis dataKey="name" stroke="#6B7280" fontSize={10} tickLine={false} />
-                  <YAxis stroke="#6B7280" fontSize={10} tickLine={false} width={24} domain={[0, "auto"]} />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke={CHART_COLOR}
-                    fill={CHART_COLOR}
-                    fillOpacity={0.4}
-                    strokeWidth={1.5}
+            <div className="h-full w-full min-h-[80px] outline-none [&_*]:outline-none [&_*]:focus:outline-none">
+              {chartType === "heatmap" || chartType === "funnel" ? (
+                <WidgetChartContent
+                  chartType={chartType}
+                  areaData={dotDataToAreaData(dotData, (chartMonths.length ? chartMonths : DEFAULT_MONTHS).slice(0, 8))}
+                  months={(chartMonths.length ? chartMonths : DEFAULT_MONTHS).slice(0, 8)}
+                  showAxes
+                />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <WidgetChartContent
+                    chartType={chartType}
+                    areaData={dotDataToAreaData(dotData, (chartMonths.length ? chartMonths : DEFAULT_MONTHS).slice(0, 8))}
+                    months={(chartMonths.length ? chartMonths : DEFAULT_MONTHS).slice(0, 8)}
+                    showAxes
                   />
-                </AreaChart>
-              </ResponsiveContainer>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>
@@ -361,9 +522,14 @@ const ElectricityUsageWidget = React.forwardRef<
           {title}
         </h3>
 
-        <div className="grid grid-cols-3 gap-4 border-b border-border pb-5 pt-4">
+        <div
+          className={cn(
+            "grid grid-cols-3 border-b border-border pt-4",
+            size === "x-large" ? "gap-5 pb-6" : "gap-4 pb-5"
+          )}
+        >
           <div>
-            <div className="text-sm font-medium text-[#595767]">Weekly</div>
+            <div className={cn("font-medium text-[#595767]", size === "x-large" ? "text-base" : "text-sm")}>Weekly</div>
             <div
               className={cn(
                 "font-bold tracking-tight text-[#181B25]",
@@ -376,11 +542,11 @@ const ElectricityUsageWidget = React.forwardRef<
               <ChangeBadge changePercent={wk.changePercent} className="text-sm" />
             )}
             {wk.comparisonText && (
-              <p className="mt-0.5 text-sm text-[#595767]">{wk.comparisonText}</p>
+              <p className={cn("mt-0.5 text-[#595767]", size === "x-large" ? "text-base" : "text-sm")}>{wk.comparisonText}</p>
             )}
           </div>
           <div>
-            <div className="text-sm font-medium text-[#595767]">Monthly</div>
+            <div className={cn("font-medium text-[#595767]", size === "x-large" ? "text-base" : "text-sm")}>Monthly</div>
             <div
               className={cn(
                 "font-bold tracking-tight text-[#181B25]",
@@ -393,11 +559,11 @@ const ElectricityUsageWidget = React.forwardRef<
               <ChangeBadge changePercent={mon.changePercent} className="text-sm" />
             )}
             {mon.comparisonText && (
-              <p className="mt-0.5 text-sm text-[#595767]">{mon.comparisonText}</p>
+              <p className={cn("mt-0.5 text-[#595767]", size === "x-large" ? "text-base" : "text-sm")}>{mon.comparisonText}</p>
             )}
           </div>
           <div>
-            <div className="text-sm font-medium text-[#595767]">Yearly</div>
+            <div className={cn("font-medium text-[#595767]", size === "x-large" ? "text-base" : "text-sm")}>Yearly</div>
             <div
               className={cn(
                 "font-bold tracking-tight text-[#181B25]",
@@ -410,50 +576,43 @@ const ElectricityUsageWidget = React.forwardRef<
               <ChangeBadge changePercent={yr.changePercent} className="text-sm" />
             )}
             {yr.comparisonText && (
-              <p className="mt-0.5 text-sm text-[#595767]">{yr.comparisonText}</p>
+              <p className={cn("mt-0.5 text-[#595767]", size === "x-large" ? "text-base" : "text-sm")}>{yr.comparisonText}</p>
             )}
           </div>
         </div>
 
-        <div className="pt-4">
+        <div className={cn("pt-4", size === "x-large" && "pt-5")}>
           <div
             className={cn(
-              "w-full",
+              "w-full outline-none [&_*]:outline-none [&_*]:focus:outline-none",
               size === "x-large" ? "h-[180px]" : "h-[140px]"
             )}
           >
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={areaData}
-                margin={{ top: 16, right: 16, bottom: 0, left: 16 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="name" hide />
-                <YAxis
-                  stroke="#6B7280"
-                  fontSize={12}
-                  tickLine={false}
-                  width={28}
-                  domain={[0, "auto"]}
+            {chartType === "heatmap" || chartType === "funnel" ? (
+              <WidgetChartContent
+                chartType={chartType}
+                areaData={areaData}
+                months={months}
+              />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <WidgetChartContent
+                  chartType={chartType}
+                  areaData={areaData}
+                  months={months}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke={CHART_COLOR}
-                  fill={CHART_COLOR}
-                  fillOpacity={0.4}
-                  strokeWidth={2}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+              </ResponsiveContainer>
+            )}
           </div>
-          <div className="mt-2 flex justify-between gap-1 text-xs text-[#595767]">
-            {months.map((m, i) => (
-              <span key={i} className="shrink-0">
-                {m}
-              </span>
-            ))}
-          </div>
+          {chartType === "area" && (
+            <div className={cn("mt-2 flex justify-between gap-1 text-[#595767]", size === "x-large" ? "text-sm" : "text-xs")}>
+              {months.map((m, i) => (
+                <span key={i} className="shrink-0">
+                  {m}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );

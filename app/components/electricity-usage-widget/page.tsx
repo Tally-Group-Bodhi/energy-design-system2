@@ -47,6 +47,14 @@ const FALLBACK_DATA: ElectricityWidgetData = {
   chartRows: 7,
 };
 
+const CHART_EXAMPLES: { chartType: "area" | "pie" | "bubble" | "heatmap" | "funnel"; label: string; title: string }[] = [
+  { chartType: "area", label: "Area", title: "Usage (Area)" },
+  { chartType: "pie", label: "Pie", title: "Share (Pie)" },
+  { chartType: "bubble", label: "Bubble", title: "Distribution (Bubble)" },
+  { chartType: "heatmap", label: "Heatmap", title: "Activity (Heatmap)" },
+  { chartType: "funnel", label: "Funnel", title: "Pipeline (Funnel)" },
+];
+
 export default function ElectricityUsageWidgetPage() {
   const [activeTab, setActiveTab] = useState("design");
   const [data, setData] = useState<ElectricityWidgetData | null>(null);
@@ -72,7 +80,7 @@ export default function ElectricityUsageWidgetPage() {
 
   return (
     <>
-      <PageBanner title="Electricity Usage Widget" />
+      <PageBanner title="Chart Widgets" />
 
       <TabNavigation
         tabs={tabs}
@@ -105,94 +113,135 @@ export default function ElectricityUsageWidgetPage() {
             <>
               <section className="mb-16 border-t border-border pt-16">
                 <h2 className="mb-4 text-2xl font-semibold tracking-tight text-gray-900">
-                  All sizes (same data)
+                  Chart types by size
                 </h2>
                 <p className="mb-6 max-w-2xl text-gray-600">
-                  One dataset from the CSV, five layouts. Use the grid to mix
-                  sizes on a dashboard.
+                  Five chart types (Area, Pie, Bubble, Heatmap, Funnel) in each
+                  of five widget sizes. Use different chart types for different
+                  metrics on a dashboard.
                 </p>
 
                 <div className="space-y-12">
+                  {/* X-Small: 5 examples (no chart in widget, titles differ) */}
                   <div>
-                    <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-gray-500">
+                    <h3 className="mb-3 text-base font-semibold uppercase tracking-wide text-gray-700">
                       X-Small
                     </h3>
-                    <div className="inline-block">
-                      <ElectricityUsageWidget
-                        size="x-small"
-                        title={shared.title}
-                        value={shared.value}
-                        changePercent={shared.changePercent}
-                      />
+                    <div className="flex flex-wrap gap-4">
+                      {CHART_EXAMPLES.map((ex) => (
+                        <div key={ex.chartType} className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-gray-600">{ex.label}</span>
+                          <ElectricityUsageWidget
+                            size="x-small"
+                            title={ex.title}
+                            value={shared.value}
+                            changePercent={shared.changePercent}
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-gray-500">
+                  {/* Small: 5 chart types */}
+                  <div className="border-t border-border pt-6">
+                    <h3 className="mb-3 text-base font-semibold uppercase tracking-wide text-gray-700">
                       Small
                     </h3>
-                    <div className="w-fit">
-                      <ElectricityUsageWidget
-                        size="small"
-                        title={shared.title}
-                        value={shared.value}
-                        changePercent={shared.changePercent}
-                        secondaryLabel={shared.secondaryLabel}
-                        showIcon
-                        dotData={shared.dotData.length ? shared.dotData : undefined}
-                      />
+                    <div className="flex flex-wrap gap-4">
+                      {CHART_EXAMPLES.map((ex) => (
+                        <div key={ex.chartType} className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-gray-600">{ex.label}</span>
+                          <ElectricityUsageWidget
+                            size="small"
+                            title={ex.title}
+                            value={shared.value}
+                            changePercent={shared.changePercent}
+                            secondaryLabel={shared.secondaryLabel}
+                            showIcon={ex.chartType === "area"}
+                            dotData={shared.dotData.length ? shared.dotData : undefined}
+                            chartMonths={shared.chartMonths}
+                            chartType={ex.chartType}
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-gray-500">
+                  {/* Medium: 5 chart types */}
+                  <div className="border-t border-border pt-6">
+                    <h3 className="mb-3 text-base font-semibold uppercase tracking-wide text-gray-700">
                       Medium
                     </h3>
-                    <div className="w-fit">
-                      <ElectricityUsageWidget
-                        size="medium"
-                        title={shared.title}
-                        value={shared.value}
-                        changePercent={shared.changePercent}
-                        secondaryLabel={shared.secondaryLabel}
-                        dotData={shared.dotData.length ? shared.dotData : undefined}
-                      />
+                    <div className="flex flex-wrap gap-4">
+                      {CHART_EXAMPLES.map((ex) => (
+                        <div key={ex.chartType} className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-gray-600">{ex.label}</span>
+                          <ElectricityUsageWidget
+                            size="medium"
+                            title={ex.title}
+                            value={shared.value}
+                            changePercent={shared.changePercent}
+                            secondaryLabel={shared.secondaryLabel}
+                            dotData={shared.dotData.length ? shared.dotData : undefined}
+                            chartMonths={shared.chartMonths}
+                            chartType={ex.chartType}
+                          />
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-gray-500">
+                  {/* Large: 5 chart types */}
+                  <div className="border-t border-border pt-6">
+                    <h3 className="mb-3 text-base font-semibold uppercase tracking-wide text-gray-700">
                       Large
                     </h3>
-                    <div className="max-w-3xl">
-                      <ElectricityUsageWidget
-                        size="large"
-                        title={shared.title}
-                        value={shared.value}
-                        weekly={shared.weekly}
-                        monthly={shared.monthly}
-                        yearly={shared.yearly}
-                        chartMonths={shared.chartMonths}
-                        dotData={shared.dotData.length ? shared.dotData : undefined}
-                      />
+                    <div className="flex flex-wrap gap-4">
+                      {CHART_EXAMPLES.map((ex) => (
+                        <div key={ex.chartType} className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-gray-600">{ex.label}</span>
+                          <div className="w-[320px] shrink-0">
+                            <ElectricityUsageWidget
+                              size="large"
+                              title={ex.title}
+                              value={shared.value}
+                              weekly={shared.weekly}
+                              monthly={shared.monthly}
+                              yearly={shared.yearly}
+                              chartMonths={shared.chartMonths}
+                              dotData={shared.dotData.length ? shared.dotData : undefined}
+                              chartType={ex.chartType}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  <div>
-                    <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-gray-500">
+                  {/* X-Large: 5 chart types */}
+                  <div className="border-t border-border pt-6">
+                    <h3 className="mb-3 text-base font-semibold uppercase tracking-wide text-gray-700">
                       X-Large
                     </h3>
-                    <div className="max-w-4xl">
-                      <ElectricityUsageWidget
-                        size="x-large"
-                        title={shared.title}
-                        value={shared.value}
-                        weekly={shared.weekly}
-                        monthly={shared.monthly}
-                        yearly={shared.yearly}
-                        chartMonths={shared.chartMonths}
-                        dotData={shared.dotData.length ? shared.dotData : undefined}
-                      />
+                    <div className="flex flex-wrap gap-4">
+                      {CHART_EXAMPLES.map((ex) => (
+                        <div key={ex.chartType} className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-gray-600">{ex.label}</span>
+                          <div className="w-[400px] shrink-0">
+                            <ElectricityUsageWidget
+                              size="x-large"
+                              title={ex.title}
+                              value={shared.value}
+                              weekly={shared.weekly}
+                              monthly={shared.monthly}
+                              yearly={shared.yearly}
+                              chartMonths={shared.chartMonths}
+                              dotData={shared.dotData.length ? shared.dotData : undefined}
+                              chartType={ex.chartType}
+                            />
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -243,6 +292,15 @@ const data = computeWidgetData(rows);
                     <code className="text-gray-800">"large"</code>,{" "}
                     <code className="text-gray-800">"x-large"</code>. Default is{" "}
                     <code className="text-gray-800">"small"</code>.
+                  </p>
+                  <p className="mb-2 text-gray-600">
+                    <code className="rounded bg-gray-200 px-1 py-0.5 text-sm">chartType</code> accepts:{" "}
+                    <code className="text-gray-800">"area"</code>,{" "}
+                    <code className="text-gray-800">"pie"</code>,{" "}
+                    <code className="text-gray-800">"bubble"</code>,{" "}
+                    <code className="text-gray-800">"heatmap"</code>,{" "}
+                    <code className="text-gray-800">"funnel"</code>. Default is{" "}
+                    <code className="text-gray-800">"area"</code>. Applies to small, medium, large, and x-large sizes.
                   </p>
                   <p className="text-gray-600">
                     For medium/large/x-large, pass <code className="rounded bg-gray-200 px-1 py-0.5 text-sm">weekly</code>,{" "}
