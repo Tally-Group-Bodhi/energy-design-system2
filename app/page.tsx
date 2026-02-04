@@ -1,65 +1,162 @@
+import Link from "next/link";
 import Image from "next/image";
+import PageBanner from "@/components/PageBanner/PageBanner";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/Card/Card";
+import { Icon } from "@/components/ui/icon";
+
+const quickLinks = [
+  {
+    title: "Foundation",
+    description: "Colours, typography, layout, icons, and design tokens",
+    href: "/foundation/colour",
+    icon: "palette",
+    color: "bg-[#2C365D]",
+  },
+  {
+    title: "Components",
+    description: "Reusable UI components built for energy sector applications",
+    href: "/components/button",
+    icon: "widgets",
+    color: "bg-[#00D2A2]",
+  },
+  {
+    title: "Pages",
+    description: "Example page implementations and patterns",
+    href: "/pages",
+    icon: "dashboard",
+    color: "bg-[#0074C4]",
+  },
+  {
+    title: "Brands",
+    description: "Brand variants and guidelines for Tally products",
+    href: "/foundation/brands/tally-group",
+    icon: "flag",
+    color: "bg-[#F59E0B]",
+  },
+];
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <PageBanner title="Tally Energy Design System" />
+
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          {/* Welcome section */}
+          <div className="mb-12">
+            <p className="max-w-3xl text-lg leading-7 text-gray-600 dark:text-gray-400">
+              A comprehensive design system for energy sector products: call center tools, customer dashboards, and related applications. Built with Next.js, React, and Tailwind CSS.
+            </p>
+          </div>
+
+          {/* Quick links */}
+          <div className="mb-16">
+            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+              Get started
+            </h2>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {quickLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="group">
+                  <Card className="h-full shadow-none transition-all hover:border-[#2C365D]/30 hover:shadow-md">
+                    <CardHeader>
+                      <div className={`mb-3 flex h-12 w-12 items-center justify-center rounded-lg ${link.color} transition-colors group-hover:opacity-90`}>
+                        <Icon name={link.icon as "palette"} size={24} className="text-white" />
+                      </div>
+                      <CardTitle className="text-lg font-semibold text-gray-900 group-hover:text-[#2C365D] dark:text-gray-100 dark:group-hover:text-[#7c8cb8]">
+                        {link.title}
+                      </CardTitle>
+                      <CardDescription className="text-sm text-muted-foreground">
+                        {link.description}
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Features section */}
+          <section className="mb-16 border-t border-border pt-16 dark:border-gray-700">
+            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+              Features
+            </h2>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+              <div>
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-[#2C365D]/10 dark:bg-[#7c8cb8]/20">
+                  <Icon name="check_circle" size={24} className="text-[#2C365D] dark:text-[#7c8cb8]" />
+                </div>
+                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">
+                  Component Library
+                </h3>
+                <p className="text-base leading-6 text-gray-600 dark:text-gray-400">
+                  Pre-built components for forms, tables, charts, navigation, and more. All components follow consistent design patterns and are fully accessible.
+                </p>
+              </div>
+              <div>
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-[#2C365D]/10 dark:bg-[#7c8cb8]/20">
+                  <Icon name="palette" size={24} className="text-[#2C365D] dark:text-[#7c8cb8]" />
+                </div>
+                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">
+                  Design Tokens
+                </h3>
+                <p className="text-base leading-6 text-gray-600 dark:text-gray-400">
+                  Comprehensive color system, typography scale, spacing, and layout tokens. Supports multiple brand variants and dark mode.
+                </p>
+              </div>
+              <div>
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-[#2C365D]/10 dark:bg-[#7c8cb8]/20">
+                  <Icon name="code" size={24} className="text-[#2C365D] dark:text-[#7c8cb8]" />
+                </div>
+                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-gray-100">
+                  Developer Friendly
+                </h3>
+                <p className="text-base leading-6 text-gray-600 dark:text-gray-400">
+                  Built with TypeScript, fully documented, and optimized for use with Cursor AI. Includes example pages and patterns to get started quickly.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* Resources section */}
+          <section className="border-t border-border pt-16 dark:border-gray-700">
+            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
+              Resources
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <Link
+                href="/foundation/cursor-rules"
+                className="flex items-center gap-3 rounded-lg border border-border bg-white p-4 transition-colors hover:border-[#2C365D]/30 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-800/80"
+              >
+                <Icon name="description" size={24} className="text-[#2C365D] dark:text-[#7c8cb8]" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">Cursor Rules</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">AI assistant guide</p>
+                </div>
+              </Link>
+              <Link
+                href="/foundation/typography"
+                className="flex items-center gap-3 rounded-lg border border-border bg-white p-4 transition-colors hover:border-[#2C365D]/30 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-800/80"
+              >
+                <Icon name="text_fields" size={24} className="text-[#2C365D] dark:text-[#7c8cb8]" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">Typography</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Fonts and text styles</p>
+                </div>
+              </Link>
+              <Link
+                href="/foundation/layout"
+                className="flex items-center gap-3 rounded-lg border border-border bg-white p-4 transition-colors hover:border-[#2C365D]/30 hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-800/80"
+              >
+                <Icon name="view_quilt" size={24} className="text-[#2C365D] dark:text-[#7c8cb8]" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">Layout</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Page structure patterns</p>
+                </div>
+              </Link>
+            </div>
+          </section>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </div>
+    </>
   );
 }
