@@ -6,6 +6,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Tally Energy Design System",
   description: "A comprehensive design system for energy sector products: call center tools, customer dashboards, and related applications",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 const navigationSections = [
