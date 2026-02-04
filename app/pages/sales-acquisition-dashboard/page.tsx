@@ -706,10 +706,14 @@ export default function SalesAcquisitionDashboardPage() {
                             <YAxis type="category" dataKey="stage" stroke="#6B7280" fontSize={12} width={70} />
                             <Tooltip
                               contentStyle={{ borderRadius: "8px", border: "1px solid #E5E7EB" }}
-                              formatter={(value: number | undefined, name: string, props: { payload: { stage: string; count: number; value: number } }) => [
-                                `${props.payload.count} deals · $${(props.payload.value / 1000).toFixed(0)}k`,
-                                props.payload.stage,
-                              ]}
+                              formatter={(value, name, item) => {
+                                const payload = item?.payload as { stage: string; count: number; value: number } | undefined;
+                                if (!payload) return [value != null ? `${value}` : "", ""];
+                                return [
+                                  `${payload.count} deals · $${(payload.value / 1000).toFixed(0)}k`,
+                                  payload.stage,
+                                ];
+                              }}
                             />
                             <Bar dataKey="value" fill={CHART_COLORS[0]} radius={[0, 4, 4, 0]} />
                           </BarChart>
@@ -748,10 +752,11 @@ export default function SalesAcquisitionDashboardPage() {
                               </Pie>
                               <Tooltip
                                 contentStyle={{ borderRadius: "8px", border: "1px solid #E5E7EB" }}
-                                formatter={(value: number | undefined, name: string, props: { payload: { stage: string } }) => [
-                                  `${value} deals`,
-                                  props.payload.stage,
-                                ]}
+                                formatter={(value, name, item) => {
+                                  const payload = item?.payload as { stage: string } | undefined;
+                                  if (!payload) return [value != null ? `${value}` : "", ""];
+                                  return [`${value} deals`, payload.stage];
+                                }}
                               />
                             </PieChart>
                           </ResponsiveContainer>
