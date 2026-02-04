@@ -8,14 +8,14 @@ const quickLinks = [
   {
     title: "Foundation",
     description: "Colours, typography, layout, icons, and design tokens",
-    href: "/foundation/colour",
+    href: "/foundation",
     icon: "palette",
     color: "bg-[#2C365D]",
   },
   {
     title: "Components",
     description: "Reusable UI components built for energy sector applications",
-    href: "/components/button",
+    href: "/components",
     icon: "widgets",
     color: "bg-[#00D2A2]",
   },
@@ -29,7 +29,7 @@ const quickLinks = [
   {
     title: "Brands",
     description: "Brand variants and guidelines for Tally products",
-    href: "/foundation/brands/tally-group",
+    href: "/foundation/brands",
     icon: "flag",
     color: "bg-[#F59E0B]",
   },
