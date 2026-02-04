@@ -22,6 +22,7 @@ import {
 import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
 import Input from "@/components/Input/Input";
+import Textarea from "@/components/Textarea/Textarea";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ToggleGroup/ToggleGroup";
 import { Avatar, AvatarFallback } from "@/components/Avatar/Avatar";
@@ -79,7 +80,7 @@ const INITIAL_CARD_OPEN: Record<string, boolean> = Object.fromEntries(
 );
 
 const ADORA_INSIGHTS = [
-  { title: "Estimated bill", desc: "Difference between estimated and actual readings for December 2024." },
+  { title: "Estimated bill", desc: "December 2024 bill was estimated, current bill is actual: A significant difference exists between an estimated and actual reading." },
   { title: "Rebates", desc: "Loss of government rebate: $435 less rebate this March compared to August." },
   { title: "Solar", desc: "Reduced solar credits: Solar credits decreased from $35 in August to $15 in March." },
   { title: "Daily Consumption", desc: "Increased daily consumption: Average daily cost increased from $0.74 in December to $9.75 in March." },
@@ -564,45 +565,85 @@ export default function TallyGlassPage() {
 
         {/* Right Sidebar - Adora */}
         <aside className="flex w-80 shrink-0 flex-col border-l border-border bg-white dark:border-gray-800 dark:bg-gray-950">
-          <div className="flex flex-col p-4">
-            <div className="flex items-center justify-between pb-4">
-              <div className="flex items-center gap-2">
-                <Icon name="smart_toy" size={24} className="text-[#2C365D] dark:text-[#7c8cb8]" />
-                <span className="font-semibold text-gray-900 dark:text-gray-100">Adora</span>
-              </div>
+          <div className="flex min-h-0 flex-1 flex-col p-4">
+            {/* Header: Logo, time, call status */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pb-3">
+              <Image
+                src="/Adora_Ai_Logo.svg"
+                alt="Adora"
+                width={120}
+                height={53}
+                className="h-8 w-auto"
+              />
               <span className="text-sm text-muted-foreground">15:55</span>
-              <Badge variant="success" className="text-xs">Call in progress</Badge>
+              <Badge variant="success" className="flex items-center gap-1.5 text-xs">
+                <Icon name="call" size={14} />
+                Call in progress
+              </Badge>
             </div>
 
-            <div className="flex-1 space-y-3 overflow-y-auto">
+            {/* Analysing call status pill */}
+            <div className="mb-4 flex justify-center">
+              <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1.5 text-xs text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                <Icon name="phone_in_talk" size={14} />
+                <Icon name="arrow_forward" size={12} />
+                Analysing call in progress..
+              </span>
+            </div>
+
+            {/* Main content - scrollable */}
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                Customer seems to be calling about an unusually high bill. Here are some issues that may have been the cause:
+              </p>
+
               {ADORA_INSIGHTS.map((insight) => (
                 <Card key={insight.title} className="shadow-none">
                   <CardContent className="p-3">
                     <h4 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{insight.title}</h4>
-                    <p className="mt-1 text-xs text-muted-foreground">{insight.desc}</p>
-                    <div className="mt-2 flex gap-2">
-                      <button
-                        type="button"
-                        className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-                        aria-label="Thumbs up"
-                      >
-                        <Icon name="thumb_up" size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-                        aria-label="Thumbs down"
-                      >
-                        <Icon name="thumb_down" size={16} />
-                      </button>
-                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{insight.desc}</p>
                   </CardContent>
                 </Card>
               ))}
+
+              {/* Feedback section */}
+              <div className="rounded-lg bg-gray-100 p-3 dark:bg-gray-800/60">
+                <p className="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300">
+                  Were the insights above helpful?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    className="rounded p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+                    aria-label="Thumbs up"
+                  >
+                    <Icon name="thumb_up" size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded p-2 text-gray-500 hover:bg-gray-200 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+                    aria-label="Thumbs down"
+                  >
+                    <Icon name="thumb_down" size={18} />
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="w-full rounded-lg border border-border bg-gray-100 px-3 py-2 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                Expand more on customers rebates
+              </button>
             </div>
 
-            <div className="mt-4 border-t border-border pt-4 dark:border-gray-800">
-              <Input placeholder="Ask Adora" className="mb-2" />
+            {/* Bottom: Ask Adora input */}
+            <div className="mt-4 shrink-0 border-t border-border pt-4 dark:border-gray-800">
+              <Textarea
+                placeholder="Ask Adora"
+                rows={3}
+                className="mb-2 resize-y min-h-[80px]"
+              />
               <p className="text-xs text-muted-foreground">Adora can make mistakes. Check important info.</p>
             </div>
           </div>
