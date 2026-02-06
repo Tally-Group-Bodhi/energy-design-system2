@@ -7,6 +7,13 @@ import { Icon } from "@/components/ui/icon";
 
 const pages = [
   {
+    title: "Login",
+    description: "Universal login screen for all Tally+ applications with branded hero section",
+    href: "/pages/login",
+    icon: "login",
+    tags: ["Authentication", "Forms", "Branding"],
+  },
+  {
     title: "Dashboard",
     description: "Interactive energy dashboard with charts, tables, KPI cards, and performance metrics",
     href: "/pages/dashboard",

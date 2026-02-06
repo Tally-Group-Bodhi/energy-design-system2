@@ -40,6 +40,7 @@ const navigationSections = [
   {
     title: "Pages",
     items: [
+      { label: "Login", href: "/pages/login" },
       { label: "Dashboard", href: "/pages/dashboard" },
       { label: "Forms", href: "/pages/forms" },
       { label: "Tally Small Market", href: "/pages/small-market" },
