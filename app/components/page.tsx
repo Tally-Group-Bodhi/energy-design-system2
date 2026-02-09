@@ -77,6 +77,13 @@ const components = [
     category: "Form",
   },
   {
+    title: "Calendar",
+    description: "Date and date range picker calendar",
+    href: "/components/calendar",
+    icon: "calendar_today",
+    category: "Form",
+  },
+  {
     title: "Card",
     description: "Content cards and panels",
     href: "/components/card",

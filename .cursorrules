@@ -1,0 +1,159 @@
+# Tally Energy Design System — Cursor Rules
+
+This is a design system for energy sector products: call center tools, customer dashboards, and related applications. **Always prefer existing components over creating new ones.**
+
+---
+
+## CRITICAL: Check Before Creating
+
+**Before creating any new component or UI pattern, you MUST:**
+1. Search the codebase for existing components that could satisfy the requirement
+2. Review the component list below and the pages in `app/pages/`
+3. Only create new components when nothing existing will work
+4. When extending, prefer composing existing components over duplicating
+
+---
+
+## Available Components
+
+### From `components/` (PascalCase, import from `@/components/X/X`)
+
+| Component | Path | Use for |
+|-----------|------|---------|
+| Accordion | `components/Accordion/Accordion.tsx` | Expandable/collapsible content sections |
+| Alert | `components/Alert/Alert.tsx` | Inline alerts, notices |
+| AlertDialog | `components/AlertDialog/AlertDialog.tsx` | Modal confirmation dialogs |
+| AspectRatio | `components/AspectRatio/AspectRatio.tsx` | Fixed aspect ratio containers |
+| Avatar | `components/Avatar/Avatar.tsx` | User avatars, profile images |
+| Badge | `components/Badge/Badge.tsx` | Status labels, counts, tags |
+| Breadcrumb | `components/Breadcrumb/Breadcrumb.tsx` | Navigation breadcrumbs |
+| Button | `components/Button/Button.tsx` | Primary actions |
+| ButtonGroup | `components/ButtonGroup/ButtonGroup.tsx` | Grouped buttons |
+| Card | `components/Card/Card.tsx` | Content cards, panels |
+| Checkbox | `components/Checkbox/Checkbox.tsx` | Checkboxes |
+| Collapsible | `components/Collapsible/Collapsible.tsx` | Collapsible sections |
+| CollapsibleCard | `components/CollapsibleCard/CollapsibleCard.tsx` | Cards with expand/collapse |
+| ColorSwatch | `components/ColorSwatch/ColorSwatch.tsx` | Color display (foundation docs) |
+| Dialog | `components/Dialog/Dialog.tsx` | Modals |
+| DropdownMenu | `components/DropdownMenu/DropdownMenu.tsx` | Dropdown menus |
+| ElectricityUsageWidget | `components/ElectricityUsageWidget/` | Energy usage charts/widgets |
+| Header | `components/Header/Header.tsx` | DS logo header (sidebar) |
+| Input | `components/Input/Input.tsx` | Text inputs |
+| Label | `components/Label/Label.tsx` | Form labels |
+| NavigationBar | `components/NavigationBar/NavigationBar.tsx` | Left nav bar (collapsible) |
+| PageBanner | `components/PageBanner/PageBanner.tsx` | Page title banner |
+| Popover | `components/Popover/Popover.tsx` | Popovers |
+| Progress | `components/Progress/Progress.tsx` | Progress bars |
+| RadioGroup | `components/RadioGroup/RadioGroup.tsx` | Radio buttons |
+| Select | `components/Select/Select.tsx` | Select dropdowns |
+| Separator | `components/Separator/Separator.tsx` | Visual dividers |
+| Sheet | `components/Sheet/Sheet.tsx` | Slide-over panels |
+| Sidebar | `components/Sidebar/Sidebar.tsx` | App sidebar navigation |
+| Skeleton | `components/Skeleton/Skeleton.tsx` | Loading placeholders |
+| Slider | `components/Slider/Slider.tsx` | Range sliders |
+| Switch | `components/Switch/Switch.tsx` | Toggle switches |
+| Table | `components/Table/Table.tsx` | Data tables |
+| TabNavigation | `components/TabNavigation/TabNavigation.tsx` | Tab switcher (Design/Code) |
+| Tabs | `components/Tabs/Tabs.tsx` | Tab panels |
+| Textarea | `components/Textarea/Textarea.tsx` | Multi-line text |
+| ThemeModeSwitch | `components/ThemeModeSwitch/ThemeModeSwitch.tsx` | Light/dark toggle |
+| ThemeToggle | `components/ThemeToggle/ThemeToggle.tsx` | Theme toggle |
+| Toast | `components/Toast/Toast.tsx` | Toast notifications |
+| Toggle | `components/Toggle/Toggle.tsx` | Toggle buttons |
+| ToggleGroup | `components/ToggleGroup/ToggleGroup.tsx` | Segmented controls |
+| Tooltip | `components/Tooltip/Tooltip.tsx` | Tooltips |
+| Typography | `components/Typography/Typography.tsx` | H1–H4, P, Lead, Small, Muted, etc. |
+
+### From `components/ui/` (lowercase, primitive/build block)
+
+- `badge.tsx`, `button.tsx`, `card.tsx`, `icon.tsx`, `input.tsx` — Use design-system components (Badge, Button, Card, Input) instead unless building a primitive.
+
+---
+
+## Page Patterns
+
+Reference these when building new pages. Path: `app/pages/`
+
+| Page | Path | Pattern |
+|------|------|---------|
+| Dashboard | `app/pages/dashboard/page.tsx` | KPI cards, charts, tables, tabs, breadcrumbs |
+| Beta Test Dashboard | `app/pages/beta-test-dashboard/page.tsx` | App bar (logo + search + avatar), left nav, main content |
+| Tally Glass | `app/pages/tally-glass/page.tsx` | App bar, compact icon nav, side panels, collapsible cards |
+| Tally Small Market | `app/pages/small-market/page.tsx` | Small market layout |
+| Tally Large Market | `app/pages/tally-large-market/page.tsx` | Large market layout |
+| Tally Orion | `app/pages/tally-orion/page.tsx` | Orion brand |
+| Tally Acquire | `app/pages/tally-acquire/page.tsx` | Acquire brand |
+| Forms | `app/pages/forms/page.tsx` | Form patterns, Input, Select, etc. |
+
+**App Bar structure** (from beta-test-dashboard, tally-glass):
+- Left: App logo (Link + Image)
+- Center: Search bar (Icon + input)
+- Right: Notifications button + Avatar
+
+---
+
+## Foundation Tokens
+
+### Colours (`lib/tokens/colors.ts`)
+
+**Primary:** `#2C365D` (primary, hero, heading, link)  
+**Text:** `#181B25`  
+**Muted:** `#595767`  
+**Border:** `#DEDEE1`  
+**Background:** `#F3F4F6`, `#F9F9FB`  
+**Secondary:** `#00D2A2` (turquoise)
+
+**Semantic:** success `#008000`, warning `#C53B00`, error `#C40000`, info `#0074C4`
+
+**Data viz:** `dataASolid`–`dataFSolid` (turquoise, navy, amber, purple, emerald, blue) — import from `@/lib/tokens/colors`
+
+### Typography (`components/Typography/Typography.tsx`)
+
+Use: H1, H2, H3, H4, P, Blockquote, Ul, Ol, InlineCode, Lead, Large, Small, Muted  
+Font: Inter (body), IBM Plex Mono (code)  
+Icons: Material Symbols Outlined via `components/ui/icon.tsx` — `<Icon name="search" size={20} />`
+
+### Layout (`app/foundation/layout/`)
+
+- **App bar** (top, h-14)
+- **Collapsible navigation** (left, w-16 collapsed / w-52 expanded)
+- **Pane** (main content, `#F9F9FB` background)
+- **Control panel** (right, optional)
+- Max content width: `max-w-7xl` or `max-w-[1600px]`
+
+---
+
+## Brand Variants
+
+Available brands (see `app/foundation/brands/`):
+
+- **Tally Group** — `/foundation/brands/tally-group`
+- **Tally Small Market** — `/foundation/brands/tally-small-markets`
+- **Tally Large Market** — `/foundation/brands/tally-large-market`
+- **Tally Sales & Acquisition** — `/foundation/brands/tally-sales-acquisition`
+- **Tally Digital** — `/foundation/brands/tally-digital`
+- **Tally CRM** — `/foundation/brands/tally-crm`
+
+**Logos in `/public/`:** Tally_DS_Logo.svg, BetaTestLogo.svg, GlassLogoTest.svg, ORION_LOGO.svg, TallyAcquire.svg (plus _darkmode variants)
+
+Always specify brand context in prompts: e.g. "This is for Tally Glass (call center agents)".
+
+---
+
+## File Structure
+
+- **Components:** `components/ComponentName/ComponentName.tsx`
+- **Component docs:** `app/components/component-name/page.tsx`
+- **Pages:** `app/pages/page-name/page.tsx`
+- **Foundation:** `app/foundation/section/page.tsx`
+- **Brands:** `app/foundation/brands/brand-name/page.tsx`
+
+---
+
+## Mistakes to Avoid
+
+- Don't create new card/panel components — use `Card` from `@/components/Card/Card`
+- Don't create new input components — use `Input`, `Select`, `Textarea` from components
+- Don't create new avatar/header components — use `Avatar`, `Header`, and App Bar patterns
+- Don't duplicate color values — use tokens from `@/lib/tokens/colors` or Tailwind semantic classes
+- Don't use `/src/` — this project uses root-level `components/` and `app/`

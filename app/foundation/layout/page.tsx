@@ -172,6 +172,124 @@ export default function LayoutPage() {
             <p className="mt-2 text-sm text-gray-500">
               2 panes: e.g. list | detail or master-detail.
             </p>
+
+            {/* 3 panes wireframe – same muted colours */}
+            <p className="mt-10 mb-2 text-sm font-medium text-gray-700">
+              3 panes
+            </p>
+            <div className="overflow-hidden rounded-lg border-2 border-border bg-white">
+              {/* App bar */}
+              <div className="relative flex h-14 items-center gap-3 border-b border-[#2C365D]/20 bg-[#2C365D]/10 px-4">
+                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-xs font-medium uppercase tracking-wide text-[#2C365D]/70">
+                  App bar
+                </span>
+                <div className="ml-auto flex items-center gap-3">
+                  <div className="h-8 w-8 rounded bg-[#2C365D]/25" aria-hidden />
+                  <div className="h-4 w-32 rounded bg-[#2C365D]/20" aria-hidden />
+                  <div className="h-8 w-24 rounded bg-[#2C365D]/20" aria-hidden />
+                </div>
+              </div>
+              <div className="flex min-h-[320px]">
+                {/* Nav */}
+                <aside className="relative flex w-16 flex-shrink-0 flex-col items-center border-r border-[#00D2A2]/25 bg-[#00D2A2]/10 py-3">
+                  <span className="absolute left-2 top-2 text-xs font-medium uppercase tracking-wide text-[#00D2A2]/80">
+                    Nav
+                  </span>
+                  <div className="mt-8 flex flex-col gap-2">
+                    <div className="h-8 w-8 rounded bg-[#00D2A2]/25" aria-hidden />
+                    <div className="h-8 w-8 rounded bg-[#00D2A2]/15" aria-hidden />
+                    <div className="h-8 w-8 rounded bg-[#00D2A2]/15" aria-hidden />
+                    <div className="h-8 w-8 rounded bg-[#00D2A2]/15" aria-hidden />
+                  </div>
+                </aside>
+
+                {/* 3-pane area */}
+                <div className="flex min-w-0 flex-1 border-r border-border">
+                  {/* Pane 1 – left sidebar */}
+                  <div className="relative flex w-1/4 min-w-[120px] flex-col border-r border-gray-200 bg-[#F9F9FB] p-4">
+                    <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                      Pane 1
+                    </span>
+                    <div className="mt-4 space-y-2">
+                      <div className="h-10 rounded bg-gray-200/70" aria-hidden />
+                      <div className="h-3 w-3/4 rounded bg-gray-200/50" aria-hidden />
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      <div className="h-10 rounded bg-gray-200/70" aria-hidden />
+                      <div className="h-3 w-3/4 rounded bg-gray-200/50" aria-hidden />
+                    </div>
+                    <div className="mt-4 space-y-2">
+                      <div className="h-10 rounded bg-gray-200/70" aria-hidden />
+                      <div className="h-3 w-3/4 rounded bg-gray-200/50" aria-hidden />
+                    </div>
+                  </div>
+
+                  {/* Pane 2 – main content (largest) */}
+                  <div className="relative flex min-w-0 flex-1 flex-col bg-[#F9F9FB] p-4">
+                    <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                      Pane 2
+                    </span>
+                    <div className="mt-4 mb-3 h-5 w-48 rounded bg-gray-200/80" aria-hidden />
+                    <div className="space-y-2">
+                      <div className="h-4 w-full rounded bg-gray-200/60" aria-hidden />
+                      <div className="h-4 w-full max-w-[90%] rounded bg-gray-200/60" aria-hidden />
+                      <div className="h-4 w-3/4 rounded bg-gray-200/60" aria-hidden />
+                    </div>
+                    <div className="mt-5 grid grid-cols-2 gap-3">
+                      <div className="h-20 rounded-lg border-2 border-dashed border-border" />
+                      <div className="h-20 rounded-lg border-2 border-dashed border-border" />
+                    </div>
+                  </div>
+
+                  {/* Pane 3 – right detail/assistant */}
+                  <div className="relative flex w-1/4 min-w-[120px] flex-col border-l border-gray-200 bg-[#F9F9FB] p-4">
+                    <span className="text-xs font-medium uppercase tracking-wide text-gray-500">
+                      Pane 3
+                    </span>
+                    <div className="mt-4 mb-3 h-4 w-20 rounded bg-gray-200/70" aria-hidden />
+                    <div className="space-y-3">
+                      <div className="h-16 rounded-lg border border-gray-200 bg-white p-2" aria-hidden>
+                        <div className="mb-1 h-3 w-16 rounded bg-gray-200/80" />
+                        <div className="h-2 w-full rounded bg-gray-200/50" />
+                        <div className="mt-1 h-2 w-3/4 rounded bg-gray-200/50" />
+                      </div>
+                      <div className="h-16 rounded-lg border border-gray-200 bg-white p-2" aria-hidden>
+                        <div className="mb-1 h-3 w-16 rounded bg-gray-200/80" />
+                        <div className="h-2 w-full rounded bg-gray-200/50" />
+                        <div className="mt-1 h-2 w-3/4 rounded bg-gray-200/50" />
+                      </div>
+                      <div className="h-16 rounded-lg border border-gray-200 bg-white p-2" aria-hidden>
+                        <div className="mb-1 h-3 w-16 rounded bg-gray-200/80" />
+                        <div className="h-2 w-full rounded bg-gray-200/50" />
+                        <div className="mt-1 h-2 w-3/4 rounded bg-gray-200/50" />
+                      </div>
+                    </div>
+                    <div className="mt-auto pt-4">
+                      <div className="h-10 rounded-lg border border-gray-200 bg-white" aria-hidden />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Control panel */}
+                <aside className="relative hidden w-0 flex-shrink-0 border-[#0074C4]/20 bg-[#0074C4]/8 lg:block lg:w-72 lg:border-l">
+                  <span className="absolute left-4 top-3 text-xs font-medium uppercase tracking-wide text-[#0074C4]/80">
+                    Control panel
+                  </span>
+                  <div className="p-4 pt-8">
+                    <div className="mb-4 h-4 w-28 rounded bg-[#0074C4]/20" aria-hidden />
+                    <div className="space-y-3">
+                      <div className="h-10 rounded bg-[#0074C4]/15" aria-hidden />
+                      <div className="h-10 rounded bg-[#0074C4]/15" aria-hidden />
+                      <div className="h-10 rounded bg-[#0074C4]/15" aria-hidden />
+                    </div>
+                  </div>
+                </aside>
+              </div>
+            </div>
+            <p className="mt-2 text-sm text-gray-500">
+              3 panes: e.g. sidebar | main content | assistant/detail — as used
+              in Tally Glass (customer details, service overview, AI insights).
+            </p>
           </section>
 
           {/* App bar */}

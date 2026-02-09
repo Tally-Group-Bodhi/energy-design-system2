@@ -65,6 +65,7 @@ const navigationSections = [
       { label: "Breadcrumb", href: "/components/breadcrumb" },
       { label: "Button", href: "/components/button" },
       { label: "Button Group", href: "/components/button-group" },
+      { label: "Calendar", href: "/components/calendar" },
       { label: "Card", href: "/components/card" },
       { label: "Charts", href: "/components/charts" },
       { label: "Chart Widgets", href: "/components/electricity-usage-widget" },

@@ -22,6 +22,7 @@ import CollapsibleCard from "@/components/CollapsibleCard/CollapsibleCard";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/Card/Card";
 import { Icon } from "@/components/ui/icon";
 import { Avatar, AvatarFallback } from "@/components/Avatar/Avatar";
+import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
 import Input from "@/components/Input/Input";
 import Checkbox from "@/components/Checkbox/Checkbox";
@@ -81,6 +82,124 @@ const INTERACTIONS = [
   { id: 4, title: "Missing Start/End Dates", category: "Billing", user: "Pooja Ahuja", time: "3 hours ago" },
 ];
 
+const CONTACTS_DATA = [
+  {
+    id: 1,
+    name: "Phoenix Baker",
+    dob: "12/04/1990",
+    badge: "Primary",
+    badgeVariant: "default" as const,
+    details: {
+      contactType: "Primary",
+      fullName: "Phoenix Barker",
+      dateOfBirth: "12/04/1990",
+      landlineServiceComment: "Residential",
+      mobileServiceComment: "Billing",
+      preferredContactMethod: "Residential",
+      landlinePhone: "03555506536",
+      mobilePhone: "04123456789",
+      verificationPassphrase: "Not Set",
+      email: "Phoenixbarker12345@gmail.com",
+      address: "29 - 35 Collingwood Road, Collingwood VIC 3066",
+      customerNumber: "10953",
+      cdnContact: "No",
+      externalRef: "Residential",
+    },
+  },
+  {
+    id: 2,
+    name: "Ethan Chang",
+    dob: "12/04/1990",
+    badge: "Secondary",
+    badgeVariant: "secondary" as const,
+    details: {
+      contactType: "Secondary",
+      fullName: "Ethan Chang",
+      dateOfBirth: "12/04/1990",
+      landlineServiceComment: "Residential",
+      mobileServiceComment: "Residential",
+      preferredContactMethod: "Email",
+      landlinePhone: "03555509821",
+      mobilePhone: "04198765432",
+      verificationPassphrase: "Set",
+      email: "ethan.chang@email.com",
+      address: "15 Collins Street, Melbourne VIC 3000",
+      customerNumber: "10954",
+      cdnContact: "No",
+      externalRef: "Residential",
+    },
+  },
+  {
+    id: 3,
+    name: "Olivia Johnson",
+    dob: "12/04/1990",
+    badge: "CDN",
+    badgeVariant: "info" as const,
+    details: {
+      contactType: "CDN",
+      fullName: "Olivia Johnson",
+      dateOfBirth: "12/04/1990",
+      landlineServiceComment: "Business",
+      mobileServiceComment: "Residential",
+      preferredContactMethod: "Phone",
+      landlinePhone: "03555501234",
+      mobilePhone: "04111222333",
+      verificationPassphrase: "Not Set",
+      email: "olivia.johnson@business.com",
+      address: "42 Bourke Street, Melbourne VIC 3000",
+      customerNumber: "10955",
+      cdnContact: "Yes",
+      externalRef: "Business",
+    },
+  },
+  {
+    id: 4,
+    name: "Aiden Smith",
+    dob: "12/04/1990",
+    badge: "Additional",
+    badgeVariant: "info" as const,
+    details: {
+      contactType: "Additional",
+      fullName: "Aiden Smith",
+      dateOfBirth: "12/04/1990",
+      landlineServiceComment: "Residential",
+      mobileServiceComment: "Residential",
+      preferredContactMethod: "Residential",
+      landlinePhone: "03555507890",
+      mobilePhone: "04155566777",
+      verificationPassphrase: "Set",
+      email: "aiden.smith@email.com",
+      address: "8 Flinders Lane, Melbourne VIC 3000",
+      customerNumber: "10956",
+      cdnContact: "No",
+      externalRef: "Residential",
+    },
+  },
+  {
+    id: 5,
+    name: "Luna Martinez",
+    dob: "12/04/1990",
+    badge: "Additional",
+    badgeVariant: "info" as const,
+    details: {
+      contactType: "Additional",
+      fullName: "Luna Martinez",
+      dateOfBirth: "12/04/1990",
+      landlineServiceComment: "Residential",
+      mobileServiceComment: "Billing",
+      preferredContactMethod: "Email",
+      landlinePhone: "03555504567",
+      mobilePhone: "04188899000",
+      verificationPassphrase: "Not Set",
+      email: "luna.martinez@email.com",
+      address: "103 Lygon Street, Carlton VIC 3053",
+      customerNumber: "10957",
+      cdnContact: "No",
+      externalRef: "Residential",
+    },
+  },
+];
+
 const CARD_GRID_CLASS = "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3";
 
 function DataCell({ label, value, className }: { label: string; value: React.ReactNode; className?: string }) {
@@ -106,7 +225,9 @@ export default function TallyLargeMarketPage() {
   const [tabValue, setTabValue] = React.useState("overview");
   const [cardOpenState, setCardOpenState] = React.useState<Record<string, boolean>>(INITIAL_CARD_OPEN);
   const [activeNavId, setActiveNavId] = React.useState("customers");
+  const [selectedContactId, setSelectedContactId] = React.useState(1);
   const currentTabLabel = TAB_CONFIG.find((t) => t.value === tabValue)?.label ?? "Overview";
+  const selectedContact = CONTACTS_DATA.find((c) => c.id === selectedContactId) ?? CONTACTS_DATA[0];
 
   const allCardsOpen = OVERVIEW_CARD_TITLES.every((t) => cardOpenState[t]);
   const expandAll = () => setCardOpenState(() => Object.fromEntries(OVERVIEW_CARD_TITLES.map((t) => [t, true])));
@@ -210,7 +331,7 @@ export default function TallyLargeMarketPage() {
         </aside>
 
         {/* Main Content */}
-        <div className="min-w-0 flex-1 overflow-y-auto">
+        <div className="relative min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto max-w-[1600px] px-6 py-6">
         <Breadcrumb className="mb-4">
           <BreadcrumbList className="items-center gap-1.5 text-sm text-gray-700 dark:text-gray-200">
@@ -492,7 +613,95 @@ export default function TallyLargeMarketPage() {
             </div>
           </TabsContent>
 
-          {TAB_CONFIG.filter((t) => t.value !== "overview").map((tab) => (
+          {/* Contacts Tab */}
+          <TabsContent value="contacts" className="mt-0">
+            <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">Contacts</h2>
+            <div className="flex gap-6">
+              {/* Left: Contact list */}
+              <div className="w-[280px] shrink-0">
+                <Card className="shadow-none">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-border px-4 pb-3 pt-3 dark:border-gray-800">
+                    <CardTitle className="text-sm font-semibold text-gray-900 dark:text-gray-100">Contact Name</CardTitle>
+                    <button type="button" className="rounded p-1 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800">
+                      <Icon name="add" size={20} />
+                    </button>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    {CONTACTS_DATA.map((contact) => (
+                      <button
+                        key={contact.id}
+                        type="button"
+                        onClick={() => setSelectedContactId(contact.id)}
+                        className={cn(
+                          "flex w-full items-start gap-3 border-b border-border px-4 py-3 text-left transition-colors last:border-b-0 dark:border-gray-800",
+                          selectedContactId === contact.id
+                            ? "bg-gray-50 dark:bg-gray-800/50"
+                            : "hover:bg-gray-50 dark:hover:bg-gray-800/30"
+                        )}
+                      >
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500">
+                          <Icon name="person" size={24} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{contact.name}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{contact.dob}</p>
+                          <Badge variant={contact.badgeVariant} className="mt-1 text-[10px] px-2 py-0.5">
+                            {contact.badge}
+                          </Badge>
+                        </div>
+                      </button>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Right: Contact details */}
+              <div className="min-w-0 flex-1">
+                <Card className="shadow-none">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-border pb-4 dark:border-gray-800">
+                    <CardTitle className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                      {selectedContact.details.fullName}
+                    </CardTitle>
+                    <div className="flex items-center gap-1">
+                      <button type="button" className="rounded p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800" aria-label="Edit contact">
+                        <Icon name="edit" size={20} />
+                      </button>
+                      <button type="button" className="rounded p-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800" aria-label="Delete contact">
+                        <Icon name="delete" size={20} />
+                      </button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <div className="grid grid-cols-3 gap-x-8 gap-y-6">
+                      <DataCell label="Contact Type" value={selectedContact.details.contactType} />
+                      <DataCell label="Full name" value={selectedContact.details.fullName} />
+                      <DataCell label="Date of birth" value={selectedContact.details.dateOfBirth} />
+                      <DataCell label="Landline Service Comment" value={selectedContact.details.landlineServiceComment} />
+                      <DataCell label="Mobile Service Comment" value={selectedContact.details.mobileServiceComment} />
+                      <DataCell label="Preferred Contact Method" value={selectedContact.details.preferredContactMethod} />
+                      <DataCell label="Landline Phone" value={selectedContact.details.landlinePhone} />
+                      <DataCell label="Mobile Phone" value={selectedContact.details.mobilePhone} />
+                      <DataCell label="Verification Passphrase" value={selectedContact.details.verificationPassphrase} />
+                      <DataCell label="Email" value={selectedContact.details.email} />
+                      <div className="col-span-2" />
+                      <DataCell label="Address" value={selectedContact.details.address} className="col-span-3" />
+                      <DataCell label="Customer Number" value={selectedContact.details.customerNumber} />
+                      <DataCell label="CDN Contact" value={selectedContact.details.cdnContact} />
+                      <DataCell label="External Ref" value={selectedContact.details.externalRef} />
+                    </div>
+
+                    <div className="mt-8 border-t border-border pt-6 dark:border-gray-800">
+                      <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">Identification Documents</h3>
+                      <p className="mt-3 text-sm text-muted-foreground">No Identification documents to display</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Remaining tab placeholders */}
+          {TAB_CONFIG.filter((t) => t.value !== "overview" && t.value !== "contacts").map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="mt-0">
               <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground dark:border-gray-700 dark:bg-gray-900/40">
                 <p className="capitalize">{tab.label} content would go here.</p>
@@ -502,6 +711,31 @@ export default function TallyLargeMarketPage() {
         </Tabs>
           </div>
         </div>
+
+        {/* Right Action Sidebar */}
+        <aside className="flex w-16 shrink-0 flex-col items-center gap-1 border-l border-border bg-white pt-4 dark:border-gray-800 dark:bg-gray-950">
+          <button
+            type="button"
+            className="flex flex-col items-center gap-1 rounded-lg px-2 py-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+          >
+            <Icon name="bolt" size={22} />
+            <span className="text-[10px] font-medium leading-tight">Actions</span>
+          </button>
+          <button
+            type="button"
+            className="flex flex-col items-center gap-1 rounded-lg px-2 py-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+          >
+            <Icon name="diamond" size={22} />
+            <span className="text-[10px] font-medium leading-tight">Exceptions</span>
+          </button>
+          <button
+            type="button"
+            className="flex flex-col items-center gap-1 rounded-lg px-2 py-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+          >
+            <Icon name="task" size={22} />
+            <span className="text-[10px] font-medium leading-tight">Tasks</span>
+          </button>
+        </aside>
       </div>
     </div>
   );

@@ -11,6 +11,13 @@
   --muted: #595767;
   --muted-foreground: #6b7280;
   --primary: #2C365D;
+  --primary-foreground: #ffffff;
+  --accent: #f3f4f6;
+  --accent-foreground: #171717;
+  --ring: #2C365D;
+  --input: #E5E7EB;
+  --popover: #ffffff;
+  --popover-foreground: #171717;
   --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-ibm-mono: "IBM Plex Mono", ui-monospace, monospace;
 }
@@ -22,6 +29,13 @@
   --card: #1f2937;
   --card-foreground: #f3f4f6;
   --muted-foreground: #9ca3af;
+  --primary-foreground: #ffffff;
+  --accent: #1f2937;
+  --accent-foreground: #f3f4f6;
+  --ring: #7c8cb8;
+  --input: #374151;
+  --popover: #1f2937;
+  --popover-foreground: #f3f4f6;
 }
 
 @theme inline {
@@ -33,6 +47,13 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-ibm-mono);
   --font-family-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
