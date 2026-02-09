@@ -354,7 +354,7 @@ export default function GlassEnergyDashboard() {
                               outerRadius={100}
                               dataKey="value"
                               paddingAngle={2}
-                              label={({ name, percent }: { name: string; percent?: number }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                              label={({ name, percent }: { name?: string; percent?: number }) => `${name ?? ""} ${((percent ?? 0) * 100).toFixed(0)}%`}
                             >
                               {energySourceData.map((entry, idx) => (
                                 <Cell key={idx} fill={entry.color} />
