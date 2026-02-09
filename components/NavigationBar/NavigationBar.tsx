@@ -275,7 +275,7 @@ export default function NavigationBar({
                           }
                         }}
                         className={cn(
-                          "flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors",
+                          "flex items-center gap-2 px-3 py-2 text-sm font-normal transition-colors",
                           isActive(child.id)
                             ? "bg-gray-200 text-gray-900 dark:bg-gray-600 dark:text-gray-100"
                             : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -298,7 +298,7 @@ export default function NavigationBar({
                       className={cn(
                         "group flex w-full items-center gap-3 rounded-md border-0 bg-transparent text-left outline-none transition-colors",
                         paddingX,
-                        "py-2 text-sm font-medium",
+                        "py-2 text-sm font-normal",
                         "focus:ring-2 focus:ring-[#2C365D] focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800",
                         active || isOpen
                           ? "bg-gray-200 text-gray-900 dark:bg-gray-600 dark:text-gray-100"
@@ -339,7 +339,7 @@ export default function NavigationBar({
                                 }
                               }}
                               className={cn(
-                                "flex items-center gap-2 rounded-md py-2 pr-3 pl-2 text-sm font-medium transition-colors",
+                                "flex items-center gap-2 rounded-md py-2 pr-3 pl-2 text-sm font-normal transition-colors",
                                 isActive(child.id)
                                   ? "bg-[#2C365D]/10 text-[#2C365D] dark:bg-[#7c8cb8]/20 dark:text-[#7c8cb8]"
                                   : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
@@ -374,7 +374,7 @@ export default function NavigationBar({
                         }
                       }}
                       className={cn(
-                        "group relative flex cursor-pointer items-center rounded-md border-0 bg-transparent py-2 text-sm font-medium outline-none transition-colors",
+                        "group relative flex cursor-pointer items-center rounded-md border-0 bg-transparent py-2 text-sm font-normal outline-none transition-colors",
                         collapsed
                           ? "mx-auto h-10 w-10 justify-center px-0 gap-0"
                           : `${paddingX} text-left gap-3`,
@@ -415,7 +415,7 @@ export default function NavigationBar({
                         else handleItemClick(item);
                       }}
                       className={cn(
-                        "group relative flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+                        "group relative flex items-center rounded-md py-2 text-sm font-normal transition-colors",
                         collapsed
                           ? "mx-auto h-10 w-10 justify-center px-0 gap-0"
                           : `${paddingX} gap-3`,
@@ -475,7 +475,7 @@ export default function NavigationBar({
               }
             }}
             className={cn(
-              "group flex items-center rounded-md py-2 text-sm font-medium transition-colors",
+              "group flex items-center rounded-md py-2 text-sm font-normal transition-colors",
               collapsed
                 ? "mx-auto h-10 w-10 justify-center px-0 gap-0"
                 : `${paddingX} gap-3`,
@@ -509,7 +509,7 @@ export default function NavigationBar({
           type="button"
           onClick={() => setCollapsed(!collapsed)}
           className={cn(
-            "flex w-full items-center rounded-md py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100",
+            "flex w-full items-center rounded-md py-2 text-sm font-normal text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100",
             collapsed
               ? "mx-auto h-10 w-10 justify-center px-0 gap-0"
               : `${paddingX} justify-start gap-3`

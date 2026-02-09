@@ -125,7 +125,7 @@ export default function RootLayout({
           <DensityModeSwitch />
           <ThemeModeSwitch />
         </div>
-        <div className="flex">
+        <div className="flex overflow-x-hidden">
           <Sidebar sections={navigationSections} />
           <main className="flex-1">{children}</main>
         </div>
