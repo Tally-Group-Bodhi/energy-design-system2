@@ -127,7 +127,7 @@ export default function NavigationBar({
     <nav
       className={cn(
         "sticky top-0 z-40 flex flex-col border-r border-border bg-white transition-[width] duration-300 dark:border-gray-700 dark:bg-gray-800",
-        compact ? "max-h-[520px] min-h-[420px]" : "h-screen",
+        compact ? "max-h-[520px] min-h-[420px]" : "h-full",
         navWidth,
         className
       )}

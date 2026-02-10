@@ -31,6 +31,7 @@ export default function CRMLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const [navCollapsed, setNavCollapsed] = React.useState(false);
 
   // Determine default active nav id from pathname
   const defaultActiveId = pathname.startsWith("/crm/pipeline")
@@ -97,7 +98,8 @@ export default function CRMLayout({
           items={navItems}
           bottomItems={bottomNavItems}
           defaultActiveId={defaultActiveId}
-          collapsed={false}
+          collapsed={navCollapsed}
+          onCollapsedChange={setNavCollapsed}
         />
 
         {/* ── Main content ─────────────────────────────────────────── */}
