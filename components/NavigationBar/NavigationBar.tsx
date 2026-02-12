@@ -470,85 +470,94 @@ export default function NavigationBar({
       </div>
 
       {/* ----- Bottom section (Help, Settings, collapse toggle) ----- */}
-      <div className="shrink-0 border-t border-border p-2 dark:border-gray-700">
-        {bottomItems.map((item) => (
-          <Link
-            key={item.id}
-            href={item.href ?? "#"}
-            onMouseEnter={(e) => {
-              setHoveredItemId(item.id);
-              showTooltip(e, item.label);
-            }}
-            onMouseLeave={() => {
-              setHoveredItemId(null);
-              hideTooltip();
-            }}
-            onClick={(e) => {
-              if (item.disabled) e.preventDefault();
-              else {
-                setActiveId(item.id);
-                onItemClick?.(item.id);
-              }
-            }}
-            className={cn(
-              "group flex items-center rounded-lg py-2 text-sm font-normal transition-colors focus:outline-none focus-visible:outline-none",
-              collapsed
-                ? "mx-auto h-10 w-10 justify-center px-0 gap-0"
-                : `${paddingX} gap-3`,
-              isActive(item.id)
-                ? activeClass
-                : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100",
-              item.disabled && "cursor-not-allowed opacity-50"
-            )}
-          >
-            {item.icon && (
-              <Icon
-                name={item.icon}
-                size={20}
-                className={cn(
-                  "shrink-0",
-                  isActive(item.id)
-                    ? activeIconClass
-                    : "text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100"
-                )}
+      <div className="shrink-0 border-t border-border dark:border-gray-700">
+        <div className="p-2">
+          {bottomItems.map((item) => (
+            <Link
+              key={item.id}
+              href={item.href ?? "#"}
+              onMouseEnter={(e) => {
+                setHoveredItemId(item.id);
+                showTooltip(e, item.label);
+              }}
+              onMouseLeave={() => {
+                setHoveredItemId(null);
+                hideTooltip();
+              }}
+              onClick={(e) => {
+                if (item.disabled) e.preventDefault();
+                else {
+                  setActiveId(item.id);
+                  onItemClick?.(item.id);
+                }
+              }}
+              className={cn(
+                "group flex items-center rounded-lg py-2 text-sm font-normal transition-colors focus:outline-none focus-visible:outline-none",
+                collapsed
+                  ? "mx-auto h-10 w-10 justify-center px-0 gap-0"
+                  : `${paddingX} gap-3`,
+                isActive(item.id)
+                  ? activeClass
+                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-gray-100",
+                item.disabled && "cursor-not-allowed opacity-50"
+              )}
+            >
+              {item.icon && (
+                <Icon
+                  name={item.icon}
+                  size={20}
+                  className={cn(
+                    "shrink-0",
+                    isActive(item.id)
+                      ? activeIconClass
+                      : "text-gray-600 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-gray-100"
+                  )}
+                />
+              )}
+              {!collapsed && <span className="truncate">{item.label}</span>}
+            </Link>
+          ))}
+        </div>
+        {/* Powered by Tally badge + collapse toggle */}
+        {collapsed ? (
+          <div className="flex items-center justify-center p-2">
+            <button
+              type="button"
+              onClick={() => setCollapsed(!collapsed)}
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:outline-none dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+              aria-label="Expand navigation"
+            >
+              <Icon name="chevron_right" size={20} />
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between px-4 py-3">
+            <div className="flex items-center">
+              <Image
+                src="/PoweredByTallyBadge.svg"
+                alt="Powered by Tally"
+                width={123}
+                height={26}
+                className="block dark:hidden"
               />
-            )}
-            {!collapsed && <span className="truncate">{item.label}</span>}
-          </Link>
-        ))}
-        {/* Powered by Tally badge */}
-        {!collapsed && (
-          <div className="mt-2 flex justify-start px-4">
-            <Image
-              src="/PoweredByTallyBadge.svg"
-              alt="Powered by Tally"
-              width={123}
-              height={26}
-              className="block dark:hidden"
-            />
-            <Image
-              src="/PoweredByTallyBadgeDark.svg"
-              alt="Powered by Tally"
-              width={123}
-              height={26}
-              className="hidden dark:block"
-            />
+              <Image
+                src="/PoweredByTallyBadgeDark.svg"
+                alt="Powered by Tally"
+                width={123}
+                height={26}
+                className="hidden dark:block"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setCollapsed(!collapsed)}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:outline-none dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+              aria-label="Collapse navigation"
+            >
+              <Icon name="chevron_left" size={20} />
+            </button>
           </div>
         )}
-        <button
-          type="button"
-          onClick={() => setCollapsed(!collapsed)}
-          className={cn(
-            "flex w-full items-center rounded-lg py-2 text-sm font-normal text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus-visible:outline-none dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100",
-            collapsed
-              ? "mx-auto h-10 w-10 justify-center px-0 gap-0"
-              : `${paddingX} justify-start gap-3`
-          )}
-          aria-label={collapsed ? "Expand navigation" : "Collapse navigation"}
-        >
-          <Icon name={collapsed ? "chevron_right" : "chevron_left"} size={20} />
-          {!collapsed && <span>Collapse</span>}
-        </button>
       </div>
 
       {/* Fixed tooltip for collapsed state — rendered outside overflow containers */}

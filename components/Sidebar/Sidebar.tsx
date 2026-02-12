@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import Header from "@/components/Header/Header";
@@ -46,11 +46,23 @@ export default function Sidebar({ sections }: SidebarProps) {
   const [collapsedSections, setCollapsedSections] = useState<
     Record<string, boolean>
   >({});
+
+  // Tooltip (simple label) for collapsed icons without flyout
   const [tooltipPos, setTooltipPos] = useState<{
     top: number;
     left: number;
     label: string;
   } | null>(null);
+
+  // Flyout (item list) for collapsed section icons
+  const [hoveredSectionIndex, setHoveredSectionIndex] = useState<number | null>(
+    null
+  );
+  const [flyoutPos, setFlyoutPos] = useState<{
+    top: number;
+    left: number;
+  } | null>(null);
+  const flyoutTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -83,6 +95,7 @@ export default function Sidebar({ sections }: SidebarProps) {
     });
   }, []);
 
+  // Simple tooltip (unused when flyout is showing)
   const showTooltip = (e: React.MouseEvent, label: string) => {
     if (!collapsed) return;
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -93,6 +106,25 @@ export default function Sidebar({ sections }: SidebarProps) {
     });
   };
   const hideTooltip = () => setTooltipPos(null);
+
+  // Flyout for collapsed section icons
+  const showFlyout = (e: React.MouseEvent, sectionIdx: number) => {
+    if (!collapsed) return;
+    if (flyoutTimeout.current) clearTimeout(flyoutTimeout.current);
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setFlyoutPos({ top: rect.top, left: rect.right + 8 });
+    setHoveredSectionIndex(sectionIdx);
+    hideTooltip();
+  };
+  const hideFlyout = () => {
+    flyoutTimeout.current = setTimeout(() => {
+      setFlyoutPos(null);
+      setHoveredSectionIndex(null);
+    }, 100);
+  };
+  const cancelHideFlyout = () => {
+    if (flyoutTimeout.current) clearTimeout(flyoutTimeout.current);
+  };
 
   const isCollapsed = collapsed && mounted;
 
@@ -142,21 +174,33 @@ export default function Sidebar({ sections }: SidebarProps) {
             const sectionIcon = SECTION_ICONS[section.title];
             const isSectionCollapsed = collapsedSections[section.title];
 
-            /* ---- Collapsed: icon-only section links ---- */
+            /* ---- Collapsed: icon with flyout on hover ---- */
             if (isCollapsed) {
               return (
                 <div
                   key={sectionIndex}
                   className={sectionIndex > 0 ? "mt-1" : ""}
                 >
-                  <Link
-                    href={sectionHref ?? "#"}
-                    onMouseEnter={(e) => showTooltip(e, section.title)}
-                    onMouseLeave={hideTooltip}
-                    className="group mx-auto flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onMouseEnter={(e) => {
+                      cancelHideFlyout();
+                      showFlyout(e, sectionIndex);
+                    }}
+                    onMouseLeave={() => {
+                      hideFlyout();
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setHoveredSectionIndex(sectionIndex);
+                      }
+                    }}
+                    className="group mx-auto flex h-10 w-10 cursor-pointer items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
                   >
                     {sectionIcon && <Icon name={sectionIcon} size={20} />}
-                  </Link>
+                  </div>
                 </div>
               );
             }
@@ -228,52 +272,51 @@ export default function Sidebar({ sections }: SidebarProps) {
         </nav>
 
         {/* ----- Bottom section (badge + collapse toggle) ----- */}
-        <div className="shrink-0 border-t border-border p-2 dark:border-gray-700">
-          {/* Powered by Tally badge */}
-          {!isCollapsed && (
-            <div className="mb-2 flex justify-start px-2">
-              <Image
-                src="/PoweredByTallyBadge.svg"
-                alt="Powered by Tally"
-                width={123}
-                height={26}
-                className="block dark:hidden"
-              />
-              <Image
-                src="/PoweredByTallyBadgeDark.svg"
-                alt="Powered by Tally"
-                width={123}
-                height={26}
-                className="hidden dark:block"
-              />
+        <div className="shrink-0 border-t border-border dark:border-gray-700">
+          {isCollapsed ? (
+            <div className="flex items-center justify-center p-2">
+              <button
+                type="button"
+                onClick={toggle}
+                className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+                aria-label="Expand navigation"
+              >
+                <Icon name="chevron_right" size={20} />
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between px-4 py-3">
+              <div className="flex items-center">
+                <Image
+                  src="/PoweredByTallyBadge.svg"
+                  alt="Powered by Tally"
+                  width={123}
+                  height={26}
+                  className="block dark:hidden"
+                />
+                <Image
+                  src="/PoweredByTallyBadgeDark.svg"
+                  alt="Powered by Tally"
+                  width={123}
+                  height={26}
+                  className="hidden dark:block"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={toggle}
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+                aria-label="Collapse navigation"
+              >
+                <Icon name="chevron_left" size={20} />
+              </button>
             </div>
           )}
-
-          {/* Collapse / Expand toggle */}
-          <button
-            type="button"
-            onClick={toggle}
-            className={cn(
-              "flex w-full items-center rounded-lg py-2 text-sm font-normal text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus:outline-none dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100",
-              isCollapsed
-                ? "mx-auto h-10 w-10 justify-center px-0"
-                : "justify-start gap-3 px-4"
-            )}
-            aria-label={
-              isCollapsed ? "Expand navigation" : "Collapse navigation"
-            }
-          >
-            <Icon
-              name={isCollapsed ? "chevron_right" : "chevron_left"}
-              size={20}
-            />
-            {!isCollapsed && <span>Collapse</span>}
-          </button>
         </div>
       </aside>
 
-      {/* Fixed tooltip for collapsed state */}
-      {isCollapsed && tooltipPos && (
+      {/* Fixed tooltip for collapsed state (only when no flyout is showing) */}
+      {isCollapsed && tooltipPos && hoveredSectionIndex === null && (
         <div
           className="pointer-events-none fixed z-[100] flex items-center"
           style={{
@@ -293,6 +336,58 @@ export default function Sidebar({ sections }: SidebarProps) {
           </span>
         </div>
       )}
+
+      {/* Fixed flyout for collapsed section icons — shows section title + item links */}
+      {isCollapsed &&
+        hoveredSectionIndex !== null &&
+        flyoutPos &&
+        (() => {
+          const section = sections[hoveredSectionIndex];
+          if (!section) return null;
+          const sectionHref = SECTION_LINKS[section.title];
+          return (
+            <div
+              className="fixed z-[100] min-w-[180px] rounded-md border border-gray-200 bg-white py-2 dark:border-gray-600 dark:bg-gray-800"
+              style={{
+                top: flyoutPos.top,
+                left: flyoutPos.left,
+                boxShadow:
+                  "0 2px 2px -1px rgba(10,13,18,0.04), 0 4px 6px -2px rgba(10,13,18,0.03), 0 12px 16px -4px rgba(10,13,18,0.08)",
+              }}
+              onMouseEnter={() => {
+                cancelHideFlyout();
+              }}
+              onMouseLeave={() => hideFlyout()}
+            >
+              {/* Section title */}
+              {sectionHref ? (
+                <Link
+                  href={sectionHref}
+                  className="block px-4 pb-1 pt-1.5 text-sm font-medium text-gray-900 transition-colors hover:text-[#2C365D] dark:text-gray-100 dark:hover:text-white"
+                >
+                  {section.title}
+                </Link>
+              ) : (
+                <div className="px-4 pb-1 pt-1.5 text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {section.title}
+                </div>
+              )}
+              {/* Item links */}
+              <div className="relative ml-4 border-l border-gray-200 dark:border-gray-600">
+                {section.items.map((item, itemIndex) => (
+                  <Link
+                    key={itemIndex}
+                    href={item.href}
+                    className="flex items-center py-2 pl-3 pr-4 text-sm font-normal text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                    onClick={() => hideFlyout()}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
     </>
   );
 }
