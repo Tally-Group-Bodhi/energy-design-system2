@@ -8,66 +8,66 @@ import { Icon } from "@/components/ui/icon";
 import NavigationBar from "@/components/NavigationBar/NavigationBar";
 import type { NavigationItem } from "@/components/NavigationBar/NavigationBar";
 
-const LOGO_BASE = "/foundation/brands/tally-digital";
+const LOGO_BASE = "/foundation/brands/tally-plus-small-market";
 
 const logos = [
-  { name: "Primary (full colour)", file: "TallyDigital.svg", bg: "bg-white", label: "Light background" },
-  { name: "Reversed (full colour)", file: "TallyDigitalReversed.svg", bg: "bg-[#802F00]", label: "Dark background" },
-  { name: "Mono (single colour)", file: "TallyDigitalMono.svg", bg: "bg-white", label: "Light background" },
-  { name: "Mono reversed", file: "TallyDigital_MonoReversed.svg", bg: "bg-[#802F00]", label: "Dark background" },
+  { name: "Primary (full colour)", file: "TallyPlusSMLogo.svg", bg: "bg-white", label: "Light background" },
+  { name: "Reversed (full colour)", file: "TallyPlusSMLogoReversed.svg", bg: "bg-[#298268]", label: "Dark background" },
+  { name: "Mono (single colour)", file: "TallyPlusSMLogoMono.svg", bg: "bg-white", label: "Light background" },
+  { name: "Mono reversed", file: "TallyPlusSMLogoMonoReversed.svg", bg: "bg-[#298268]", label: "Dark background" },
 ] as const;
 
-const tallyDigitalPalette = [
-  { name: "Lighter", hex: "#FFF3E6" },
-  { name: "Light", hex: "#FFCF99" },
-  { name: "Orange", hex: "#FF5E00" },
-  { name: "Dark", hex: "#BF4600" },
-  { name: "Darker", hex: "#802F00" },
+const tallyPlusSMPalette = [
+  { name: "Lighter", hex: "#E7FBF8" },
+  { name: "Light", hex: "#A7F0E5" },
+  { name: "Turquoise", hex: "#4EEECA" },
+  { name: "Dark", hex: "#3BB89A" },
+  { name: "Darker", hex: "#298268" },
 ];
 
-const tallyDigitalNavItems: NavigationItem[] = [
+const tallyPlusSMNavItems: NavigationItem[] = [
   { id: "home", label: "Home", href: "#", icon: "home" },
   { id: "dashboard", label: "Dashboard", href: "#", icon: "dashboard" },
   { id: "opportunities", label: "Opportunities", href: "#", icon: "trending_up" },
   { id: "reports", label: "Reports", href: "#", icon: "assessment" },
 ];
 
-const tallyDigitalBottomItems: NavigationItem[] = [
+const tallyPlusSMBottomItems: NavigationItem[] = [
   { id: "help", label: "Help", href: "#", icon: "help" },
   { id: "settings", label: "Settings", href: "#", icon: "settings" },
 ];
 
-const tallyDigitalActiveColors = {
-  bg: "bg-[#FFF3E6]",
-  text: "text-[#BF4600]",
-  darkBg: "dark:bg-[#FFF3E6]/15",
-  darkText: "dark:text-[#FFCF99]",
+// Use Darker (#298268) for fonts and icons whenever Lighter/Light is used as background (accessibility).
+const tallyPlusSMActiveColors = {
+  bg: "bg-[#E7FBF8]",
+  text: "text-[#298268]",
+  darkBg: "dark:bg-[#E7FBF8]/15",
+  darkText: "dark:text-[#A7F0E5]",
 };
 
-const BRAND_ORANGE = "#FF5E00";
-const BRAND_LIGHTER = "#FFF3E6";
+const BRAND_TURQUOISE = "#4EEECA";
+const DARKER = "#298268";
+const DARK = "#3BB89A";
 
-export default function TallyDigitalPage() {
+export default function TallyPlusSmallMarketPage() {
   return (
     <>
-      <PageBanner title="Tally Digital" />
+      <PageBanner title="Tally+ Small Market" />
 
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          {/* Intro */}
           <div className="mb-12">
             <p className="max-w-3xl text-lg leading-7 text-gray-600 dark:text-gray-400">
-              Color is key to the immediate brand recognition of our suite of products. The products powered by Tally Digital are distinguishable by their dedicated brand colors.
+              Color is key to the immediate brand recognition of our suite of products. The products powered by Tally+ Small Market are distinguishable by their dedicated brand colors.
             </p>
           </div>
 
-          {/* Logos */}
           <section className="mb-16 border-t border-border pt-16">
             <h2 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
               Logo
             </h2>
             <p className="mb-6 max-w-3xl text-base text-gray-600 dark:text-gray-400">
-              Use the official Tally Digital logo in the correct variant for your background. Download the asset you need below.
+              Use the official Tally+ Small Market logo in the correct variant for your background. Download the asset you need below.
             </p>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
               {logos.map((logo) => (
@@ -101,45 +101,34 @@ export default function TallyDigitalPage() {
             </div>
           </section>
 
-          {/* UI colours */}
           <section className="mb-16 border-t border-border pt-20">
             <h2 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
               UI colours
             </h2>
             <p className="mb-8 max-w-3xl text-base text-gray-600 dark:text-gray-400">
-              Tally Digital UI palette for navigation, headers, buttons, and surfaces. Based on #FF5E00.
+              Tally+ Small Market UI palette for navigation, headers, buttons, and surfaces. Based on #4EEECA.
             </p>
             <div className="flex flex-col rounded-lg overflow-hidden sm:flex-row">
-              {tallyDigitalPalette.map((c) => (
-                <div
-                  key={c.hex}
-                  className="flex flex-1 flex-col items-center justify-end py-6 text-center"
-                  style={{ backgroundColor: c.hex }}
-                >
-                  <span
-                    className={
-                      [BRAND_ORANGE, "#BF4600", "#802F00"].includes(c.hex)
-                        ? "text-white"
-                        : "text-gray-900"
-                    }
+              {tallyPlusSMPalette.map((c) => {
+                const useLightText = [DARK, DARKER].includes(c.hex);
+                return (
+                  <div
+                    key={c.hex}
+                    className="flex flex-1 flex-col items-center justify-end py-6 text-center"
+                    style={{ backgroundColor: c.hex }}
                   >
-                    {c.name}
-                  </span>
-                  <span
-                    className={`font-mono text-sm ${
-                      [BRAND_ORANGE, "#BF4600", "#802F00"].includes(c.hex)
-                        ? "text-white/90"
-                        : "text-gray-700"
-                    }`}
-                  >
-                    {c.hex}
-                  </span>
-                </div>
-              ))}
+                    <span className={useLightText ? "text-white" : "text-gray-900"}>
+                      {c.name}
+                    </span>
+                    <span className={`font-mono text-sm ${useLightText ? "text-white/90" : "text-gray-700"}`}>
+                      {c.hex}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </section>
 
-          {/* Rules */}
           <section className="mb-16 border-t border-border pt-16">
             <h2 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
               Brand colour rules
@@ -148,20 +137,20 @@ export default function TallyDigitalPage() {
               Apply brand colors to different areas of an interface not only to create visual prominence, but also to anchor people in a specific product experience. Avoid overusing brand colors or using them on large surfaces as they can dilute a hierarchy and make an experience difficult to navigate.
             </p>
             <ul className="list-inside list-disc space-y-2 text-gray-600 dark:text-gray-400">
-              <li>Use orange (#FF5E00) for primary actions, selected states, and key UI anchors.</li>
+              <li>Use turquoise (#4EEECA) for primary actions, selected states, and key UI anchors.</li>
+              <li>Use <strong>Darker (#298268)</strong> for all text and icons on Lighter or Light backgrounds (e.g. active nav) for contrast.</li>
               <li>Reserve brand colour for one primary CTA or active nav item rather than many.</li>
-              <li>Avoid full-width or large blocks of orange; use for buttons, icons, and highlights.</li>
+              <li>Avoid full-width or large blocks of turquoise; use for buttons, icons, and highlights.</li>
               <li>Use Lighter and Light shades for backgrounds and borders to support hierarchy.</li>
             </ul>
           </section>
 
-          {/* Examples: Buttons & CTAs, Selected states, Navigation, App header */}
           <section className="mb-16 border-t border-border pt-16">
             <h2 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
               Brand colour in the interface
             </h2>
             <p className="mb-8 max-w-3xl text-base text-gray-600 dark:text-gray-400">
-              Examples of using Tally Digital colours for buttons, selected states, navigation, and app layout.
+              Examples of using Tally+ Small Market colours for buttons, selected states, navigation, and app layout.
             </p>
 
             <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
@@ -172,8 +161,8 @@ export default function TallyDigitalPage() {
                 <CardContent className="flex flex-col gap-3">
                   <button
                     type="button"
-                    className="w-full rounded-lg px-4 py-2.5 text-center font-medium text-white transition-colors"
-                    style={{ backgroundColor: BRAND_ORANGE }}
+                    className="w-full rounded-lg px-4 py-2.5 text-center font-medium text-gray-900 transition-colors"
+                    style={{ backgroundColor: BRAND_TURQUOISE }}
                   >
                     One (primary)
                   </button>
@@ -196,8 +185,8 @@ export default function TallyDigitalPage() {
                       A▾
                     </span>
                     <span
-                      className="rounded px-2 py-1 text-sm font-bold text-white"
-                      style={{ backgroundColor: BRAND_ORANGE }}
+                      className="rounded px-2 py-1 text-sm font-bold text-gray-900"
+                      style={{ backgroundColor: BRAND_TURQUOISE }}
                     >
                       B
                     </span>
@@ -236,8 +225,8 @@ export default function TallyDigitalPage() {
                     </a>
                     <a
                       href="#"
-                      className="rounded-md px-3 py-2 text-sm font-medium text-white"
-                      style={{ backgroundColor: BRAND_ORANGE }}
+                      className="rounded-md px-3 py-2 text-sm font-medium text-gray-900"
+                      style={{ backgroundColor: BRAND_TURQUOISE }}
                     >
                       Opportunities
                     </a>
@@ -252,36 +241,35 @@ export default function TallyDigitalPage() {
               </Card>
             </div>
 
-            {/* App header — Tally Acquire–style with Tally Digital logo + 4px brand line */}
             <div className="mt-10">
               <Card className="overflow-hidden shadow-none">
                 <CardHeader>
                   <CardTitle className="text-lg">App header and page layout</CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    Tally Acquire–style nav bar with Tally Digital logo. A 4px Tally Digital brand colour line sits above the app bar; content area stays neutral.
+                    Tally Acquire–style nav bar with Tally+ Small Market logo. A 4px brand colour line sits above the app bar; content area stays neutral.
                   </p>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="rounded-lg border border-gray-200 overflow-hidden dark:border-gray-700">
                     <div
                       className="h-1 shrink-0"
-                      style={{ backgroundColor: BRAND_ORANGE }}
+                      style={{ backgroundColor: BRAND_TURQUOISE }}
                       aria-hidden
                     />
                     <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-white px-6 dark:border-gray-800 dark:bg-gray-950/90">
                       <div className="flex items-center gap-4">
-                        <Link href="/foundation/brands/tally-digital" className="flex items-center">
+                        <Link href="/foundation/brands/tally-plus-small-market" className="flex items-center">
                           <Image
-                            src={`${LOGO_BASE}/TallyDigital.svg`}
-                            alt="Tally Digital"
+                            src={`${LOGO_BASE}/TallyPlusSMLogo.svg`}
+                            alt="Tally+ Small Market"
                             width={140}
                             height={28}
                             className="h-8 w-auto dark:hidden"
                             unoptimized
                           />
                           <Image
-                            src={`${LOGO_BASE}/TallyDigitalReversed.svg`}
-                            alt="Tally Digital"
+                            src={`${LOGO_BASE}/TallyPlusSMLogoReversed.svg`}
+                            alt="Tally+ Small Market"
                             width={140}
                             height={28}
                             className="h-8 w-auto hidden dark:block"
@@ -299,7 +287,7 @@ export default function TallyDigitalPage() {
                           <input
                             type="search"
                             placeholder="Search"
-                            className="h-10 w-full rounded-lg border border-border bg-gray-50 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#FF5E00] focus:outline-none focus:ring-1 focus:ring-[#FF5E00] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                            className="h-10 w-full rounded-lg border border-border bg-gray-50 pl-10 pr-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-[#4EEECA] focus:outline-none focus:ring-1 focus:ring-[#4EEECA] dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                           />
                         </div>
                       </div>
@@ -311,17 +299,17 @@ export default function TallyDigitalPage() {
                           <Icon name="notifications" size={20} />
                         </button>
                         <div
-                          className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium text-white"
-                          style={{ backgroundColor: BRAND_ORANGE }}
+                          className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium text-gray-900"
+                          style={{ backgroundColor: BRAND_TURQUOISE }}
                         >
-                          TD
+                          SM
                         </div>
                       </div>
                     </header>
                     <div className="flex">
                       <aside className="flex w-48 shrink-0 flex-col border-r border-border bg-white dark:border-gray-800 dark:bg-gray-950">
                         <nav className="flex flex-col gap-1 p-2">
-                          <div className="mx-2 rounded-lg bg-[#FFF3E6] px-3 py-2.5 text-sm font-medium text-[#BF4600] dark:bg-[#FFF3E6]/15 dark:text-[#FFCF99]">
+                          <div className="mx-2 rounded-lg bg-[#E7FBF8] px-3 py-2.5 text-sm font-medium text-[#298268] dark:bg-[#E7FBF8]/15 dark:text-[#A7F0E5]">
                             Home
                           </div>
                           <div className="mx-2 rounded-lg px-3 py-2.5 text-sm text-gray-600 dark:text-gray-400">
@@ -342,13 +330,12 @@ export default function TallyDigitalPage() {
             </div>
           </section>
 
-          {/* Nav Bar */}
           <section className="mb-16 border-t border-border pt-16">
             <h2 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-gray-100">
               Nav Bar
             </h2>
             <p className="mb-6 max-w-3xl text-base text-gray-600 dark:text-gray-400">
-              The navigation bar uses Tally Digital brand colours for the active item and hover states. The active item uses the <strong>Lighter</strong> UI colour (#FFF3E6) as background, with <strong>Dark</strong> (#BF4600) for icons and text for clear contrast. In <strong>collapsed</strong> mode only icons are shown; hover an icon to see its label in a tooltip. In <strong>expanded</strong> mode labels are visible. Click items to see the active state.
+              The navigation bar uses Tally+ Small Market brand colours for the active item and hover states. The active item uses the <strong>Lighter</strong> UI colour (#E7FBF8) as background, with <strong>Darker</strong> (#298268) for icons and text for clear contrast. Always use Darker for fonts and icons on Lighter or Light backgrounds. In <strong>collapsed</strong> mode only icons are shown; hover an icon to see its label in a tooltip. In <strong>expanded</strong> mode labels are visible. Click items to see the active state.
             </p>
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
               <div className="rounded-lg border border-border bg-white dark:border-gray-700 dark:bg-gray-800/50">
@@ -362,13 +349,13 @@ export default function TallyDigitalPage() {
                 </div>
                 <div className="flex min-h-[420px]">
                   <NavigationBar
-                    items={tallyDigitalNavItems}
-                    bottomItems={tallyDigitalBottomItems}
+                    items={tallyPlusSMNavItems}
+                    bottomItems={tallyPlusSMBottomItems}
                     defaultActiveId="home"
                     collapsed={true}
                     onCollapsedChange={() => {}}
                     compact
-                    activeColors={tallyDigitalActiveColors}
+                    activeColors={tallyPlusSMActiveColors}
                   />
                   <div className="flex-1 border-l border-border bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-900/30" />
                 </div>
@@ -379,18 +366,18 @@ export default function TallyDigitalPage() {
                     Expanded
                   </span>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Active background Lighter (#FFF3E6); icons and text use Dark (#BF4600).
+                    Active background Lighter (#E7FBF8); icons and text use Darker (#298268).
                   </p>
                 </div>
                 <div className="flex min-h-[420px]">
                   <NavigationBar
-                    items={tallyDigitalNavItems}
-                    bottomItems={tallyDigitalBottomItems}
+                    items={tallyPlusSMNavItems}
+                    bottomItems={tallyPlusSMBottomItems}
                     defaultActiveId="home"
                     collapsed={false}
                     onCollapsedChange={() => {}}
                     compact
-                    activeColors={tallyDigitalActiveColors}
+                    activeColors={tallyPlusSMActiveColors}
                   />
                   <div className="flex-1 border-l border-border bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-900/30" />
                 </div>
@@ -401,7 +388,7 @@ export default function TallyDigitalPage() {
           <div className="border-t border-border pt-8">
             <Link
               href="/foundation/brands"
-              className="text-sm font-medium text-[#FF5E00] hover:underline dark:text-[#FF9F66]"
+              className="text-sm font-medium text-[#298268] hover:underline dark:text-[#A7F0E5]"
             >
               ← Back to Brands
             </Link>
