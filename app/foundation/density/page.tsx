@@ -25,9 +25,9 @@ import { Icon } from "@/components/ui/icon";
 const MODES: DensityMode[] = ["comfortable", "normal", "compact"];
 
 const MODE_META: Record<DensityMode, { label: string; range: string; icon: string }> = {
-  comfortable: { label: "Comfortable", range: "≥ 2 560 px (4K)", icon: "desktop_windows" },
-  normal:      { label: "Normal",      range: "1 920 – 2 559 px", icon: "monitor" },
-  compact:     { label: "Compact",     range: "< 1 920 px (laptop)", icon: "laptop" },
+  comfortable: { label: "Comfortable", range: "2560px and above", icon: "desktop_windows" },
+  normal:      { label: "Normal",      range: "1536px to 2559px", icon: "monitor" },
+  compact:     { label: "Compact",     range: "below 1536px (default)", icon: "laptop" },
 };
 
 export default function DensityPage() {
@@ -508,7 +508,7 @@ function CodeTab() {
 
 function MyComponent() {
   const density = useDensity();
-  // → "compact" on a 1440px laptop, "normal" on 1920px, "comfortable" on 4K
+  // → "compact" on a 1440px laptop, "normal" from 1536px, "comfortable" on 4K
 
   const tokens = densityTokens[density];
 

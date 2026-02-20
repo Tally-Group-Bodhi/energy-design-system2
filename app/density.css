@@ -8,7 +8,7 @@
  * so the @theme block below extends the Tailwind theme.
  * ────────────────────────────────────────────────────────────────────────── */
 
-/* ── Default: "normal" density (1920 px – 2559 px) ─────────────────────── */
+/* ── Default: "normal" density (1536 px – 2559 px) ─────────────────────── */
 
 :root {
   --tally-spacing-xs: 3px;
@@ -76,9 +76,9 @@
   }
 }
 
-/* ── "compact" density (laptops, < 1920 px) ─────────────────────────────── */
+/* ── "compact" density (below 1536 px, default) ─────────────────────────── */
 
-@media (max-width: 1919px) {
+@media (max-width: 1535px) {
   :root {
     --tally-spacing-xs: 2px;
     --tally-spacing-sm: 4px;

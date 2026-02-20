@@ -8,9 +8,9 @@ The Tally Design System includes a viewport-adaptive density system that automat
 
 | Mode | Viewport | Typical screen |
 |------|----------|----------------|
-| **Comfortable** | ≥ 2 560 px | 4K / Ultra-wide displays |
-| **Normal** | 1 920 – 2 559 px | Full HD desktop monitors |
-| **Compact** | < 1 920 px | Laptops (13″–15″) |
+| **Comfortable** | 2560px and above | 4K / Ultra-wide displays |
+| **Normal** | 1536px to 2559px | Full HD desktop monitors |
+| **Compact** | below 1536px (default) | Laptops (13″–15″) |
 
 ## Three Ways to Use It
 

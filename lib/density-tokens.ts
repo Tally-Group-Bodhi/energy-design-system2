@@ -68,7 +68,7 @@ export const densityTokens: Record<DensityMode, DensityTokenSet> = {
     borderRadius: { sm: "4px", md: "8px", lg: "12px" },
   },
   normal: {
-    // Standard displays (1920 px – 2559 px)
+    // Standard displays (1536 px – 2559 px)
     spacing: { xs: "3px", sm: "6px", md: "12px", lg: "16px", xl: "24px", xxl: "32px" },
     fontSize: { xs: "11px", sm: "13px", base: "14px", lg: "16px", xl: "18px", xxl: "20px", "3xl": "24px", "4xl": "30px" },
     lineHeight: { tight: "1.2", normal: "1.4", relaxed: "1.6" },
@@ -76,7 +76,7 @@ export const densityTokens: Record<DensityMode, DensityTokenSet> = {
     borderRadius: { sm: "3px", md: "6px", lg: "10px" },
   },
   compact: {
-    // Laptops (< 1920 px)
+    // Below 1536 px (default)
     spacing: { xs: "2px", sm: "4px", md: "8px", lg: "12px", xl: "16px", xxl: "24px" },
     fontSize: { xs: "10px", sm: "12px", base: "13px", lg: "14px", xl: "16px", xxl: "18px", "3xl": "20px", "4xl": "24px" },
     lineHeight: { tight: "1.15", normal: "1.35", relaxed: "1.5" },
@@ -95,9 +95,9 @@ export const densityTokens: Record<DensityMode, DensityTokenSet> = {
  * checked from largest to smallest.
  */
 export const densityBreakpoints: Record<DensityMode, number> = {
-  comfortable: 2560, // 4K and above
-  normal: 1920,      // Standard → 4K
-  compact: 0,        // Below 1920 px (catch-all)
+  comfortable: 2560, // 2560px and above
+  normal: 1536,      // 1536px to 2559px
+  compact: 0,        // Below 1536px (default)
 } as const;
 
 // ────────────────────────────────────────────────────────────────────────────
