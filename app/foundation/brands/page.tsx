@@ -56,6 +56,14 @@ const brands = [
     tags: ["CRM"],
   },
   {
+    title: "Tally Glass",
+    description: "Logo and brand guidelines for Tally Glass (call centre)",
+    href: "/foundation/brands/tally-glass",
+    logo: "/foundation/brands/tally-glass/TallyGlassLogo.svg",
+    icon: "support_agent",
+    tags: ["Call Centre", "Glass"],
+  },
+  {
     title: "Powered by Tally",
     description: "Powered by Tally badge and its use in the navigation bar",
     href: "/foundation/brands/powered-by-tally",

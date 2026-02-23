@@ -9,7 +9,8 @@ export interface SwitchProps
 
 const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
   ({ className, label, helperText, id, checked, ...props }, ref) => {
-    const switchId = id || `switch-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = React.useId();
+    const switchId = id ?? generatedId;
 
     return (
       <div className="flex items-start space-x-3">

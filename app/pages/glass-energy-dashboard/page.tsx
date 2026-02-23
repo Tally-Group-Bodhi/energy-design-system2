@@ -17,6 +17,7 @@ import NavigationBar from "@/components/NavigationBar/NavigationBar";
 import type { NavigationItem } from "@/components/NavigationBar/NavigationBar";
 import Badge from "@/components/Badge/Badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/Tabs/Tabs";
+import { surfaceColours } from "@/lib/tokens/surface-colours";
 import {
   AreaChart,
   Area,
@@ -145,7 +146,7 @@ export default function GlassEnergyDashboard() {
   const [currentEnv, setCurrentEnv] = useState("glass");
 
   return (
-    <div className="flex h-screen flex-col bg-[#F9F9FB] dark:bg-gray-900">
+    <div className="flex h-screen flex-col">
       {/* ── App Bar ──────────────────────────────────────────────────── */}
       <header className="flex h-14 shrink-0 items-center border-b border-border bg-white px-4 dark:bg-gray-800">
         {/* Logo */}
@@ -222,7 +223,7 @@ export default function GlassEnergyDashboard() {
         />
 
         {/* ── Main content ─────────────────────────────────────────── */}
-        <main className="flex-1 overflow-y-auto">
+        <main className={`flex-1 overflow-y-auto ${surfaceColours["tally-crm"]}`}>
           <div className="mx-auto max-w-[1600px] p-density-xl">
 
             {/* Page header */}

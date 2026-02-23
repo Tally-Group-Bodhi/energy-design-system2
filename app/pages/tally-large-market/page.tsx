@@ -27,6 +27,7 @@ import Button from "@/components/Button/Button";
 import Input from "@/components/Input/Input";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import { cn } from "@/lib/utils";
+import { surfaceColours } from "@/lib/tokens/surface-colours";
 
 const LEFT_NAV_ITEMS = [
   { id: "home", label: "Home", icon: "dashboard" },
@@ -234,7 +235,7 @@ export default function TallyLargeMarketPage() {
   const collapseAll = () => setCardOpenState(() => Object.fromEntries(OVERVIEW_CARD_TITLES.map((t) => [t, false])));
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen flex-col">
       {/* App Bar */}
       <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-white px-6 dark:border-gray-800 dark:bg-gray-950/90">
         {/* Left: Logo */}
@@ -331,7 +332,7 @@ export default function TallyLargeMarketPage() {
         </aside>
 
         {/* Main Content */}
-        <div className="relative min-w-0 flex-1 overflow-y-auto">
+        <div className={`relative min-w-0 flex-1 overflow-y-auto ${surfaceColours["tally-group"]}`}>
           <div className="mx-auto max-w-[1600px] px-6 py-6">
         <Breadcrumb className="mb-4">
           <BreadcrumbList className="items-center gap-1.5 text-sm text-gray-700 dark:text-gray-200">

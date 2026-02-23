@@ -130,9 +130,13 @@ Icons: Material Symbols Outlined via `components/ui/icon.tsx` — `<Icon name="s
 - **Root layout** uses `flex h-screen overflow-hidden` — the sidebar stays fixed and only `<main>` scrolls (`overflow-y-auto`)
 - **App bar** (top, h-14)
 - **Collapsible navigation** (left, w-16 collapsed / w-64 expanded)
-- **Pane** (main content, `#F9F9FB` background)
+- **Pane** (main content): use **surface colour** per brand — gradient from brand Lighter to `#F9F9FB` (see **Surface Colour** below). Tokens: `lib/tokens/surface-colours.ts`; doc: `app/foundation/surface-colour/`
 - **Control panel** (right, optional)
 - Max content width: `max-w-7xl` or `max-w-[1600px]`
+
+### Surface Colour (`lib/tokens/surface-colours.ts`, `app/foundation/surface-colour/`)
+
+The main content area (Pane) uses a subtle gradient from the brand’s **Lighter** tint to `#F9F9FB`. Apply `surfaceColours["<brand-key>"]` or `getSurfaceClass(brand)` to the main/pane wrapper. Keys: `tally-crm`, `tally-group`, `tally-plus`, `tally-plus-small-market`, `tally-sales-acquisition`, `tally-digital`, `tally-glass`, `powered-by-tally` (neutral). Dark mode: gradient is not used; pane uses `dark:bg-gray-900`.
 
 ### NavigationBar Active Colours
 
@@ -187,13 +191,15 @@ Two Kanban layout strategies exist (both in `app/crm/`):
 Available brands (see `app/foundation/brands/`):
 
 - **Tally Group** — `/foundation/brands/tally-group`
-- **Tally Small Market** — `/foundation/brands/tally-small-markets`
-- **Tally Large Market** — `/foundation/brands/tally-large-market`
+- **Tally+** — `/foundation/brands/tally-plus`
+- **Tally+ Small Market** — `/foundation/brands/tally-plus-small-market`
 - **Tally Sales & Acquisition** — `/foundation/brands/tally-sales-acquisition`
 - **Tally Digital** — `/foundation/brands/tally-digital`
 - **Tally CRM** — `/foundation/brands/tally-crm`
+- **Tally Glass** — `/foundation/brands/tally-glass` (call centre; logos only for now)
+- **Powered by Tally** — `/foundation/brands/powered-by-tally` (badge variants and nav bar usage)
 
-**Logos in `/public/`:** Tally_DS_Logo.svg, BetaTestLogo.svg, GlassLogoTest.svg, ORION_LOGO.svg, TallyAcquire.svg, Tally_CRM_Logo.svg, PoweredByTallyBadge.svg (plus _darkmode / _dark variants)
+**Logos in `/public/`:** Tally_DS_Logo.svg, tDS_Logo_Compact.svg, BetaTestLogo.svg, GlassLogoTest.svg, ORION_LOGO.svg, TallyAcquire.svg, TallyPlus.svg, Tally_CRM_Logo.svg, PoweredByTallyBadge.svg (light), PoweredByTallyBadgeREV.svg (dark variant). Brand foundation assets (e.g. TallyOfficialLogo, TallyCRMLogo) live in `public/foundation/brands/<brand-name>/`.
 
 Always specify brand context in prompts: e.g. "This is for Tally Glass (call center agents)".
 

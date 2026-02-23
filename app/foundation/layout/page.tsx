@@ -66,7 +66,7 @@ export default function LayoutPage() {
                   </div>
                 </aside>
 
-                {/* Pane – light background (token #F9F9FB) */}
+                {/* Pane – surface colour: gradient from brand Lighter to #F9F9FB (see Surface Colour) */}
                 <main className="relative min-w-0 flex-1 border-r border-border bg-[#F9F9FB] p-6">
                   <span className="absolute left-4 top-3 text-xs font-medium uppercase tracking-wide text-gray-500">
                     Pane
@@ -192,7 +192,7 @@ export default function LayoutPage() {
               <div className="flex min-h-[320px]">
                 {/* Nav */}
                 <aside className="relative flex w-16 flex-shrink-0 flex-col items-center border-r border-[#00D2A2]/25 bg-[#00D2A2]/10 py-3">
-                  <span className="absolute left-2 top-2 text-xs font-medium uppercase tracking-wide text-[#00D2A2]/80">
+                  <span className="absolute left-2 top-2 text-xs font-medium uppercase tracking-wide text-[#00D2A2]/80 md:left-3">
                     Nav
                   </span>
                   <div className="mt-8 flex flex-col gap-2">

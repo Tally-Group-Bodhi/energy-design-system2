@@ -33,6 +33,7 @@ import Select from "@/components/Select/Select";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { dataVisualizationColors } from "@/lib/tokens/colors";
+import { surfaceColours } from "@/lib/tokens/surface-colours";
 import {
   BarChart,
   Bar,
@@ -280,7 +281,7 @@ export default function SalesAcquisitionDashboardPage() {
   const [timeRange, setTimeRange] = useState("12months");
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen flex-col">
       {/* Top App Bar */}
       <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-white px-6 dark:border-gray-800 dark:bg-gray-950/90">
         <div className="flex items-center gap-4">
@@ -388,7 +389,7 @@ export default function SalesAcquisitionDashboardPage() {
         </aside>
 
         {/* Main Content */}
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className={`min-w-0 flex-1 overflow-y-auto ${surfaceColours["tally-sales-acquisition"]}`}>
           <div className="mx-auto max-w-[1600px] px-6 py-6">
             {/* Breadcrumb */}
             <Breadcrumb className="mb-4">

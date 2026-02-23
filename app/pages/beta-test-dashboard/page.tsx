@@ -22,6 +22,7 @@ import Progress from "@/components/Progress/Progress";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { dataVisualizationColors } from "@/lib/tokens/colors";
+import { surfaceColours } from "@/lib/tokens/surface-colours";
 
 const CHART_COLORS = [
   dataVisualizationColors.dataASolid.hex,
@@ -77,7 +78,7 @@ export default function BetaTestDashboardPage() {
   const [activeNavId, setActiveNavId] = React.useState("dashboard");
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen flex-col">
       {/* Top App Bar */}
       <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-white px-6 dark:border-gray-800 dark:bg-gray-950/90">
         <div className="flex items-center gap-4">
@@ -164,7 +165,7 @@ export default function BetaTestDashboardPage() {
         </aside>
 
         {/* Main Content */}
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className={`min-w-0 flex-1 overflow-y-auto ${surfaceColours["tally-group"]}`}>
           <div className="mx-auto max-w-[1600px] px-6 py-6">
             <div className="mb-6">
               <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">

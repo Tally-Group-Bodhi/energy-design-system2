@@ -25,6 +25,7 @@ import Checkbox from "@/components/Checkbox/Checkbox";
 import { Avatar, AvatarFallback } from "@/components/Avatar/Avatar";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
+import { surfaceColours } from "@/lib/tokens/surface-colours";
 import {
   Table,
   TableHeader,
@@ -75,7 +76,7 @@ export default function TallyOrionPage() {
   const collapseAll = () => setCardOpenState(() => Object.fromEntries(SECTION_CARD_TITLES.map((t) => [t, false])));
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen flex-col">
       {/* Top Header */}
       <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-white px-6 dark:border-gray-800 dark:bg-gray-950/90">
         {/* Left: Logo */}
@@ -207,7 +208,7 @@ export default function TallyOrionPage() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-gray-50 dark:bg-gray-900">
+        <main className={`flex min-w-0 flex-1 flex-col overflow-hidden ${surfaceColours["tally-group"]}`}>
           {/* Info Bar - anchored to main content */}
           <div className="flex shrink-0 flex-wrap items-center justify-between gap-4 border-b border-border bg-gray-100 px-6 py-3 dark:border-gray-800 dark:bg-gray-900/70">
             <div className="flex items-center gap-2 text-gray-900 dark:text-gray-100">

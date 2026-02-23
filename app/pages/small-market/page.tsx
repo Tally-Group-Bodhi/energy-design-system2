@@ -29,6 +29,7 @@ import {
   TableRow,
   TableCell,
 } from "@/components/Table/Table";
+import { surfaceColours } from "@/lib/tokens/surface-colours";
 
 const LEFT_NAV_ITEMS = [
   { id: "dashboard", label: "Dashboard", icon: "home" },
@@ -134,7 +135,7 @@ export default function SmallMarketPage() {
   const BRAND_GREEN = "#C1EE41";
 
   return (
-    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen flex-col">
       {/* 4px Tally+ Small Market brand bar */}
       <div
         className="h-1 shrink-0"
@@ -238,7 +239,7 @@ export default function SmallMarketPage() {
       </aside>
 
       {/* Main Content */}
-      <div className="min-w-0 flex-1 overflow-y-auto">
+      <div className={`min-w-0 flex-1 overflow-y-auto ${surfaceColours["tally-plus-small-market"]}`}>
         <div className="mx-auto max-w-[1600px] px-6 py-6">
         {/* Breadcrumb */}
         <Breadcrumb className="mb-4">

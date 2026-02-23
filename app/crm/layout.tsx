@@ -9,6 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/Avatar/Avatar"
 import NavigationBar from "@/components/NavigationBar/NavigationBar";
 import type { NavigationItem } from "@/components/NavigationBar/NavigationBar";
 import DensityToggle from "@/components/crm/DensityToggle";
+import { surfaceColours } from "@/lib/tokens/surface-colours";
 
 /* ─── Nav items ─────────────────────────────────────────────────────────── */
 
@@ -44,7 +45,7 @@ export default function CRMLayout({
         : "dashboard";
 
   return (
-    <div className="flex h-screen min-w-0 flex-col overflow-hidden bg-[#F9F9FB] dark:bg-gray-900">
+    <div className="flex h-screen min-w-0 flex-col overflow-hidden">
       {/* ── App Bar ──────────────────────────────────────────────────── */}
       <header className="flex h-14 shrink-0 items-center border-b border-border bg-white px-4 dark:bg-gray-800">
         {/* Logo */}
@@ -112,7 +113,7 @@ export default function CRMLayout({
         />
 
         {/* ── Main content ─────────────────────────────────────────── */}
-        <main className="flex min-h-0 min-w-0 flex-1">{children}</main>
+        <main className={`flex min-h-0 min-w-0 flex-1 ${surfaceColours["tally-crm"]}`}>{children}</main>
       </div>
     </div>
   );

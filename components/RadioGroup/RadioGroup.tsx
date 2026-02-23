@@ -43,7 +43,8 @@ RadioGroup.displayName = "RadioGroup";
 
 const RadioItem = React.forwardRef<HTMLInputElement, RadioItemProps>(
   ({ className, label, id, ...props }, ref) => {
-    const radioId = id || `radio-${Math.random().toString(36).substr(2, 9)}`;
+    const generatedId = React.useId();
+    const radioId = id ?? generatedId;
 
     return (
       <div className="flex items-center space-x-3">
