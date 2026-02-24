@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -396,6 +396,17 @@ export default function GlassVisionPage() {
   const [controlPanelOpen, setControlPanelOpen] = useState(true);
   const [activePanelTab, setActivePanelTab] = useState<(typeof PANEL_TABS)[number]>("Control Panel");
 
+  const handleAccountClick = useCallback((address: string) => {
+    const isDeselecting = selectedAccountAddress === address;
+    setSelectedAccountAddress(isDeselecting ? null : address);
+    if (!isDeselecting) {
+      requestAnimationFrame(() => {
+        const el = document.getElementById(`account-${address.replace(/\W/g, "-")}`);
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+  }, [selectedAccountAddress]);
+
   React.useEffect(() => {
     const root = document.querySelector(".flex.h-screen.overflow-hidden");
     const sidebar = root?.querySelector(":scope > aside");
@@ -732,6 +743,7 @@ export default function GlassVisionPage() {
                 return (
                   <React.Fragment key={acc.address}>
                     <Card
+                      id={`account-${acc.address.replace(/\W/g, "-")}`}
                       className={cn(
                         "cursor-pointer overflow-hidden border-0 transition-all duration-200",
                         GLASS_CARD_LIGHT,
@@ -739,7 +751,7 @@ export default function GlassVisionPage() {
                         "hover:shadow-lg hover:shadow-[#00D2A2]/10 dark:hover:shadow-[0_0_28px_rgba(0,210,162,0.12)]",
                         isSelected && "ring-1 ring-[#00D2A2]/25 shadow-[0_0_20px_rgba(0,210,162,0.12)] dark:ring-[#00D2A2]/20 dark:shadow-[0_0_24px_rgba(0,210,162,0.15)]"
                       )}
-                      onClick={() => setSelectedAccountAddress(isSelected ? null : acc.address)}
+                      onClick={() => handleAccountClick(acc.address)}
                     >
                       <CardContent className="px-5 py-4 pt-4">
                         <div className="flex items-center justify-between gap-3.5">
