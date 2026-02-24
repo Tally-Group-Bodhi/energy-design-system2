@@ -549,7 +549,7 @@ export default function GlassVisionPage() {
             )}
           >
             {/* Details panel — same background as main content */}
-            <aside className={cn("flex w-80 shrink-0 flex-col overflow-y-auto px-3 py-4", PANE_LIGHT, PANE_DARK)}>
+            <aside className={cn("flex w-72 shrink-0 flex-col overflow-y-auto px-3 py-4", PANE_LIGHT, PANE_DARK)}>
               <div className="space-y-2">
                 {/* Profile header card */}
                 <Card className={cn("overflow-hidden border-0", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
@@ -587,9 +587,9 @@ export default function GlassVisionPage() {
                         <span>01 Jun 1960</span>
                         <Badge variant="secondary" className="ml-auto border-gray-200 bg-gray-100 text-xs text-gray-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-300">65</Badge>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Icon name="mail" size={18} className="text-gray-500 dark:text-slate-500" />
-                        <span className="truncate">ronald_thomas12345@gmail.com</span>
+                      <div className="flex items-start gap-2">
+                        <Icon name="mail" size={18} className="mt-0.5 shrink-0 text-gray-500 dark:text-slate-500" />
+                        <span className="break-all">ronald_thomas12345@gmail.com</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Icon name="phone" size={18} className="text-gray-500 dark:text-slate-500" />
@@ -685,30 +685,32 @@ export default function GlassVisionPage() {
               )}
         <div className="min-h-full w-full px-6 py-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="mb-6 h-10 flex-nowrap justify-start gap-1 rounded-xl bg-gray-100/90 p-1 backdrop-blur-md border border-gray-200/80 dark:bg-white/[0.06] dark:border-white/[0.08]">
-              <TabsTrigger value="overview" className="rounded-lg px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] data-[state=active]:shadow-md dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2] dark:data-[state=active]:shadow-[0_0_20px_rgba(0,210,162,0.2)]">
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="insights" className="rounded-lg px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] data-[state=active]:shadow-md dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2] dark:data-[state=active]:shadow-[0_0_20px_rgba(0,210,162,0.2)]">
-                Insights
-              </TabsTrigger>
-              <TabsTrigger value="bill-compare" className="rounded-lg px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] data-[state=active]:shadow-md dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2] dark:data-[state=active]:shadow-[0_0_20px_rgba(0,210,162,0.2)]">
-                Bill Compare
-              </TabsTrigger>
-              <TabsTrigger value="history" className="rounded-lg px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] data-[state=active]:shadow-md dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2] dark:data-[state=active]:shadow-[0_0_20px_rgba(0,210,162,0.2)]">
-                History
-              </TabsTrigger>
-            </TabsList>
+            <div className="mb-6 flex justify-center">
+              <TabsList className="h-10 flex-nowrap gap-1 rounded-xl bg-gray-100/90 p-1 backdrop-blur-md border border-gray-200/80 dark:bg-white/[0.06] dark:border-white/[0.08]">
+                <TabsTrigger value="overview" className="rounded-lg px-3 py-1.5 text-sm text-gray-400 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] data-[state=active]:shadow-md dark:text-slate-500 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2] dark:data-[state=active]:shadow-[0_0_20px_rgba(0,210,162,0.2)]">
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="insights" className="rounded-lg px-3 py-1.5 text-sm text-gray-400 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] data-[state=active]:shadow-md dark:text-slate-500 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2] dark:data-[state=active]:shadow-[0_0_20px_rgba(0,210,162,0.2)]">
+                  Insights
+                </TabsTrigger>
+                <TabsTrigger value="bill-compare" className="rounded-lg px-3 py-1.5 text-sm text-gray-400 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] data-[state=active]:shadow-md dark:text-slate-500 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2] dark:data-[state=active]:shadow-[0_0_20px_rgba(0,210,162,0.2)]">
+                  Bill Compare
+                </TabsTrigger>
+                <TabsTrigger value="history" className="rounded-lg px-3 py-1.5 text-sm text-gray-400 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] data-[state=active]:shadow-md dark:text-slate-500 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2] dark:data-[state=active]:shadow-[0_0_20px_rgba(0,210,162,0.2)]">
+                  History
+                </TabsTrigger>
+              </TabsList>
+            </div>
             <TabsContent value="overview" className="mt-0">
           {/* Adora Customer Summary — light: warm tint; dark: turquoise glow */}
           <Card className={cn("mb-8 overflow-hidden border border-[#00D2A2]/20 dark:border-[#00D2A2]/15", GLASS_CARD_LIGHT, GLASS_CARD_DARK, "shadow-[0_0_30px_rgba(0,210,162,0.08)] dark:shadow-[0_0_40px_rgba(0,210,162,0.12)]")}>
             <CardContent className="p-6 pt-6">
               <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[#00D2A2] shadow-[0_0_10px_rgba(0,210,162,0.4)] dark:shadow-[0_0_12px_rgba(0,210,162,0.6)]" aria-hidden />
-                  <h1 className="text-lg font-bold tracking-tight text-[#008f6f] dark:text-[#00D2A2]">
-                    Adora Customer Summary
-                  </h1>
+                <div className="flex items-center gap-2.5">
+                  <Image src="/Adora.svg" alt="Adora" width={80} height={36} className="h-6 w-auto" />
+                  <span className="text-lg font-bold tracking-tight text-gray-900 dark:text-slate-100">
+                    Customer Summary
+                  </span>
                 </div>
                 <Badge className="border-[#00D2A2]/40 bg-[#00D2A2]/10 text-xs font-medium text-[#008f6f] dark:border-[#00D2A2]/30 dark:bg-[#00D2A2]/15 dark:text-[#00D2A2]">
                   Auto-generated
@@ -745,7 +747,7 @@ export default function GlassVisionPage() {
                     <Card
                       id={`account-${acc.address.replace(/\W/g, "-")}`}
                       className={cn(
-                        "cursor-pointer overflow-hidden border-0 transition-all duration-200",
+                        "scroll-mt-4 cursor-pointer overflow-hidden border-0 transition-all duration-200",
                         GLASS_CARD_LIGHT,
                         GLASS_CARD_DARK,
                         "hover:shadow-lg hover:shadow-[#00D2A2]/10 dark:hover:shadow-[0_0_28px_rgba(0,210,162,0.12)]",
@@ -1173,9 +1175,9 @@ export default function GlassVisionPage() {
               <Card className={cn("mb-3 overflow-hidden border border-[#00D2A2]/20 dark:border-[#00D2A2]/15", GLASS_CARD_LIGHT, GLASS_CARD_DARK, "shadow-[0_0_30px_rgba(0,210,162,0.08)] dark:shadow-[0_0_40px_rgba(0,210,162,0.12)]")}>
                 <CardContent className="p-4 pt-4">
                   <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-[#00D2A2] shadow-[0_0_10px_rgba(0,210,162,0.4)]" aria-hidden />
-                      <h3 className="text-lg font-bold tracking-tight text-[#008f6f] dark:text-[#00D2A2]">Adora Customer Summary</h3>
+                    <div className="flex items-center gap-2.5">
+                      <Image src="/Adora.svg" alt="Adora" width={80} height={36} className="h-6 w-auto" />
+                      <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-slate-100">Customer Summary</h3>
                     </div>
                     <Badge className="border-[#00D2A2]/40 bg-[#00D2A2]/10 text-xs font-medium text-[#008f6f] dark:border-[#00D2A2]/30 dark:bg-[#00D2A2]/15 dark:text-[#00D2A2]">Auto-generated</Badge>
                   </div>
@@ -1419,40 +1421,49 @@ export default function GlassVisionPage() {
             {/* Right-hand control panel */}
             <aside
               className={cn(
-                "flex shrink-0 flex-col overflow-hidden border-l transition-[width] duration-300 ease-in-out",
-                "border-gray-200/80 bg-white/55 backdrop-blur-2xl",
-                "dark:border-white/[0.08] dark:bg-white/[0.04]",
-                controlPanelOpen ? "w-[290px]" : "w-0 border-l-0"
+                "shrink-0 overflow-hidden py-4 pr-3 transition-[width,padding] duration-300 ease-in-out",
+                controlPanelOpen ? "w-[306px]" : "w-0 pr-0"
               )}
             >
-              <div className="flex min-w-[290px] flex-1 flex-col overflow-y-auto">
+              <div
+                className={cn(
+                  "flex h-full min-w-[290px] flex-col overflow-hidden rounded-2xl",
+                  GLASS_CARD_LIGHT,
+                  GLASS_CARD_DARK
+                )}
+              >
+              <div className="flex flex-1 flex-col overflow-y-auto">
                 {/* Panel tabs */}
-                <div className="flex border-b border-gray-200/60 px-1 dark:border-white/[0.06]">
-                  {PANEL_TABS.map((tab) => (
-                    <button
-                      key={tab}
-                      type="button"
-                      onClick={() => setActivePanelTab(tab)}
-                      className={cn(
-                        "relative flex-1 whitespace-nowrap px-1.5 py-3 text-center text-xs font-medium transition-colors",
-                        activePanelTab === tab
-                          ? "font-semibold text-gray-900 dark:text-slate-100"
-                          : "text-gray-500 hover:text-gray-800 dark:text-slate-500 dark:hover:text-slate-300"
-                      )}
-                    >
-                      {tab}
-                      {activePanelTab === tab && (
-                        <span className="absolute inset-x-2 -bottom-px h-0.5 rounded-t bg-gradient-to-r from-[#4EEECA] to-[#3BB89A]" />
-                      )}
-                    </button>
-                  ))}
+                <div className="flex items-center gap-1 px-3 pt-3 pb-2">
+                  <div className="flex flex-1 gap-1">
+                    {PANEL_TABS.map((tab) => (
+                      <button
+                        key={tab}
+                        type="button"
+                        onClick={() => setActivePanelTab(tab)}
+                        className={cn(
+                          "whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-medium transition-all",
+                          activePanelTab === tab
+                            ? "bg-gray-100 text-[#2C365D] dark:bg-white/[0.1] dark:text-[#00D2A2]"
+                            : "text-gray-400 hover:text-gray-600 dark:text-slate-600 dark:hover:text-slate-400"
+                        )}
+                      >
+                        {tab === "Adora" ? (
+                          <span className="flex items-center gap-1">
+                            <Image src="/AdoraDot.svg" alt="" width={16} height={16} className="h-3.5 w-3.5" />
+                            Adora
+                          </span>
+                        ) : tab}
+                      </button>
+                    ))}
+                  </div>
                   <button
                     type="button"
                     onClick={() => setControlPanelOpen(false)}
-                    className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center self-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/[0.06] dark:hover:text-slate-300"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-white/[0.06] dark:hover:text-slate-300"
                     aria-label="Close control panel"
                   >
-                    <Icon name="right_panel_close" size={18} />
+                    <Icon name="right_panel_close" size={16} />
                   </button>
                 </div>
 
@@ -1517,6 +1528,7 @@ export default function GlassVisionPage() {
                     </button>
                   ))}
                 </div>
+              </div>
               </div>
             </aside>
           </main>
