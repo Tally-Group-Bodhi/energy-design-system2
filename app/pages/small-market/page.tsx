@@ -10,6 +10,7 @@ import {
   BreadcrumbLink,
   BreadcrumbPage,
   BreadcrumbSeparator,
+  BreadcrumbEllipsis,
 } from "@/components/Breadcrumb/Breadcrumb";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/Card/Card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/Tabs/Tabs";
@@ -32,6 +33,7 @@ import {
 import { surfaceColours } from "@/lib/tokens/surface-colours";
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery";
 import AccountContextPanel from "@/components/crm/AccountContextPanel";
+import type { StatusBox } from "@/components/crm/AccountContextPanel";
 import type { Account } from "@/types/crm";
 
 interface NavItem {
@@ -82,13 +84,17 @@ const LEFT_NAV_ITEMS: NavItem[] = [
   { id: "maintenance", label: "Maintenance", icon: "build", children: [] },
 ];
 
-const TAB_CONFIG = [
+const TAB_CONFIG: { value: string; label: string; badge?: number }[] = [
   { value: "details", label: "Details" },
   { value: "pricing", label: "Pricing" },
   { value: "financial", label: "Financial" },
   { value: "utility", label: "Utility" },
   { value: "usage", label: "Usage" },
+  { value: "market", label: "Market" },
   { value: "interaction", label: "Interaction" },
+  { value: "timeline", label: "Timeline" },
+  { value: "tasks-exceptions", label: "Tasks & Exceptions", badge: 1 },
+  { value: "recurring-events", label: "Recurring Events" },
 ];
 
 const DETAILS_CARD_TITLES = [
@@ -178,43 +184,58 @@ const TASK_CATEGORIES = [
 
 function DataCell({ label, value, className }: { label: string; value: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("flex flex-col gap-1 text-sm", className)}>
-      <span className="text-muted-foreground">{label}</span>
-      <span className="text-foreground">{value || "—"}</span>
+    <div className={cn("flex flex-col gap-density-xs", className)}>
+      <span className="text-muted-foreground" style={{ fontSize: "var(--tally-font-size-sm)" }}>{label}</span>
+      <span className="text-foreground" style={{ fontSize: "var(--tally-font-size-sm)" }}>{value || "—"}</span>
     </div>
   );
 }
 
-function StatusCard({ label, value, icon, variant = "default" }: { label: string; value: string; icon: string; variant?: "default" | "success" | "info" }) {
-  return (
-    <div className={cn(
-      "flex items-center gap-3 rounded-lg border p-4 shadow-none",
-      variant === "success" ? "border-[#008000]/20 bg-[#D1FAE5]/30 dark:border-emerald-500/30 dark:bg-emerald-500/10" : 
-      variant === "info" ? "border-[#0074C4]/20 bg-[#DBEAFE]/30 dark:border-blue-500/30 dark:bg-blue-500/10" : 
-      "border-border bg-card dark:border-gray-800 dark:bg-gray-900/40"
-    )}>
-      <div className={cn(
-        "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
-        variant === "success" ? "bg-[#008000]/10 dark:bg-emerald-500/20" :
-        variant === "info" ? "bg-[#0074C4]/10 dark:bg-blue-500/20" :
-        "bg-gray-100 dark:bg-gray-800"
-      )}>
-        <Icon name={icon} size={20} className={cn(
-          variant === "success" ? "text-[#008000] dark:text-emerald-300" :
-          variant === "info" ? "text-[#0074C4] dark:text-blue-300" :
-          "text-gray-600 dark:text-gray-300"
-        )} />
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="text-xs text-muted-foreground dark:text-gray-400">{label}</p>
-        <p className="mt-0.5 text-sm font-semibold text-gray-900 dark:text-gray-100">{value}</p>
-      </div>
-    </div>
-  );
-}
+const ACCOUNT_STATUS_BOXES: StatusBox[] = [
+  { label: "$0.00 In Credit", value: "Nothing Overdue" },
+  { label: "Open", value: "No Churn Activity" },
+  { label: "Monthly Billing", value: "Not Billed" },
+  { label: "Account Commence", value: "15 Apr 2025" },
+];
 
 export default function SmallMarketPage() {
   const [tabValue, setTabValue] = useState("details");
+  const tabsScrollRef = React.useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
+  const [canScrollRight, setCanScrollRight] = React.useState(false);
+
+  const updateScrollArrows = React.useCallback(() => {
+    const el = tabsScrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 1);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
+  }, []);
+
+  React.useEffect(() => {
+    const el = tabsScrollRef.current;
+    if (!el) return;
+    const check = () => updateScrollArrows();
+    const raf = requestAnimationFrame(() => {
+      check();
+      requestAnimationFrame(check);
+    });
+    el.addEventListener("scroll", check, { passive: true });
+    window.addEventListener("resize", check);
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => {
+      cancelAnimationFrame(raf);
+      el.removeEventListener("scroll", check);
+      window.removeEventListener("resize", check);
+      ro.disconnect();
+    };
+  }, [updateScrollArrows]);
+
+  const scrollTabs = (dir: "left" | "right") => {
+    const el = tabsScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir === "left" ? -200 : 200, behavior: "smooth" });
+  };
   const [cardOpenState, setCardOpenState] = useState<Record<string, boolean>>(INITIAL_CARD_OPEN);
   const [activeNavId, setActiveNavId] = useState("dashboard-overview");
   const [openParentId, setOpenParentId] = useState<string | null>("dashboard");
@@ -549,16 +570,16 @@ export default function SmallMarketPage() {
 
       {/* Account Context Panel + Main Content share the surface gradient */}
       <div className={`flex min-w-0 flex-1 overflow-hidden ${surfaceColours["tally-crm"]}`}>
-        <AccountContextPanel account={SM_ACCOUNT} />
+        <AccountContextPanel account={SM_ACCOUNT} statusBoxes={ACCOUNT_STATUS_BOXES} />
 
         {/* Main Content */}
-        <div className="min-w-0 flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-[1600px] px-4 py-4 xl:px-6 xl:py-6">
+        <div className="@container min-w-0 flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-[1600px] px-density-lg py-density-lg">
         {/* Breadcrumb + Glass logo */}
-        <div className="mb-4 flex items-center justify-between">
-          <Breadcrumb>
-            <BreadcrumbList className="items-center gap-1.5 text-sm text-gray-700 dark:text-gray-300">
-              <BreadcrumbItem>
+        <div className="mb-density-lg flex items-center justify-between gap-density-sm">
+          <Breadcrumb className="min-w-0">
+            <BreadcrumbList className="flex-nowrap items-center gap-density-sm text-gray-700 dark:text-gray-300" style={{ fontSize: "var(--tally-font-size-sm)" }}>
+              <BreadcrumbItem className="shrink-0">
                 <BreadcrumbLink asChild>
                   <Link
                     href="/"
@@ -568,31 +589,37 @@ export default function SmallMarketPage() {
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="text-gray-400 [&>svg]:size-4" />
-              <BreadcrumbItem>
+              <BreadcrumbSeparator className="shrink-0 text-gray-400 [&>svg]:size-4" />
+              {/* Middle items — collapse to ellipsis on narrow widths */}
+              <BreadcrumbItem className="hidden @lg:flex">
                 <BreadcrumbLink asChild>
                   <Link
                     href="/pages"
-                    className="text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                    className="whitespace-nowrap text-gray-700 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
                   >
                     Customers
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="text-gray-400 [&>svg]:size-4" />
-              <BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden shrink-0 text-gray-400 @lg:flex [&>svg]:size-4" />
+              <BreadcrumbItem className="hidden @xl:flex">
                 <BreadcrumbLink asChild>
                   <Link
                     href="/pages/small-market"
-                    className="text-gray-700 transition-colors hover:text-[#006180] dark:text-gray-300 dark:hover:text-[#80E0FF]"
+                    className="whitespace-nowrap text-gray-700 transition-colors hover:text-[#006180] dark:text-gray-300 dark:hover:text-[#80E0FF]"
                   >
                     Tally+ Small Market Accounts
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="text-gray-400 [&>svg]:size-4" />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="rounded bg-[#E6F7FF] px-2.5 py-1 font-normal text-[#006180] dark:bg-[#006180]/20 dark:text-[#80E0FF]">
+              <BreadcrumbSeparator className="hidden shrink-0 text-gray-400 @xl:flex [&>svg]:size-4" />
+              {/* Ellipsis shown when middle items are hidden */}
+              <BreadcrumbItem className="@xl:hidden">
+                <BreadcrumbEllipsis className="text-gray-400" />
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="shrink-0 text-gray-400 @xl:hidden [&>svg]:size-4" />
+              <BreadcrumbItem className="min-w-0">
+                <BreadcrumbPage className="truncate rounded bg-[#E6F7FF] px-2.5 py-1 font-normal text-[#006180] dark:bg-[#006180]/20 dark:text-[#80E0FF]">
                   104063774 - Ronald Thomas
                 </BreadcrumbPage>
               </BreadcrumbItem>
@@ -620,72 +647,63 @@ export default function SmallMarketPage() {
           </Link>
         </div>
 
-        {/* Page Header */}
-        <div className="mb-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-                104063774 - Ronald Thomas
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                1 Lee Walk, Cranbourne, VIC 3977
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline">Tally CRM</Badge>
-              <Badge variant="success">Active</Badge>
-            </div>
-          </div>
-        </div>
-
-        {/* Status Cards */}
-        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <StatusCard
-            label="Account Balance"
-            value="$0.00 Nothing Overdue"
-            icon="account_balance_wallet"
-            variant="success"
-          />
-          <StatusCard
-            label="Account Status"
-            value="Open - No Churn Activity"
-            icon="check_circle"
-            variant="info"
-          />
-          <StatusCard
-            label="Billing Cycle"
-            value="Monthly - Billed to 27 Apr 2025"
-            icon="calendar_today"
-          />
-          <StatusCard
-            label="Account Commenced"
-            value="15 Apr 2025"
-            icon="schedule"
-          />
-        </div>
-
         {/* Tabs */}
-        <Tabs value={tabValue} onValueChange={setTabValue} className="mb-6">
-          <TabsList className="mb-6 h-10 flex-nowrap justify-start gap-1 rounded-lg bg-gray-100 p-1 text-gray-600 dark:bg-gray-800 dark:text-gray-200">
-            {TAB_CONFIG.map((tab) => (
-              <TabsTrigger
-                key={tab.value}
-                value={tab.value}
-                className="text-gray-700 data-[state=active]:bg-[#E6F7FF] data-[state=active]:text-[#006180] dark:text-gray-200 dark:data-[state=active]:bg-[#006180]/20 dark:data-[state=active]:text-[#80E0FF]"
-              >
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
+        <Tabs value={tabValue} onValueChange={setTabValue} className="mb-density-xl">
+          <div className="relative mb-density-xl flex items-center">
+            <button
+              type="button"
+              onClick={() => scrollTabs("left")}
+              className={cn(
+                "absolute left-0 z-10 flex h-full w-8 items-center justify-center bg-gradient-to-r from-gray-100 via-gray-100/90 to-transparent transition-opacity dark:from-gray-800 dark:via-gray-800/90",
+                canScrollLeft ? "opacity-100" : "pointer-events-none opacity-0"
+              )}
+              aria-label="Scroll tabs left"
+              tabIndex={canScrollLeft ? 0 : -1}
+            >
+              <Icon name="chevron_left" size={18} className="text-gray-500" />
+            </button>
+            <TabsList
+              ref={tabsScrollRef}
+              className="flex w-full flex-nowrap justify-start gap-density-xs overflow-x-auto rounded-density-md bg-gray-100 p-density-xs text-gray-600 scrollbar-none dark:bg-gray-800 dark:text-gray-200"
+            >
+              {TAB_CONFIG.map((tab) => (
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  className="shrink-0 whitespace-nowrap uppercase tracking-wide text-gray-700 data-[state=active]:bg-[#E6F7FF] data-[state=active]:text-[#006180] dark:text-gray-200 dark:data-[state=active]:bg-[#006180]/20 dark:data-[state=active]:text-[#80E0FF]"
+                >
+                  {tab.label}
+                  {tab.badge != null && (
+                    <span className="ml-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full border border-gray-300 text-[10px] font-semibold text-gray-600 dark:border-gray-600 dark:text-gray-300">
+                      {tab.badge}
+                    </span>
+                  )}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+            <button
+              type="button"
+              onClick={() => scrollTabs("right")}
+              className={cn(
+                "absolute right-0 z-10 flex h-full w-8 items-center justify-center bg-gradient-to-l from-gray-100 via-gray-100/90 to-transparent transition-opacity dark:from-gray-800 dark:via-gray-800/90",
+                canScrollRight ? "opacity-100" : "pointer-events-none opacity-0"
+              )}
+              aria-label="Scroll tabs right"
+              tabIndex={canScrollRight ? 0 : -1}
+            >
+              <Icon name="chevron_right" size={18} className="text-gray-500" />
+            </button>
+          </div>
 
           {/* Details Tab */}
           <TabsContent value="details" className="mt-0">
-            <div className="mb-4 flex flex-wrap items-center gap-3">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Account Details</h2>
+            <div className="mb-density-lg flex flex-wrap items-center gap-density-md">
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-lg)" }}>Account Details</h2>
               <button
                 type="button"
                 onClick={allCardsOpen ? collapseAll : expandAll}
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                className="inline-flex items-center gap-density-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
+                style={{ fontSize: "var(--tally-font-size-sm)" }}
                 aria-label={allCardsOpen ? "Collapse all" : "Expand all"}
               >
                 {allCardsOpen ? (
@@ -703,13 +721,13 @@ export default function SmallMarketPage() {
             </div>
 
             <div>
-              <div className="space-y-6">
+              <div className="space-y-density-xl">
                 <CollapsibleCard
                   title="Account Summary"
                   open={cardOpenState["Account Summary"]}
                   onOpenChange={(open) => setCardOpenState((prev) => ({ ...prev, "Account Summary": open }))}
                 >
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-density-xl sm:grid-cols-2 lg:grid-cols-3">
                     <DataCell label="Account Type" value="Residential" />
                     <DataCell label="Protection Classification" value="Tally+ Small Market" />
                     <DataCell label="Journal Segment" value="Residential" />
@@ -727,15 +745,15 @@ export default function SmallMarketPage() {
                   open={cardOpenState["Billing Configuration"]}
                   onOpenChange={(open) => setCardOpenState((prev) => ({ ...prev, "Billing Configuration": open }))}
                 >
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-density-lg">
+                    <div className="grid grid-cols-1 gap-density-lg sm:grid-cols-2">
                       <Select label="Bill Group" defaultValue="monthly">
                         <option value="monthly">Monthly Bill Group</option>
                         <option value="quarterly">Quarterly Bill Group</option>
                       </Select>
                       <Input label="Invoice Due Days" type="number" defaultValue="15" />
                     </div>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-density-lg sm:grid-cols-2">
                       <Select label="Correspondence Delivery" defaultValue="email">
                         <option value="email">Email</option>
                         <option value="post">Post</option>
@@ -744,16 +762,17 @@ export default function SmallMarketPage() {
                       <Input label="Invoice Template" defaultValue="Standard Residential" />
                     </div>
                     <div>
-                      <label className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-100">
+                      <label className="mb-density-sm block font-medium text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-sm)" }}>
                         Custom Invoice Message
                       </label>
                       <textarea
-                        className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#006180] focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                        className="w-full rounded-density-md border border-border bg-white px-density-md py-density-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#006180] focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                        style={{ fontSize: "var(--tally-font-size-sm)" }}
                         rows={3}
                         defaultValue="The Australian Government and your State Government require us to provide you with information about energy rebates and concessions."
                       />
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-density-lg">
                       <Checkbox label="Override Due Days" />
                       <Checkbox label="Sensitive Load" />
                     </div>
@@ -765,7 +784,7 @@ export default function SmallMarketPage() {
                   open={cardOpenState["Payment Details"]}
                   onOpenChange={(open) => setCardOpenState((prev) => ({ ...prev, "Payment Details": open }))}
                 >
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-density-lg sm:grid-cols-2">
                     <Select label="Payment Frequency" defaultValue="monthly">
                       <option value="monthly">Monthly</option>
                       <option value="quarterly">Quarterly</option>
@@ -782,25 +801,25 @@ export default function SmallMarketPage() {
                   open={cardOpenState["Contact Information"]}
                   onOpenChange={(open) => setCardOpenState((prev) => ({ ...prev, "Contact Information": open }))}
                 >
-                  <div className="mb-4 flex items-center justify-between rounded-lg border border-border bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
+                  <div className="mb-density-lg flex items-center justify-between rounded-density-md border border-border bg-gray-50 p-density-lg dark:border-gray-700 dark:bg-gray-900/40">
                     <div>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Ronald Thomas</p>
-                      <p className="mt-1 text-xs text-muted-foreground">Primary Contact since 14 Apr 2025</p>
+                      <p className="font-semibold text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-sm)" }}>Ronald Thomas</p>
+                      <p className="mt-density-xs text-muted-foreground" style={{ fontSize: "var(--tally-font-size-xs)" }}>Primary Contact since 14 Apr 2025</p>
                     </div>
                     <Badge variant="info">Primary</Badge>
                   </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    <div className="flex items-center gap-2">
+                  <div className="grid grid-cols-1 gap-density-lg sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="flex items-center gap-density-sm">
                       <Icon name="phone" size={18} className="text-gray-500 dark:text-gray-400" />
-                      <span className="text-sm text-gray-900 dark:text-gray-100">0464 464 646</span>
+                      <span className="text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-sm)" }}>0464 464 646</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-density-sm">
                       <Icon name="email" size={18} className="text-gray-500 dark:text-gray-400" />
-                      <span className="text-sm text-gray-900 dark:text-gray-100">ronald.thomas@email.com</span>
+                      <span className="text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-sm)" }}>ronald.thomas@email.com</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-density-sm">
                       <Icon name="badge" size={18} className="text-gray-500 dark:text-gray-400" />
-                      <span className="text-sm text-gray-900 dark:text-gray-100">31680432</span>
+                      <span className="text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-sm)" }}>31680432</span>
                     </div>
                   </div>
                 </CollapsibleCard>
@@ -810,25 +829,25 @@ export default function SmallMarketPage() {
                   open={cardOpenState["Service Address"]}
                   onOpenChange={(open) => setCardOpenState((prev) => ({ ...prev, "Service Address": open }))}
                 >
-                  <div className="space-y-4">
-                    <div className="rounded-lg border border-border bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
+                  <div className="space-y-density-lg">
+                    <div className="rounded-density-md border border-border bg-gray-50 p-density-lg dark:border-gray-700 dark:bg-gray-900/40">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-xs font-medium text-muted-foreground">Service Address</p>
-                          <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">1 Lee Walk</p>
-                          <p className="text-sm text-gray-900 dark:text-gray-100">Cranbourne, VIC 3977</p>
+                          <p className="font-medium text-muted-foreground" style={{ fontSize: "var(--tally-font-size-xs)" }}>Service Address</p>
+                          <p className="mt-density-xs font-medium text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-sm)" }}>1 Lee Walk</p>
+                          <p className="text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-sm)" }}>Cranbourne, VIC 3977</p>
                         </div>
                         <button className="text-[#006180] hover:text-[#004D66] dark:text-[#80E0FF] dark:hover:text-[#B3EDFF]">
                           <Icon name="edit" size={18} />
                         </button>
                       </div>
                     </div>
-                    <div className="rounded-lg border border-border bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/40">
+                    <div className="rounded-density-md border border-border bg-gray-50 p-density-lg dark:border-gray-700 dark:bg-gray-900/40">
                       <div className="flex items-start justify-between">
                         <div>
-                          <p className="text-xs font-medium text-muted-foreground">Postal Address</p>
-                          <p className="mt-1 text-sm font-medium text-gray-900 dark:text-gray-100">666-678 Lygon Street</p>
-                          <p className="text-sm text-gray-900 dark:text-gray-100">Carlton North, VIC 3054</p>
+                          <p className="font-medium text-muted-foreground" style={{ fontSize: "var(--tally-font-size-xs)" }}>Postal Address</p>
+                          <p className="mt-density-xs font-medium text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-sm)" }}>666-678 Lygon Street</p>
+                          <p className="text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-sm)" }}>Carlton North, VIC 3054</p>
                         </div>
                         <button className="text-[#006180] hover:text-[#004D66] dark:text-[#80E0FF] dark:hover:text-[#B3EDFF]">
                           <Icon name="edit" size={18} />
@@ -839,7 +858,7 @@ export default function SmallMarketPage() {
                   </div>
                 </CollapsibleCard>
 
-                <div className="flex items-center justify-end gap-3">
+                <div className="flex items-center justify-end gap-density-md">
                   <Button variant="outline" className="border-[#006180] text-[#006180] hover:bg-[#006180]/10 focus:ring-[#006180] dark:border-[#80E0FF] dark:text-[#80E0FF] dark:hover:bg-[#80E0FF]/10">
                     Cancel
                   </Button>
@@ -855,11 +874,11 @@ export default function SmallMarketPage() {
 
           {/* Financial Tab */}
           <TabsContent value="financial" className="mt-0">
-            <div className="space-y-6">
+            <div className="space-y-density-xl">
               <Card className="shadow-none">
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-density-lg">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base font-bold text-gray-900 dark:text-gray-100">Recent Bills</CardTitle>
+                    <CardTitle className="font-bold text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-base)" }}>Recent Bills</CardTitle>
                     <Button variant="outline" size="sm">
                       <Icon name="download" size={16} className="mr-1" />
                       Export
@@ -900,10 +919,10 @@ export default function SmallMarketPage() {
 
           {/* Usage Tab */}
           <TabsContent value="usage" className="mt-0">
-            <div className="space-y-6">
+            <div className="space-y-density-xl">
               <Card className="shadow-none">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-base font-bold text-gray-900 dark:text-gray-100">Usage History</CardTitle>
+                <CardHeader className="pb-density-lg">
+                  <CardTitle className="font-bold text-gray-900 dark:text-gray-100" style={{ fontSize: "var(--tally-font-size-base)" }}>Usage History</CardTitle>
                 </CardHeader>
                 <CardContent className="px-0 pb-0">
                   <Table>
@@ -934,7 +953,7 @@ export default function SmallMarketPage() {
           {/* Other Tabs */}
           {TAB_CONFIG.filter((t) => !["details", "financial", "usage"].includes(t.value)).map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="mt-0">
-              <div className="rounded-lg border border-border bg-card p-8 text-center text-muted-foreground shadow-none dark:border-gray-700 dark:bg-gray-900/40">
+              <div className="rounded-density-md border border-border bg-card p-density-xxl text-center text-muted-foreground shadow-none dark:border-gray-700 dark:bg-gray-900/40">
                 <p className="capitalize">{tab.label} content would go here.</p>
               </div>
             </TabsContent>

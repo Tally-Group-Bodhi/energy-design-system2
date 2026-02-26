@@ -17,6 +17,7 @@ const navigationSections = [
     title: "Elements",
     items: [
       { label: "How the TDS is Set Up", href: "/foundation/tds-setup" },
+      { label: "Implementation Guide", href: "/foundation/implementation" },
       { label: "Colours", href: "/foundation/colour" },
       { label: "Cursor Rules", href: "/foundation/cursor-rules" },
       { label: "Dark Mode", href: "/foundation/dark-mode" },

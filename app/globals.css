@@ -157,6 +157,15 @@ body {
     linear-gradient(to bottom, rgb(69 26 3 / 0.1), rgb(69 26 3 / 0.2));
 }
 
+/* Hide scrollbar while keeping scroll functionality */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* Material Symbols Outlined (icons) */
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";

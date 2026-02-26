@@ -21,8 +21,17 @@ import { getCaseByCaseNumber } from "@/lib/mock-data/cases";
 import { getAccountById } from "@/lib/mock-data/accounts";
 import type { Account, CaseItem } from "@/types/crm";
 
+export interface StatusBox {
+  label: string;
+  value: string;
+  /** Optional: use "success" to highlight the value in brand blue */
+  variant?: "default" | "success" | "info";
+}
+
 interface AccountContextPanelProps {
   account: Account;
+  /** Compact 2x2 account status boxes shown below quick actions */
+  statusBoxes?: StatusBox[];
   /** Case numbers of manually linked cases to show in Linked Cases section */
   linkedCaseNumbers?: string[];
   /** When set, show "Link case" button and allow adding links */
@@ -104,6 +113,7 @@ function BoolRow({
 
 export default function AccountContextPanel({
   account,
+  statusBoxes,
   linkedCaseNumbers = [],
   currentCaseId,
   onOpenLinkModal,
@@ -119,6 +129,25 @@ export default function AccountContextPanel({
   const [contactDetailsExpanded, setContactDetailsExpanded] = React.useState(false);
   const [linkedCasesOpen, setLinkedCasesOpen] = React.useState(false);
   const [supplyDetailsOpen, setSupplyDetailsOpen] = React.useState(false);
+
+  const handleSectionToggle = (
+    open: boolean,
+    setter: React.Dispatch<React.SetStateAction<boolean>>,
+    ref: React.RefObject<HTMLDivElement | null>
+  ) => {
+    setter(open);
+    if (open && ref.current) {
+      setTimeout(() => {
+        ref.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 150);
+    }
+  };
+
+  const accountDetailsRef = React.useRef<HTMLDivElement>(null);
+  const primaryContactRef = React.useRef<HTMLDivElement>(null);
+  const supplyDetailsRef = React.useRef<HTMLDivElement>(null);
+  const accountBalanceRef = React.useRef<HTMLDivElement>(null);
+  const linkedCasesRef = React.useRef<HTMLDivElement>(null);
   const resolveCase = (caseNum: string) => relatedCasesMap?.get(caseNum) ?? getCaseByCaseNumber(caseNum);
   const accountTypeVariant =
     account.type === "Industrial"
@@ -181,7 +210,7 @@ export default function AccountContextPanel({
       </div>
 
       {/* Quick actions — Note, Email, Call */}
-      <div className="border-b border-border px-density-md py-density-sm dark:border-gray-800">
+      <div className="px-density-md py-density-sm">
         <div className="flex w-full items-center gap-2">
           {QUICK_ACTIONS.map(({ label, icon }) => (
             <button
@@ -246,12 +275,42 @@ export default function AccountContextPanel({
       </div>
 
       {/* Content — scrollable when taller than panel */}
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-density-md py-density-sm">
-        <div className="flex flex-col gap-density-md">
+      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        {/* Status boxes — full-width 2x2 grid, scrolls with content */}
+        {statusBoxes && statusBoxes.length > 0 && (
+          <div className="grid grid-cols-2 border-y border-border dark:border-gray-800">
+            {statusBoxes.map((box, i) => (
+              <div
+                key={box.label}
+                className={cn(
+                  "flex flex-col gap-0.5 px-density-md py-2.5",
+                  i % 2 === 0 && "border-r border-border dark:border-gray-800",
+                  i < statusBoxes.length - 2 && "border-b border-border dark:border-gray-800"
+                )}
+              >
+                <p
+                  className="font-bold uppercase leading-snug text-gray-900 dark:text-gray-100"
+                  style={{ fontSize: "var(--tally-font-size-xs)" }}
+                >
+                  {box.label}
+                </p>
+                <span
+                  className="text-muted-foreground"
+                  style={{ fontSize: "var(--tally-font-size-xs)" }}
+                >
+                  {box.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="flex flex-col gap-density-md px-density-md py-density-sm">
           {/* Account details */}
           <Collapsible
+            ref={accountDetailsRef}
             open={accountDetailsOpen}
-            onOpenChange={setAccountDetailsOpen}
+            onOpenChange={(open) => handleSectionToggle(open, setAccountDetailsOpen, accountDetailsRef)}
             className="flex flex-col"
           >
             <CollapsibleTrigger className={sectionTriggerClass} style={{ fontSize: "var(--tally-font-size-xs)" }}>
@@ -309,8 +368,9 @@ export default function AccountContextPanel({
 
             {/* Primary Contact */}
             <Collapsible
+              ref={primaryContactRef}
               open={primaryContactOpen}
-              onOpenChange={setPrimaryContactOpen}
+              onOpenChange={(open) => handleSectionToggle(open, setPrimaryContactOpen, primaryContactRef)}
               className="flex flex-col"
             >
               <CollapsibleTrigger className={sectionTriggerClass} style={{ fontSize: "var(--tally-font-size-xs)" }}>
@@ -382,8 +442,9 @@ export default function AccountContextPanel({
 
             {/* Supply details */}
             <Collapsible
+              ref={supplyDetailsRef}
               open={supplyDetailsOpen}
-              onOpenChange={setSupplyDetailsOpen}
+              onOpenChange={(open) => handleSectionToggle(open, setSupplyDetailsOpen, supplyDetailsRef)}
               className="flex flex-col"
             >
               <CollapsibleTrigger className={sectionTriggerClass} style={{ fontSize: "var(--tally-font-size-xs)" }}>
@@ -437,8 +498,9 @@ export default function AccountContextPanel({
 
           {/* Account balance */}
           <Collapsible
+            ref={accountBalanceRef}
             open={accountBalanceOpen}
-            onOpenChange={setAccountBalanceOpen}
+            onOpenChange={(open) => handleSectionToggle(open, setAccountBalanceOpen, accountBalanceRef)}
             className="flex flex-col"
           >
             <CollapsibleTrigger className={sectionTriggerClass} style={{ fontSize: "var(--tally-font-size-xs)" }}>
@@ -488,8 +550,9 @@ export default function AccountContextPanel({
             <>
               <div className={sectionDividerClass} />
               <Collapsible
+                ref={linkedCasesRef}
                 open={linkedCasesOpen}
-                onOpenChange={setLinkedCasesOpen}
+                onOpenChange={(open) => handleSectionToggle(open, setLinkedCasesOpen, linkedCasesRef)}
                 className="flex flex-col"
               >
 <CollapsibleTrigger className={sectionTriggerClass} style={{ fontSize: "var(--tally-font-size-xs)" }}>
