@@ -46,7 +46,21 @@ interface AccountContextPanelProps {
   relatedCasesMap?: Map<string, CaseItem>;
   /** Called when the Note quick action is clicked */
   onOpenNote?: () => void;
+  /** Allow collapsing the panel into a slim vertical bar with initials */
+  collapsible?: boolean;
+  /** Start collapsed when collapsible is true */
+  defaultCollapsed?: boolean;
   className?: string;
+}
+
+function getInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 function DataRow({
@@ -121,8 +135,11 @@ export default function AccountContextPanel({
   onOpenCallLogPanel,
   relatedCasesMap,
   onOpenNote,
+  collapsible = false,
+  defaultCollapsed = false,
   className,
 }: AccountContextPanelProps) {
+  const [collapsed, setCollapsed] = React.useState(collapsible && defaultCollapsed);
   const [accountDetailsOpen, setAccountDetailsOpen] = React.useState(true);
   const [accountBalanceOpen, setAccountBalanceOpen] = React.useState(false);
   const [primaryContactOpen, setPrimaryContactOpen] = React.useState(true);
@@ -168,6 +185,31 @@ export default function AccountContextPanel({
     "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full -m-0.5 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors";
   const sectionDividerClass = "border-t border-gray-200 dark:border-gray-800/60";
 
+  if (collapsible && collapsed) {
+    return (
+      <button
+        type="button"
+        onClick={() => setCollapsed(false)}
+        className={cn(
+          "my-3 ml-3 flex w-11 shrink-0 flex-col items-center gap-3 rounded-xl border border-border bg-white py-4 text-gray-500 transition-colors hover:text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-400 dark:hover:text-gray-100",
+          className
+        )}
+        aria-label="Open account panel"
+      >
+        <Icon name="left_panel_open" size={18} />
+        <div
+          className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white"
+          style={{ backgroundColor: "#006180" }}
+        >
+          {getInitials(account.name)}
+        </div>
+        <span className="text-[10px] font-semibold tracking-wide [writing-mode:vertical-lr]">
+          {account.name}
+        </span>
+      </button>
+    );
+  }
+
   return (
     <aside
       className={cn(
@@ -178,12 +220,24 @@ export default function AccountContextPanel({
       {/* Header — account name and badges */}
       <div className="flex flex-col gap-density-sm px-density-md pt-density-md pb-density-xs">
         <div className="flex flex-col gap-1.5">
-          <p
-            className="font-bold text-gray-900 dark:text-gray-100 break-words"
-            style={{ fontSize: "var(--tally-font-size-base)", lineHeight: "var(--tally-line-height-tight)" }}
-          >
-            {account.name}
-          </p>
+          <div className="flex items-start justify-between gap-2">
+            <p
+              className="font-bold text-gray-900 dark:text-gray-100 break-words"
+              style={{ fontSize: "var(--tally-font-size-base)", lineHeight: "var(--tally-line-height-tight)" }}
+            >
+              {account.name}
+            </p>
+            {collapsible && (
+              <button
+                type="button"
+                onClick={() => setCollapsed(true)}
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                aria-label="Collapse account panel"
+              >
+                <Icon name="left_panel_close" size={16} />
+              </button>
+            )}
+          </div>
           <p
             className="text-muted-foreground"
             style={{ fontSize: "var(--tally-font-size-sm)" }}

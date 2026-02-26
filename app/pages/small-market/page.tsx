@@ -570,7 +570,7 @@ export default function SmallMarketPage() {
 
       {/* Account Context Panel + Main Content share the surface gradient */}
       <div className={`flex min-w-0 flex-1 overflow-hidden ${surfaceColours["tally-crm"]}`}>
-        <AccountContextPanel account={SM_ACCOUNT} statusBoxes={ACCOUNT_STATUS_BOXES} />
+        <AccountContextPanel account={SM_ACCOUNT} statusBoxes={ACCOUNT_STATUS_BOXES} collapsible defaultCollapsed />
 
         {/* Main Content */}
         <div className="@container min-w-0 flex-1 overflow-y-auto">
@@ -654,7 +654,7 @@ export default function SmallMarketPage() {
               type="button"
               onClick={() => scrollTabs("left")}
               className={cn(
-                "absolute left-0 z-10 flex h-full w-8 items-center justify-center bg-gradient-to-r from-gray-100 via-gray-100/90 to-transparent transition-opacity dark:from-gray-800 dark:via-gray-800/90",
+                "absolute left-0 z-10 flex h-full w-8 items-center justify-center bg-gradient-to-r from-white via-white/90 to-transparent transition-opacity dark:from-gray-900 dark:via-gray-900/90",
                 canScrollLeft ? "opacity-100" : "pointer-events-none opacity-0"
               )}
               aria-label="Scroll tabs left"
@@ -664,13 +664,13 @@ export default function SmallMarketPage() {
             </button>
             <TabsList
               ref={tabsScrollRef}
-              className="flex w-full flex-nowrap justify-start gap-density-xs overflow-x-auto rounded-density-md bg-gray-100 p-density-xs text-gray-600 scrollbar-none dark:bg-gray-800 dark:text-gray-200"
+              className="flex w-full flex-nowrap justify-start gap-density-xs overflow-x-auto rounded-density-md bg-white p-density-xs text-gray-600 scrollbar-none dark:bg-gray-900 dark:text-gray-200"
             >
               {TAB_CONFIG.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
-                  className="shrink-0 whitespace-nowrap uppercase tracking-wide text-gray-700 data-[state=active]:bg-[#E6F7FF] data-[state=active]:text-[#006180] dark:text-gray-200 dark:data-[state=active]:bg-[#006180]/20 dark:data-[state=active]:text-[#80E0FF]"
+                  className="shrink-0 whitespace-nowrap text-gray-700 data-[state=active]:bg-[#E6F7FF] data-[state=active]:text-[#006180] dark:text-gray-200 dark:data-[state=active]:bg-[#006180]/20 dark:data-[state=active]:text-[#80E0FF]"
                 >
                   {tab.label}
                   {tab.badge != null && (
@@ -685,7 +685,7 @@ export default function SmallMarketPage() {
               type="button"
               onClick={() => scrollTabs("right")}
               className={cn(
-                "absolute right-0 z-10 flex h-full w-8 items-center justify-center bg-gradient-to-l from-gray-100 via-gray-100/90 to-transparent transition-opacity dark:from-gray-800 dark:via-gray-800/90",
+                "absolute right-0 z-10 flex h-full w-8 items-center justify-center bg-gradient-to-l from-white via-white/90 to-transparent transition-opacity dark:from-gray-900 dark:via-gray-900/90",
                 canScrollRight ? "opacity-100" : "pointer-events-none opacity-0"
               )}
               aria-label="Scroll tabs right"
