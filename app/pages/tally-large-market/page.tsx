@@ -28,6 +28,8 @@ import Input from "@/components/Input/Input";
 import Checkbox from "@/components/Checkbox/Checkbox";
 import { cn } from "@/lib/utils";
 import { surfaceColours } from "@/lib/tokens/surface-colours";
+import AccountContextPanel from "@/components/crm/AccountContextPanel";
+import type { Account } from "@/types/crm";
 
 const LEFT_NAV_ITEMS = [
   { id: "home", label: "Home", icon: "dashboard" },
@@ -201,6 +203,52 @@ const CONTACTS_DATA = [
   },
 ];
 
+const LM_ACCOUNT: Account = {
+  id: "lm-001",
+  name: "Masked_Name_44D550D62",
+  accountNumber: "QB00171824",
+  type: "Commercial",
+  status: "Active",
+  nmis: ["30125553846"],
+  energyType: "Electricity",
+  primaryContact: {
+    id: "lm-con-001",
+    name: "Justine Masked_Name_32BB",
+    role: "Account Manager",
+    email: "justine.masked@example.com",
+    phone: "07 3555 0653",
+    isPrimary: true,
+  },
+  contacts: [
+    {
+      id: "lm-con-001",
+      name: "Justine Masked_Name_32BB",
+      role: "Account Manager",
+      email: "justine.masked@example.com",
+      phone: "07 3555 0653",
+      isPrimary: true,
+    },
+  ],
+  address: "129 Springwood Rd, Springwood QLD 4127",
+  annualConsumption: "4,500 kWh",
+  accountBalance: "-$200.58",
+  lastPaymentDate: "07/06/2023",
+  lastPaymentAmount: "$50.10",
+  contractEndDate: "30/06/2025",
+  orgId: "org-lm-001",
+  legalBusinessName: "AMPOL FOODARY GUMLY GUMLY",
+  parentAccountName: "Residential",
+  customerType: "Residential",
+  accountStatus: "Billing",
+  isClosed: false,
+  accountSyncStatus: true,
+  consolidateToParent: false,
+  isDirectDebit: false,
+  terms: "Standard",
+  serviceReferenceNumber: "SR-QB00171824",
+  lifeSupport: false,
+};
+
 const CARD_GRID_CLASS = "grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3";
 
 function DataCell({ label, value, className }: { label: string; value: React.ReactNode; className?: string }) {
@@ -227,6 +275,8 @@ export default function TallyLargeMarketPage() {
   const [cardOpenState, setCardOpenState] = React.useState<Record<string, boolean>>(INITIAL_CARD_OPEN);
   const [activeNavId, setActiveNavId] = React.useState("customers");
   const [selectedContactId, setSelectedContactId] = React.useState(1);
+  const [navCollapsed, setNavCollapsed] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(false);
   const currentTabLabel = TAB_CONFIG.find((t) => t.value === tabValue)?.label ?? "Overview";
   const selectedContact = CONTACTS_DATA.find((c) => c.id === selectedContactId) ?? CONTACTS_DATA[0];
 
@@ -234,8 +284,19 @@ export default function TallyLargeMarketPage() {
   const expandAll = () => setCardOpenState(() => Object.fromEntries(OVERVIEW_CARD_TITLES.map((t) => [t, true])));
   const collapseAll = () => setCardOpenState(() => Object.fromEntries(OVERVIEW_CARD_TITLES.map((t) => [t, false])));
 
+  React.useEffect(() => {
+    const root = document.querySelector(".flex.h-screen.overflow-hidden");
+    const sidebar = root?.querySelector(":scope > aside");
+    if (sidebar instanceof HTMLElement) {
+      sidebar.style.display = isExpanded ? "none" : "";
+    }
+    return () => {
+      if (sidebar instanceof HTMLElement) sidebar.style.display = "";
+    };
+  }, [isExpanded]);
+
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-screen flex-col overflow-hidden">
       {/* App Bar */}
       <header className="flex h-14 shrink-0 items-center gap-4 border-b border-border bg-white px-6 dark:border-gray-800 dark:bg-gray-950/90">
         {/* Left: Logo */}
@@ -284,55 +345,111 @@ export default function TallyLargeMarketPage() {
 
       <div className="flex min-w-0 flex-1 overflow-hidden">
         {/* Left Navigation Bar */}
-        <aside className="flex w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-white dark:border-gray-800 dark:bg-gray-950">
+        <aside
+          className={cn(
+            "flex shrink-0 flex-col overflow-hidden border-r border-border bg-white transition-[width] duration-300 dark:border-gray-800 dark:bg-gray-950",
+            navCollapsed ? "w-16" : "w-64"
+          )}
+        >
           <div className="min-h-0 flex-1 overflow-y-auto">
-          <nav className="flex flex-col p-2">
-            {LEFT_NAV_ITEMS.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setActiveNavId(item.id)}
-                className={cn(
-                  "group flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-medium transition-colors",
-                  activeNavId === item.id
-                    ? "bg-gray-100 text-gray-900 dark:bg-[#7c8cb8]/20 dark:text-[#7c8cb8]"
-                    : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100"
-                )}
-              >
-                <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <Icon
-                    name={item.icon as "dashboard"}
-                    size={20}
-                    className={cn(
-                      "shrink-0 font-extralight transition-colors",
-                      activeNavId === item.id
-                        ? "text-gray-900 dark:text-[#7c8cb8]"
-                        : "text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100"
-                    )}
-                  />
-                  <span className="truncate">{item.label}</span>
-                </div>
-                <Icon
-                  name="expand_more"
-                  size={18}
+            <nav className={cn("flex flex-col", navCollapsed ? "items-center p-2" : "p-2")}>
+              {LEFT_NAV_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveNavId(item.id)}
+                  title={navCollapsed ? item.label : undefined}
                   className={cn(
-                    "shrink-0 font-extralight transition-colors",
+                    "group flex items-center rounded-lg text-left text-sm font-medium transition-colors",
+                    navCollapsed
+                      ? "h-10 w-10 justify-center"
+                      : "w-full justify-between gap-3 px-3 py-2.5",
                     activeNavId === item.id
-                      ? "text-gray-900 dark:text-[#7c8cb8]"
-                      : "text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100"
+                      ? "bg-gray-100 text-gray-900 dark:bg-[#7c8cb8]/20 dark:text-[#7c8cb8]"
+                      : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100"
                   )}
-                />
-              </button>
-            ))}
-          </nav>
+                >
+                  <div className={cn("flex items-center", navCollapsed ? "" : "min-w-0 flex-1 gap-3")}>
+                    <Icon
+                      name={item.icon as "dashboard"}
+                      size={20}
+                      className={cn(
+                        "shrink-0 font-extralight transition-colors",
+                        activeNavId === item.id
+                          ? "text-gray-900 dark:text-[#7c8cb8]"
+                          : "text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100"
+                      )}
+                    />
+                    {!navCollapsed && <span className="truncate">{item.label}</span>}
+                  </div>
+                  {!navCollapsed && (
+                    <Icon
+                      name="expand_more"
+                      size={18}
+                      className={cn(
+                        "shrink-0 font-extralight transition-colors",
+                        activeNavId === item.id
+                          ? "text-gray-900 dark:text-[#7c8cb8]"
+                          : "text-gray-500 group-hover:text-gray-900 dark:text-gray-400 dark:group-hover:text-gray-100"
+                      )}
+                    />
+                  )}
+                </button>
+              ))}
+            </nav>
           </div>
-          <div className="shrink-0 border-t border-border p-3 dark:border-gray-800">
-            <Image src="/PoweredByTallyBadgeREV.svg" alt="Powered by Tally" width={120} height={29} className="w-[120px] h-auto" />
+          <div className="shrink-0 border-t border-border dark:border-gray-800">
+            {navCollapsed ? (
+              <div className="flex flex-col items-center gap-1 p-2">
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded((v) => !v)}
+                  className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                  aria-label={isExpanded ? "Exit full screen" : "Enter full screen"}
+                >
+                  <Icon name={isExpanded ? "close_fullscreen" : "open_in_full"} size={20} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setNavCollapsed(false)}
+                  className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                  aria-label="Expand navigation"
+                >
+                  <Icon name="chevron_right" size={20} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between px-3 py-3">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsExpanded((v) => !v)}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                    aria-label={isExpanded ? "Exit full screen" : "Enter full screen"}
+                  >
+                    <Icon name={isExpanded ? "close_fullscreen" : "open_in_full"} size={18} />
+                  </button>
+                  <Image src="/PoweredByTallyBadgeREV.svg" alt="Powered by Tally" width={120} height={29} className="w-[120px] h-auto" />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setNavCollapsed(true)}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                  aria-label="Collapse navigation"
+                >
+                  <Icon name="chevron_left" size={20} />
+                </button>
+              </div>
+            )}
           </div>
         </aside>
 
-        {/* Main Content */}
-        <div className={`relative min-w-0 flex-1 overflow-y-auto ${surfaceColours["tally-group"]}`}>
+        {/* Account Context Panel + Main Content share the surface gradient */}
+        <div className={`flex min-w-0 flex-1 overflow-hidden ${surfaceColours["tally-group"]}`}>
+          <AccountContextPanel account={LM_ACCOUNT} />
+
+          {/* Main Content */}
+          <div className="relative min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto max-w-[1600px] px-6 py-6">
         <Breadcrumb className="mb-4">
           <BreadcrumbList className="items-center gap-1.5 text-sm text-gray-700 dark:text-gray-200">
@@ -711,10 +828,11 @@ export default function TallyLargeMarketPage() {
           ))}
         </Tabs>
           </div>
+          </div>
         </div>
 
         {/* Right Action Sidebar */}
-        <aside className="flex w-16 shrink-0 flex-col items-center gap-1 border-l border-border bg-white pt-4 dark:border-gray-800 dark:bg-gray-950">
+        <aside className="flex w-16 shrink-0 flex-col items-center gap-1 overflow-y-auto border-l border-border bg-white pt-4 dark:border-gray-800 dark:bg-gray-950">
           <button
             type="button"
             className="flex flex-col items-center gap-1 rounded-lg px-2 py-2.5 text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
