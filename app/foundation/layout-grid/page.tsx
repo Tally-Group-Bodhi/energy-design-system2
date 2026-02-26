@@ -1,33 +1,34 @@
+"use client";
+
+import { useState } from "react";
 import PageBanner from "@/components/PageBanner/PageBanner";
 import TabNavigation from "@/components/TabNavigation/TabNavigation";
 
 const breakpoints = [
-  { name: "xs", min: "0px", max: "639px", desc: "Mobile portrait" },
-  { name: "sm", min: "640px", max: "767px", desc: "Mobile landscape / large phone" },
-  { name: "md", min: "768px", max: "1023px", desc: "Tablet" },
-  { name: "lg", min: "1024px", max: "1279px", desc: "Laptop / small desktop" },
-  { name: "xl", min: "1280px", max: "1535px", desc: "Desktop" },
-  { name: "2xl", min: "1536px", max: "—", desc: "Large desktop" },
+  { name: "md", min: "768px", desc: "Minimum viable. Search bar appears; internal grids shift to 2-col." },
+  { name: "lg", min: "1024px", desc: "Primary target. Full layout shell (nav + panels + main pane) renders." },
+  { name: "xl", min: "1280px", desc: "Comfortable. Padding increases; tab bars expand; more grid columns." },
+  { name: "2xl", min: "1536px", desc: "Large desktop. Extra grid columns for data-dense views (e.g. LM contacts)." },
 ];
 
 const containerSizes = [
-  { token: "max-w-3xl", px: "768px", use: "Forms, narrow content" },
-  { token: "max-w-4xl", px: "896px", use: "Article, long-form" },
-  { token: "max-w-5xl", px: "1024px", use: "Medium content" },
-  { token: "max-w-6xl", px: "1152px", use: "Wide content" },
-  { token: "max-w-7xl", px: "1280px", use: "Default page container" },
-  { token: "max-w-[1600px]", px: "1600px", use: "Dashboards, data-heavy" },
+  { token: "max-w-3xl", px: "768px", use: "Forms, narrow focused content" },
+  { token: "max-w-4xl", px: "896px", use: "Articles, long-form text" },
+  { token: "max-w-7xl", px: "1280px", use: "Design system doc pages" },
+  { token: "max-w-[1600px]", px: "1600px", use: "Product main panes (SM, LM, Glass)" },
 ];
 
 const spacingScale = [
-  { token: "4", px: "16px", use: "Tight (inline, compact)" },
-  { token: "6", px: "24px", use: "Default (sections, cards)" },
-  { token: "8", px: "32px", use: "Comfortable" },
-  { token: "12", px: "48px", use: "Page vertical rhythm" },
-  { token: "16", px: "64px", use: "Major section breaks" },
+  { token: "2", px: "8px", use: "Tight gaps (icon + label, inline elements)" },
+  { token: "4", px: "16px", use: "Card padding, compact grid gaps" },
+  { token: "6", px: "24px", use: "Default section/card gap, grid gutters" },
+  { token: "8", px: "32px", use: "Comfortable breathing room between sections" },
+  { token: "12", px: "48px", use: "Page vertical rhythm, major group separation" },
 ];
 
 export default function LayoutGridPage() {
+  const [activeTab, setActiveTab] = useState("design");
+
   const tabs = [
     { id: "design", label: "Design" },
     { id: "code", label: "Code" },
@@ -36,310 +37,367 @@ export default function LayoutGridPage() {
   return (
     <>
       <PageBanner title="Grid" />
-
-      <TabNavigation tabs={tabs} defaultTab="design" />
+      <TabNavigation
+        tabs={tabs}
+        defaultTab="design"
+        onTabChange={setActiveTab}
+      />
 
       <div className="min-h-screen bg-gray-50">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          {/* Page Description */}
           <div className="mb-12">
             <p className="max-w-3xl text-lg leading-7 text-gray-600">
-              Our layout and grid system provides a consistent, responsive
-              structure for all digital experiences. Use these guidelines to
-              align content, maintain rhythm, and ensure interfaces work across
-              all key breakpoints and device sizes.
+              Tally products are enterprise desktop applications used by call
+              centre agents and back-office staff on laptops and monitors. The
+              grid system is designed for these viewports — we don&apos;t target
+              mobile or tablet. Content grids, container widths, and spacing
+              tokens ensure consistency inside the main pane.
             </p>
           </div>
 
-          {/* Breakpoints Section */}
-          <section className="mb-16 border-t border-border pt-16">
-            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-gray-900">
-              Breakpoints
-            </h2>
-            <p className="mb-6 max-w-3xl text-base leading-6 text-gray-600">
-              Design and build for these breakpoints so layouts adapt from
-              mobile to large desktop. Use mobile-first CSS: base styles for
-              smallest viewport, then add <code className="rounded bg-gray-200 px-1.5 py-0.5 text-sm font-mono">sm:</code>,{" "}
-              <code className="rounded bg-gray-200 px-1.5 py-0.5 text-sm font-mono">md:</code>,{" "}
-              <code className="rounded bg-gray-200 px-1.5 py-0.5 text-sm font-mono">lg:</code>,{" "}
-              <code className="rounded bg-gray-200 px-1.5 py-0.5 text-sm font-mono">xl:</code>,{" "}
-              <code className="rounded bg-gray-200 px-1.5 py-0.5 text-sm font-mono">2xl:</code> for
-              larger screens.
-            </p>
-            <div className="overflow-x-auto rounded-lg border border-border bg-white">
-              <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 font-semibold text-gray-900">Token</th>
-                    <th className="px-4 py-3 font-semibold text-gray-900">Min width</th>
-                    <th className="px-4 py-3 font-semibold text-gray-900">Max width</th>
-                    <th className="px-4 py-3 font-semibold text-gray-900">Use case</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {breakpoints.map((bp) => (
-                    <tr key={bp.name}>
-                      <td className="px-4 py-3 font-mono text-gray-800">{bp.name}</td>
-                      <td className="px-4 py-3 text-gray-600">{bp.min}</td>
-                      <td className="px-4 py-3 text-gray-600">{bp.max}</td>
-                      <td className="px-4 py-3 text-gray-600">{bp.desc}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+          {activeTab === "design" && (
+            <div className="space-y-14">
+              {/* Breakpoints */}
+              <section className="border-t border-border pt-10">
+                <h2 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
+                  Breakpoints
+                </h2>
+                <p className="mb-6 max-w-3xl text-sm leading-6 text-gray-600">
+                  The layout shell (nav, panels, app bar) is built for{" "}
+                  <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">lg</code> and
+                  above. Breakpoints below <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">md</code> are
+                  not used. Internal content grids may adapt at these four points.
+                </p>
 
-          {/* Container Widths Section */}
-          <section className="mb-16 border-t border-border pt-16">
-            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-gray-900">
-              Container widths
-            </h2>
-            <p className="mb-6 max-w-3xl text-base leading-6 text-gray-600">
-              Limit content width for readability and consistency. Use a single
-              max-width per page type; combine with horizontal padding for
-              responsive gutters.
-            </p>
-            <div className="overflow-x-auto rounded-lg border border-border bg-white">
-              <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 font-semibold text-gray-900">Class</th>
-                    <th className="px-4 py-3 font-semibold text-gray-900">Width</th>
-                    <th className="px-4 py-3 font-semibold text-gray-900">Use case</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
+                <div className="overflow-hidden rounded-lg border border-border bg-white">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-border bg-gray-50/80">
+                        <th className="w-[100px] px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">Token</th>
+                        <th className="w-[120px] px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">Min width</th>
+                        <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">What happens</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {breakpoints.map((bp) => (
+                        <tr key={bp.name} className="border-b border-border last:border-b-0">
+                          <td className="px-4 py-3 font-mono text-sm text-gray-900">{bp.name}</td>
+                          <td className="px-4 py-3 font-mono text-xs text-gray-600">{bp.min}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{bp.desc}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <p className="mt-4 text-sm text-gray-500">
+                  <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">xs</code> (0–639px)
+                  and <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">sm</code> (640–767px)
+                  are not targeted. The fixed-width nav (64px), Account Context Panel (288px), and
+                  Control Panel (290px) require at least 1024px to render properly.
+                </p>
+              </section>
+
+              {/* Container widths */}
+              <section className="border-t border-border pt-10">
+                <h2 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
+                  Container widths
+                </h2>
+                <p className="mb-6 max-w-3xl text-sm leading-6 text-gray-600">
+                  Limit content width for readability. Product main panes use{" "}
+                  <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">max-w-[1600px]</code>;
+                  design system doc pages use{" "}
+                  <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">max-w-7xl</code>.
+                  Pick one per page type.
+                </p>
+
+                <div className="overflow-hidden rounded-lg border border-border bg-white">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-border bg-gray-50/80">
+                        <th className="w-[180px] px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">Class</th>
+                        <th className="w-[100px] px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">Width</th>
+                        <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">Use case</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {containerSizes.map((c) => (
+                        <tr key={c.token} className="border-b border-border last:border-b-0">
+                          <td className="px-4 py-3 font-mono text-sm text-gray-900">{c.token}</td>
+                          <td className="px-4 py-3 font-mono text-xs text-gray-600">{c.px}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{c.use}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Visual comparison */}
+                <div className="mt-6 space-y-3">
+                  <p className="text-sm font-medium text-gray-700">Visual comparison</p>
                   {containerSizes.map((c) => (
-                    <tr key={c.token}>
-                      <td className="px-4 py-3 font-mono text-gray-800">{c.token}</td>
-                      <td className="px-4 py-3 text-gray-600">{c.px}</td>
-                      <td className="px-4 py-3 text-gray-600">{c.use}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <p className="mt-4 max-w-3xl text-sm text-gray-600">
-              Standard page wrapper:{" "}
-              <code className="rounded bg-gray-200 px-1.5 py-0.5 font-mono">
-                mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8
-              </code>
-            </p>
-          </section>
-
-          {/* Grid system Section */}
-          <section className="mb-16 border-t border-border pt-16">
-            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-gray-900">
-              Grid system
-            </h2>
-            <p className="mb-6 max-w-3xl text-base leading-6 text-gray-600">
-              Use a 12-column grid for complex layouts. Columns collapse to
-              full-width on small screens; specify column spans per breakpoint
-              for responsive behaviour.
-            </p>
-            <div className="space-y-6">
-              <div>
-                <p className="mb-2 text-sm font-medium text-gray-700">
-                  12-column (responsive): 1 col → 2 col → 3 col
-                </p>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {[1, 2, 3].map((n) => (
-                    <div
-                      key={n}
-                      className="flex h-16 items-center justify-center rounded-lg border-2 border-dashed border-border bg-gray-50 text-sm font-medium text-gray-500"
-                    >
-                      Col {n}
+                    <div key={c.token} className="flex items-center gap-3">
+                      <span className="w-[140px] shrink-0 text-right font-mono text-xs text-gray-500">{c.token}</span>
+                      <div className="h-5 rounded bg-[#2C365D]/10" style={{ width: `${(parseInt(c.px) / 1600) * 100}%`, minWidth: 40 }}>
+                        <span className="px-2 text-[10px] font-medium text-[#2C365D]/60 leading-5">{c.px}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
-              <div>
-                <p className="mb-2 text-sm font-medium text-gray-700">
-                  Asymmetric: sidebar (4) + main (8) on large; stacked on small
+              </section>
+
+              {/* Grid system */}
+              <section className="border-t border-border pt-10">
+                <h2 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
+                  Content grids
+                </h2>
+                <p className="mb-6 max-w-3xl text-sm leading-6 text-gray-600">
+                  Inside the main pane, use CSS Grid for card layouts and data
+                  grids. These are the patterns found in SM, LM, and Glass.
                 </p>
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-                  <div className="flex h-16 items-center justify-center rounded-lg border-2 border-dashed border-primary/40 bg-primary/5 font-medium text-gray-700 lg:col-span-4">
-                    Sidebar (4/12)
+
+                <div className="space-y-8">
+                  {/* KPI cards — 4 col */}
+                  <div>
+                    <p className="mb-2 text-sm font-medium text-gray-700">
+                      KPI cards — 4 columns at <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">lg</code>
+                    </p>
+                    <p className="mb-3 text-xs text-gray-500">
+                      <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">grid grid-cols-2 gap-4 lg:grid-cols-4</code>
+                    </p>
+                    <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                      {["Revenue", "Accounts", "Usage", "Overdue"].map((label) => (
+                        <div
+                          key={label}
+                          className="flex h-16 flex-col justify-center rounded-lg border border-border bg-white px-4"
+                        >
+                          <span className="text-[10px] font-medium uppercase tracking-wide text-gray-400">{label}</span>
+                          <span className="mt-0.5 text-lg font-semibold text-gray-800">—</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex h-16 items-center justify-center rounded-lg border-2 border-dashed border-border bg-gray-50 font-medium text-gray-500 lg:col-span-8">
-                    Main (8/12)
+
+                  {/* Detail cards — 2 col */}
+                  <div>
+                    <p className="mb-2 text-sm font-medium text-gray-700">
+                      Detail cards — 2 columns
+                    </p>
+                    <p className="mb-3 text-xs text-gray-500">
+                      <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">grid grid-cols-1 gap-4 lg:grid-cols-2</code>
+                    </p>
+                    <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                      {["Account Summary", "Billing Configuration"].map((label) => (
+                        <div
+                          key={label}
+                          className="rounded-lg border border-border bg-white p-4"
+                        >
+                          <span className="text-sm font-medium text-gray-700">{label}</span>
+                          <div className="mt-2 space-y-1.5">
+                            <div className="h-3 w-full rounded bg-gray-100" aria-hidden />
+                            <div className="h-3 w-3/4 rounded bg-gray-100" aria-hidden />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div>
-                <p className="mb-2 text-sm font-medium text-gray-700">
-                  Equal 4-column on large; 2 then 1 on smaller
-                </p>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {[1, 2, 3, 4].map((n) => (
-                    <div
-                      key={n}
-                      className="flex h-14 items-center justify-center rounded-lg border-2 border-dashed border-border bg-gray-50 text-sm text-gray-500"
-                    >
-                      {n}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
 
-          {/* Spacing scale Section */}
-          <section className="mb-16 border-t border-border pt-16">
-            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-gray-900">
-              Spacing scale
-            </h2>
-            <p className="mb-6 max-w-3xl text-base leading-6 text-gray-600">
-              Use the 4px-based spacing scale (Tailwind: 1 = 4px) for padding,
-              margins, and gaps. Keeps vertical rhythm and alignment consistent.
-            </p>
-            <div className="overflow-x-auto rounded-lg border border-border bg-white">
-              <table className="min-w-full divide-y divide-gray-200 text-left text-sm">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="px-4 py-3 font-semibold text-gray-900">Token (e.g. gap-6)</th>
-                    <th className="px-4 py-3 font-semibold text-gray-900">Size</th>
-                    <th className="px-4 py-3 font-semibold text-gray-900">Use case</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {spacingScale.map((s) => (
-                    <tr key={s.token}>
-                      <td className="px-4 py-3 font-mono text-gray-800">{s.token}</td>
-                      <td className="px-4 py-3 text-gray-600">{s.px}</td>
-                      <td className="px-4 py-3 text-gray-600">{s.use}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          {/* Key layout patterns Section */}
-          <section className="mb-16 border-t border-border pt-16">
-            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-gray-900">
-              Key layout patterns
-            </h2>
-            <p className="mb-8 max-w-3xl text-base leading-6 text-gray-600">
-              Standard patterns for common page types. All are responsive:
-              simplify columns and reduce density on smaller viewports.
-            </p>
-
-            <div className="space-y-12">
-              {/* Single column */}
-              <div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900">
-                  Single column
-                </h3>
-                <p className="mb-4 max-w-2xl text-sm text-gray-600">
-                  Forms, articles, and focused content. Use max-w-3xl or
-                  max-w-4xl; center with mx-auto.
-                </p>
-                <div className="mx-auto max-w-2xl rounded-lg border border-border bg-white p-6">
-                  <div className="mx-auto h-12 max-w-md rounded bg-gray-100" />
-                  <div className="mx-auto mt-4 h-4 max-w-full rounded bg-gray-100" />
-                  <div className="mx-auto mt-2 h-4 max-w-[80%] rounded bg-gray-100" />
-                </div>
-              </div>
-
-              {/* Two column */}
-              <div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900">
-                  Two column (content + sidebar or equal split)
-                </h3>
-                <p className="mb-4 max-w-2xl text-sm text-gray-600">
-                  Use grid-cols-1 lg:grid-cols-12 with col-span-8 and col-span-4,
-                  or grid-cols-1 md:grid-cols-2 for equal columns.
-                </p>
-                <div className="rounded-lg border border-border bg-white p-4">
-                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-                    <div className="flex h-20 items-center justify-center rounded bg-gray-100 lg:col-span-8">
-                      Main content
-                    </div>
-                    <div className="flex h-20 items-center justify-center rounded bg-gray-200 lg:col-span-4">
-                      Sidebar
+                  {/* Data fields — 2/3 col */}
+                  <div>
+                    <p className="mb-2 text-sm font-medium text-gray-700">
+                      Data field grid — 2 or 3 columns
+                    </p>
+                    <p className="mb-3 text-xs text-gray-500">
+                      <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">grid grid-cols-2 gap-x-8 gap-y-4 2xl:grid-cols-3</code>
+                    </p>
+                    <div className="rounded-lg border border-border bg-white p-4">
+                      <div className="grid grid-cols-2 gap-x-8 gap-y-3 2xl:grid-cols-3">
+                        {["Account Number", "Status", "NMI", "Energy Type", "Contract End", "Balance"].map((label) => (
+                          <div key={label} className="flex flex-col gap-0.5">
+                            <span className="text-[11px] text-gray-400">{label}</span>
+                            <span className="text-sm text-gray-800">—</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
+              </section>
+
+              {/* Spacing */}
+              <section className="border-t border-border pt-10">
+                <h2 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
+                  Spacing scale
+                </h2>
+                <p className="mb-6 max-w-3xl text-sm leading-6 text-gray-600">
+                  Use the 4px-based Tailwind spacing scale for padding, margins,
+                  and gaps. Keeps vertical rhythm consistent across products.
+                </p>
+
+                <div className="overflow-hidden rounded-lg border border-border bg-white">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-border bg-gray-50/80">
+                        <th className="w-[140px] px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">Token</th>
+                        <th className="w-[80px] px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">Preview</th>
+                        <th className="w-[80px] px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">Size</th>
+                        <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">Use case</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {spacingScale.map((s) => (
+                        <tr key={s.token} className="border-b border-border last:border-b-0">
+                          <td className="px-4 py-3 font-mono text-sm text-gray-900">gap-{s.token}</td>
+                          <td className="px-4 py-3">
+                            <div
+                              className="rounded bg-[#2C365D]/15"
+                              style={{ width: parseInt(s.px), height: 12 }}
+                              aria-hidden
+                            />
+                          </td>
+                          <td className="px-4 py-3 font-mono text-xs text-gray-600">{s.px}</td>
+                          <td className="px-4 py-3 text-sm text-gray-600">{s.use}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
+              {/* Guidelines */}
+              <section className="border-t border-border pt-10">
+                <h2 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
+                  Guidelines
+                </h2>
+                <p className="mb-6 max-w-3xl text-sm leading-6 text-gray-600">
+                  Rules for grid and spacing decisions inside product pages.
+                </p>
+
+                <div className="overflow-hidden rounded-lg border border-border bg-white">
+                  <table className="w-full border-collapse text-left">
+                    <thead>
+                      <tr className="border-b border-border bg-gray-50/80">
+                        <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">Rule</th>
+                        <th className="px-4 py-3 text-xs font-medium uppercase tracking-wide text-gray-500">Detail</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="border-b border-border">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">Design for lg first</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">1024px is the primary viewport. The full layout shell (nav + panels) renders here.</td>
+                      </tr>
+                      <tr className="border-b border-border">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">One max-width per page</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">Product panes use <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">max-w-[1600px]</code>. Don&apos;t mix container widths on the same page.</td>
+                      </tr>
+                      <tr className="border-b border-border">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">Use the spacing scale</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">Stick to the five spacing tokens above. Avoid arbitrary values like <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">p-[13px]</code>.</td>
+                      </tr>
+                      <tr className="border-b border-border">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">Consistent grid gaps</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">Use <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">gap-4</code> for card grids and <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">gap-6</code> for section grids. Don&apos;t mix gaps within the same grid.</td>
+                      </tr>
+                      <tr className="border-b border-border">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">Don&apos;t target mobile</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">The layout shell requires ≥1024px. Don&apos;t add <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">xs:</code> or <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">sm:</code> breakpoints for layout structure.</td>
+                      </tr>
+                      <tr className="border-b border-border last:border-b-0">
+                        <td className="px-4 py-3 text-sm font-medium text-gray-900">Limit text width</td>
+                        <td className="px-4 py-3 text-sm text-gray-600">Body text should not exceed <code className="rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700">max-w-3xl</code> (~65 characters per line) for readability.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeTab === "code" && (
+            <div className="space-y-10 border-t border-border pt-10">
+              <div>
+                <h2 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
+                  Main pane wrapper
+                </h2>
+                <p className="mb-4 max-w-3xl text-sm leading-6 text-gray-600">
+                  Standard wrapper inside the main pane of product pages.
+                </p>
+                <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
+                  <code>{`<main className="min-w-0 flex-1 overflow-y-auto">
+  <div className="mx-auto max-w-[1600px] px-4 py-4 xl:px-6 xl:py-6">
+    {/* page content */}
+  </div>
+</main>`}</code>
+                </pre>
               </div>
 
-              {/* Dashboard / cards grid */}
               <div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900">
-                  Dashboard / cards grid
-                </h3>
-                <p className="mb-4 max-w-2xl text-sm text-gray-600">
-                  Responsive card grids: 1 column on mobile, 2 on tablet, 3–4 on
-                  desktop. Use grid with gap-6 and consistent card heights where
-                  appropriate.
-                </p>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {[1, 2, 3, 4].map((n) => (
-                    <div
-                      key={n}
-                      className="flex h-24 flex-col rounded-lg border border-border bg-white p-4 shadow-sm"
-                    >
-                      <div className="h-4 w-1/3 rounded bg-gray-200" />
-                      <div className="mt-2 h-3 w-full rounded bg-gray-100" />
-                      <div className="mt-1 h-3 w-2/3 rounded bg-gray-100" />
-                    </div>
-                  ))}
-                </div>
+                <h2 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
+                  KPI card grid
+                </h2>
+                <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
+                  <code>{`<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+  <Card>...</Card>
+  <Card>...</Card>
+  <Card>...</Card>
+  <Card>...</Card>
+</div>`}</code>
+                </pre>
               </div>
 
-              {/* Full-bleed with constrained content */}
               <div>
-                <h3 className="mb-2 text-lg font-semibold text-gray-900">
-                  Full-bleed with constrained content
-                </h3>
-                <p className="mb-4 max-w-2xl text-sm text-gray-600">
-                  Background or banner spans full width; inner content uses
-                  max-w-7xl (or other container) with px-4 sm:px-6 lg:px-8.
+                <h2 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
+                  Detail cards (2-column)
+                </h2>
+                <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
+                  <code>{`<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+  <CollapsibleCard title="Account Summary">...</CollapsibleCard>
+  <CollapsibleCard title="Billing Config">...</CollapsibleCard>
+</div>`}</code>
+                </pre>
+              </div>
+
+              <div>
+                <h2 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
+                  Data field grid
+                </h2>
+                <p className="mb-4 max-w-3xl text-sm leading-6 text-gray-600">
+                  Used inside cards for label/value pairs. Expands to 3 columns on 2xl.
                 </p>
-                <div className="rounded-lg border border-border bg-gray-100">
-                  <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-                    <div className="h-10 rounded bg-white/80" />
-                  </div>
-                </div>
+                <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
+                  <code>{`<div className="grid grid-cols-2 gap-x-8 gap-y-4 2xl:grid-cols-3">
+  <DataCell label="Account Number" value="104063774" />
+  <DataCell label="Status" value="Active" />
+  <DataCell label="NMI" value="6305194250" />
+</div>`}</code>
+                </pre>
+              </div>
+
+              <div>
+                <h2 className="mb-1 text-xl font-semibold tracking-tight text-gray-900">
+                  Spacing tokens
+                </h2>
+                <pre className="overflow-x-auto rounded-lg bg-gray-900 p-4 text-sm text-gray-100">
+                  <code>{`// Tight — icon gaps, inline elements
+gap-2    // 8px
+
+// Default — card grids, section gaps
+gap-4    // 16px
+gap-6    // 24px
+
+// Comfortable — between major sections
+gap-8    // 32px
+
+// Page rhythm — top-level section breaks
+gap-12   // 48px
+
+// Padding patterns
+px-4 py-4              // compact pane padding
+xl:px-6 xl:py-6        // relaxed at xl+`}</code>
+                </pre>
               </div>
             </div>
-          </section>
-
-          {/* Guidelines / Do's and Don'ts */}
-          <section className="mb-16 border-t border-border pt-16">
-            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-gray-900">
-              Guidelines
-            </h2>
-            <div className="grid gap-8 md:grid-cols-2">
-              <div>
-                <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-green-800">
-                  <span aria-hidden>✓</span> Do
-                </h3>
-                <ul className="list-inside list-disc space-y-2 text-sm text-gray-700">
-                  <li>Use mobile-first breakpoints (base, then sm/md/lg/xl/2xl)</li>
-                  <li>Keep horizontal padding consistent (px-4, sm:px-6, lg:px-8)</li>
-                  <li>Limit line length for text (max-w-3xl or less for body)</li>
-                  <li>Use the same container width per page type</li>
-                  <li>Stack columns on small screens; add columns as width increases</li>
-                  <li>Use the spacing scale for gaps and padding</li>
-                </ul>
-              </div>
-              <div>
-                <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-red-800">
-                  <span aria-hidden>✗</span> Don&apos;t
-                </h3>
-                <ul className="list-inside list-disc space-y-2 text-sm text-gray-700">
-                  <li>Mix arbitrary max-widths on the same page</li>
-                  <li>Assume desktop-only; always test mobile and tablet</li>
-                  <li>Use fixed pixel widths for layout; prefer max-w and %</li>
-                  <li>Overcrowd small viewports with too many columns</li>
-                  <li>Skip horizontal padding on narrow screens</li>
-                  <li>Ignore touch targets (min 44px) on interactive elements</li>
-                </ul>
-              </div>
-            </div>
-          </section>
+          )}
         </div>
       </div>
     </>
