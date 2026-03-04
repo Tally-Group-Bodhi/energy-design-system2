@@ -128,7 +128,7 @@ function GlassWireframe() {
       <div className="flex" style={{ minHeight: 200 }}>
         {/* Compact nav */}
         <div className="flex w-8 shrink-0 flex-col items-center gap-1.5 border-r border-gray-200 bg-gray-50 pt-2">
-          <WireframeLabel className="text-gray-400 mb-0.5" />
+          <WireframeLabel className="text-gray-400 mb-0.5">Nav</WireframeLabel>
           <div className="h-3.5 w-3.5 rounded bg-gray-300/70" aria-hidden />
           <div className="h-3.5 w-3.5 rounded bg-gray-200/70" aria-hidden />
           <div className="h-3.5 w-3.5 rounded bg-gray-200/70" aria-hidden />
