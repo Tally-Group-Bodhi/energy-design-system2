@@ -530,6 +530,7 @@ export default function GlassVisionPage() {
   const [adoraCharCount, setAdoraCharCount] = useState(0);
   const adoraStarted = useRef(false);
   const [xSellView, setXSellView] = useState<string | null>(null);
+  const [partnerLogo, setPartnerLogo] = useState<"alinta" | "sumo">("alinta");
   const [billCompareView, setBillCompareView] = useState<"table" | "chart">("table");
   const [serviceAddressView, setServiceAddressView] = useState<"list" | "card">("list");
   const [adoraSummaryVisible, setAdoraSummaryVisible] = useState(true);
@@ -608,16 +609,32 @@ export default function GlassVisionPage() {
       {/* Seamless chrome: header + nav as one dark block (no border between them) */}
       <div className="flex min-h-0 flex-1 flex-col">
         <header className="flex h-14 shrink-0 items-center gap-4 px-6">
-        <Link href="/" className="flex shrink-0 items-center">
-          <Image
-            src="/GlassLogoTest_darkmode.svg"
-            alt="Tally Glass"
-            width={140}
-            height={40}
-            className="h-8 w-auto"
-            priority
-          />
-        </Link>
+        <div className="flex shrink-0 items-center gap-3">
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/GlassLogoTest_darkmode.svg"
+              alt="Tally Glass"
+              width={140}
+              height={40}
+              className="h-8 w-auto"
+              priority
+            />
+          </Link>
+          <div className="h-6 w-px bg-white/30" />
+          <button
+            type="button"
+            onClick={() => setPartnerLogo(partnerLogo === "alinta" ? "sumo" : "alinta")}
+            className="flex items-center transition-opacity hover:opacity-80"
+          >
+            <Image
+              src={partnerLogo === "alinta" ? "/AlintaLogo.svg" : "/SumoLogo.png"}
+              alt={partnerLogo === "alinta" ? "Alinta Energy" : "Sumo"}
+              width={140}
+              height={34}
+              className={cn("h-8 w-auto", partnerLogo === "sumo" && "mix-blend-screen")}
+            />
+          </button>
+        </div>
         <div className="flex flex-1 justify-center">
           <div className="relative w-full max-w-md">
             <Icon
@@ -973,14 +990,14 @@ export default function GlassVisionPage() {
                     type="button"
                     onClick={() => setServiceAddressView(opt.key)}
                     className={cn(
-                      "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-all",
+                      "flex items-center justify-center rounded-md p-1.5 transition-all",
                       serviceAddressView === opt.key
                         ? "bg-white text-[#2C365D] shadow-sm dark:bg-[#00D2A2]/20 dark:text-[#00D2A2]"
                         : "text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-300"
                     )}
+                    aria-label={opt.label}
                   >
-                    <Icon name={opt.icon} size={15} />
-                    {opt.label}
+                    <Icon name={opt.icon} size={16} />
                   </button>
                 ))}
               </div>
@@ -1401,7 +1418,7 @@ export default function GlassVisionPage() {
             </div>
             ) : (
             /* ── Card View ── */
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               {ACCOUNTS.map((acc) => {
                 const typeIcon = acc.type === "Residential" ? "home" : acc.type === "Commercial" ? "business" : "store";
                 const typeIconBg =
