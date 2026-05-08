@@ -98,7 +98,7 @@ const ATOMIC_LEVELS = [
 
 const TDS_LAYERS = [
   {
-    name: "Elements",
+    name: "Foundation",
     icon: "palette",
     color: "#595767",
     atomicMapping: "Design Tokens (sub-atomic)",
@@ -237,9 +237,9 @@ const DESIGN_DECISIONS = [
   },
   {
     icon: "palette",
-    title: "Elements serve as the sub-atomic layer",
+    title: "Foundation serves as the sub-atomic layer",
     description:
-      "Atomic design has an implied \"design tokens\" layer beneath atoms. The TDS captures this as Elements — colours, typography, icons, density, and other foundational settings that atoms are built from.",
+      "Atomic design has an implied \"design tokens\" layer beneath atoms. The TDS captures this in the Foundation section — colours, typography, icons, density, and other foundational settings that atoms are built from.",
   },
 ];
 
@@ -739,8 +739,8 @@ function DesignTab() {
           {[
             {
               step: "1",
-              title: "Start with Elements",
-              body: "Identify the colours, typography, and spacing you need. Check the Elements section for tokens and foundation settings.",
+              title: "Start with Foundation",
+              body: "Identify the colours, typography, and spacing you need. Check the Foundation section for tokens and foundation settings.",
             },
             {
               step: "2",
@@ -831,7 +831,7 @@ export default function TdsSetupPage() {
                 <div className="overflow-hidden rounded-xl border border-border bg-gray-900 dark:border-gray-700">
                   <pre className="overflow-x-auto p-6 text-sm leading-relaxed text-gray-300">
                     <code>{`├── lib/
-│   ├── tokens/              # Elements (sub-atomic)
+│   ├── tokens/              # Foundation (sub-atomic)
 │   │   ├── colors.ts        # Colour palette & semantic colours
 │   │   └── surface-colours.ts  # Brand surface gradients
 │   ├── density.ts           # Density system (spacing, type, radius)
@@ -847,7 +847,7 @@ export default function TdsSetupPage() {
 │   └── crm/                 # Organisms: PipelineColumn, OpportunityCard
 │
 ├── app/
-│   ├── foundation/          # Elements + Brands documentation
+│   ├── foundation/          # Foundation + Brands documentation
 │   ├── components/          # Component, Molecule & Organism docs
 │   ├── pages/               # Templates + Pages
 │   └── crm/                 # Tally CRM (page instance)`}</code>
@@ -868,7 +868,7 @@ export default function TdsSetupPage() {
                 </p>
                 <div className="overflow-hidden rounded-xl border border-border bg-gray-900 dark:border-gray-700">
                   <pre className="overflow-x-auto p-6 text-sm leading-relaxed text-gray-300">
-                    <code>{`// ── Elements (design tokens) ──────────────────────
+                    <code>{`// ── Foundation (design tokens) ──────────────────────
 import { colors } from "@/lib/tokens/colors";
 import { surfaceColours } from "@/lib/tokens/surface-colours";
 

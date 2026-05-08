@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ag-grid-community/react": "^32.3.2",
+    "ag-grid-community": "^32.3.2",
     "class-variance-authority": "^0.7.0",
     "date-fns": "^4.1.0",
     "next": "16.1.6",

@@ -23,7 +23,7 @@ const CHANGELOG: { version: string; date: string; changes: string[] }[] = [
     version: "1.5.4",
     date: "2026-02-23",
     changes: [
-      "Surface Colour (Elements): new foundation page at /foundation/surface-colour with CRM example, brand table (layers per brand), live swatches, and usage; “Surface Colour” added to sidebar Elements section.",
+      "Surface Colour (Foundation): new foundation page at /foundation/surface-colour with CRM example, brand table (layers per brand), live swatches, and usage; “Surface Colour” added to sidebar Foundation section.",
       "Surface colour tokens: lib/tokens/surface-colours.ts with surfaceColours and getSurfaceClass(brand); layered gradient classes in globals.css for all brands (CRM: sky/blue; Group/Plus/Glass: slate/blue; Small Market: teal/emerald; S&A: violet/purple; Digital: orange/amber).",
       "Surface gradients applied to CRM layout, Glass Energy Dashboard, Small Market, S&A Dashboard, Tally Acquire, Tally Glass, Beta Test Dashboard, Tally Orion, Tally Large Market.",
       "Tally Glass brand page and logo assets at /foundation/brands/tally-glass and public/foundation/brands/tally-glass/.",

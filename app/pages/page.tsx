@@ -42,11 +42,32 @@ const pages = [
     tags: ["Inputs", "Validation", "Layout"],
   },
   {
+    title: "Tables",
+    description: "AG Grid data table template with sorting, filtering, and TDS styling",
+    href: "/pages/tables",
+    icon: "table_chart",
+    tags: ["AG Grid", "Data Grid", "Tables", "Sorting", "Filtering"],
+  },
+  {
     title: "Glass Vision",
     description: "Tally Glass Vision call centre interface with customer account panels and real-time data",
     href: "/pages/glass-vision",
     icon: "visibility",
     tags: ["Call Centre", "Glass", "Dashboard"],
+  },
+  {
+    title: "Glass Vision – demo2",
+    description: "Copy of Glass Vision for iterating on new designs",
+    href: "/pages/glass-vision-demo2",
+    icon: "visibility",
+    tags: ["Call Centre", "Glass", "Dashboard", "Demo"],
+  },
+  {
+    title: "Glass Vision – Large Market",
+    description: "Tally Glass Vision interface tailored for Large Market commercial accounts with CIS navigation",
+    href: "/pages/glass-vision-lm",
+    icon: "visibility",
+    tags: ["Large Market", "Glass", "Commercial", "Dashboard"],
   },
   {
     title: "Tally Orion",
