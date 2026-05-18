@@ -385,56 +385,50 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
 
         <Panel className="p-5 xl:col-span-4">
           <SectionHeader title="Payment Status (Based on Billed $)" />
-          <div className="flex min-h-64 items-center gap-6">
-            <div className="h-56 w-56 shrink-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={[
-                      { name: "Paid On Time", value: 64 },
-                      { name: "Paid Late", value: 17 },
-                      { name: "1-30 Days Overdue", value: 11 },
-                      { name: "31+ Days Overdue", value: 8 },
-                    ]}
-                    innerRadius={72}
-                    outerRadius={100}
-                    dataKey="value"
-                    paddingAngle={2}
-                  >
-                    <Cell fill={COLORS.green} />
-                    <Cell fill={COLORS.blue} />
-                    <Cell fill={COLORS.amber} />
-                    <Cell fill={COLORS.red} />
-                  </Pie>
-                  <Tooltip contentStyle={chartTooltipStyle} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="flex-1 space-y-4 text-sm">
-              <div className="flex items-center gap-3 text-slate-300">
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" /> Paid On Time
-                <span className="ml-auto text-slate-500">$736.9m</span>
-              </div>
-              <div className="flex items-center gap-3 text-slate-300">
-                <span className="h-2.5 w-2.5 rounded-full bg-blue-400" /> Paid Late
-                <span className="ml-auto text-slate-500">$195.5m</span>
-              </div>
-              <div className="flex items-center gap-3 text-slate-300">
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-400" /> 1-30 Days Overdue
-                <span className="ml-auto text-slate-500">$126.6m</span>
-              </div>
-              <div className="flex items-center gap-3 text-slate-300">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-400" /> 31+ Days Overdue
-                <span className="ml-auto text-slate-500">$93.6m</span>
-              </div>
-            </div>
+          <div className="mx-auto h-44 w-44">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: "Paid On Time", value: 64 },
+                    { name: "Paid Late", value: 17 },
+                    { name: "1-30 Days Overdue", value: 11 },
+                    { name: "31+ Days Overdue", value: 8 },
+                  ]}
+                  innerRadius={56}
+                  outerRadius={80}
+                  dataKey="value"
+                  paddingAngle={2}
+                >
+                  <Cell fill={COLORS.green} />
+                  <Cell fill={COLORS.blue} />
+                  <Cell fill={COLORS.amber} />
+                  <Cell fill={COLORS.red} />
+                </Pie>
+                <Tooltip contentStyle={chartTooltipStyle} />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
-          <div className="mt-2 grid grid-cols-2 border-t border-slate-800 pt-4 text-sm">
-            <div>
+          <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+            {[
+              { color: "bg-emerald-400", label: "Paid On Time", amount: "$736.9m" },
+              { color: "bg-blue-400", label: "Paid Late", amount: "$195.5m" },
+              { color: "bg-amber-400", label: "1-30 Days Overdue", amount: "$126.6m" },
+              { color: "bg-red-400", label: "31+ Days Overdue", amount: "$93.6m" },
+            ].map((row) => (
+              <div key={row.label} className="flex min-w-0 items-center gap-2 text-slate-300">
+                <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", row.color)} />
+                <span className="min-w-0 truncate">{row.label}</span>
+                <span className="ml-auto whitespace-nowrap text-slate-500">{row.amount}</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-800 pt-4 text-sm">
+            <div className="min-w-0">
               <div className="text-slate-500">Total Billed</div>
-              <div className="mt-1 text-xl font-semibold text-white">$1,152.6m</div>
+              <div className="mt-1 truncate text-xl font-semibold text-white">$1,152.6m</div>
             </div>
-            <div className="text-right">
+            <div className="min-w-0 text-right">
               <div className="text-slate-500">Collection Efficiency (YTD)</div>
               <div className="mt-1 text-xl font-semibold text-emerald-300">92.1%</div>
             </div>
