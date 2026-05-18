@@ -70,6 +70,13 @@ const pages = [
     tags: ["Large Market", "Glass", "Commercial", "Dashboard"],
   },
   {
+    title: "Glass Vision LM 2",
+    description: "Operations command centre for Large Market: portfolio overview, customer hierarchy, and exception workspace",
+    href: "/pages/glass-vision-lm-2",
+    icon: "monitor_heart",
+    tags: ["Large Market", "Glass", "Operations", "Exceptions", "Dashboard"],
+  },
+  {
     title: "Tally Orion",
     description: "ORION-style CRM/account management with contact details and address tables",
     href: "/pages/tally-orion",

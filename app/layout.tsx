@@ -117,6 +117,7 @@ const navigationSections = [
       { label: "Tally+ Large Market", href: "/pages/tally-large-market" },
       { label: "Glass Vision", href: "/pages/glass-vision" },
       { label: "Glass Vision – LM", href: "/pages/glass-vision-lm" },
+      { label: "Glass Vision LM 2", href: "/pages/glass-vision-lm-2" },
       { label: "Tally Orion", href: "/pages/tally-orion" },
       { label: "Tally Acquire", href: "/pages/tally-acquire" },
       { label: "Beta Test Dashboard", href: "/pages/beta-test-dashboard" },
