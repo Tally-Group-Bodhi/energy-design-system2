@@ -811,37 +811,6 @@ function GlassVisionLMContent() {
                   </CardContent>
                 </Card>
 
-                {/* Payer rating */}
-                <Card className="overflow-hidden border border-sky-200 bg-sky-50 dark:border-sky-500/20 dark:bg-sky-500/10">
-                  <CardContent className="flex items-center justify-between px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Icon name="star" size={20} className="text-sky-600 dark:text-sky-400" />
-                      <span className="text-sm font-medium text-sky-700 dark:text-sky-300">Payer Rating</span>
-                    </div>
-                    <span className="text-sm font-semibold text-sky-800 dark:text-sky-200">Good</span>
-                  </CardContent>
-                </Card>
-
-                {/* Payment methods */}
-                <Card className={cn("overflow-hidden border-0", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
-                  <CardContent className="p-4 pt-4">
-                    <p className="mb-3 text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-600">Payment methods</p>
-                    <div className="space-y-3 text-xs">
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex h-6 w-9 shrink-0 items-center justify-center rounded bg-violet-600 text-[8px] font-bold text-white">DD</div>
-                        <div className="min-w-0 flex-1">
-                          <div className="font-medium text-gray-800 dark:text-slate-200">Direct Debit</div>
-                          <div className="text-[10px] text-gray-400 dark:text-slate-600">BSB 063-000</div>
-                        </div>
-                        <Badge variant="secondary" className="border-emerald-200 bg-emerald-50 text-[10px] text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300">Default</Badge>
-                      </div>
-                      <button type="button" className="flex w-full items-center gap-2 pt-1 text-xs font-medium text-gray-400 transition-colors hover:text-[#00D2A2] dark:text-slate-500 dark:hover:text-[#00D2A2]">
-                        <Icon name="add" size={14} />
-                        Add method
-                      </button>
-                    </div>
-                  </CardContent>
-                </Card>
               </div>
             </aside>
 
