@@ -22,16 +22,15 @@ import {
 } from "recharts";
 import { Icon } from "@/components/ui/icon";
 import { Avatar, AvatarFallback } from "@/components/Avatar/Avatar";
+import { Sheet, SheetContent } from "@/components/Sheet/Sheet";
 import { cn } from "@/lib/utils";
 import { secondaryColors } from "@/lib/tokens/colors";
 
 /* ────────── Theme tokens ────────── */
 
-const DARKEST_NAVY = "#161B2E";
-const DARK_NAVY = "#212946";
 const ACCENT = "#00D2A2";
 
-const COLORS = {
+const COLORS_DARK = {
   green: ACCENT,
   green2: "#22c55e",
   blue: "#60a5fa",
@@ -41,25 +40,75 @@ const COLORS = {
   slate: "#64748b",
 };
 
+const COLORS_LIGHT = {
+  green: "#0F9C7A",
+  green2: "#16a34a",
+  blue: "#2563eb",
+  amber: "#d97706",
+  red: "#dc2626",
+  purple: "#7c3aed",
+  slate: "#475569",
+};
+
+/** Subscribe to the global `.dark` class on <html> and return the resolved theme. */
+function useResolvedTheme(): "light" | "dark" {
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const compute = () => (root.classList.contains("dark") ? "dark" : "light");
+    setTheme(compute());
+    const observer = new MutationObserver(() => setTheme(compute()));
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
+  return theme;
+}
+
+function useColors() {
+  const theme = useResolvedTheme();
+  return theme === "light" ? COLORS_LIGHT : COLORS_DARK;
+}
+
+function useChartTheme() {
+  const theme = useResolvedTheme();
+  const isLight = theme === "light";
+  return {
+    isLight,
+    grid: isLight ? "#E2E8F0" : "#1e293b",
+    axis: isLight ? "#64748b" : "#94a3b8",
+    tooltipStyle: {
+      background: isLight ? "#ffffff" : "#020617",
+      border: `1px solid ${isLight ? "#cbd5e1" : "#334155"}`,
+      borderRadius: 12,
+      color: isLight ? "#0f172a" : "#e2e8f0",
+    } as React.CSSProperties,
+  };
+}
+
+/** Back-compat alias for module-scope constants that pre-date the theme hook. */
+const COLORS = COLORS_DARK;
+
 const riskClasses: Record<string, string> = {
-  High: "bg-red-500/15 text-red-300 border-red-400/30",
-  Medium: "bg-amber-500/15 text-amber-300 border-amber-400/30",
-  Low: "bg-emerald-500/15 text-emerald-300 border-emerald-400/30",
-  Critical: "bg-red-500/20 text-red-200 border-red-400/40",
+  High: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-400/30",
+  Medium: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-400/30",
+  Low: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-400/30",
+  Critical: "bg-red-100 text-red-800 border-red-300 dark:bg-red-500/20 dark:text-red-200 dark:border-red-400/40",
 };
 
 const statusClasses: Record<string, string> = {
-  Ready: "bg-emerald-500/15 text-emerald-300 border-emerald-400/30",
-  Blocked: "bg-red-500/15 text-red-300 border-red-400/30",
-  Pending: "bg-amber-500/15 text-amber-300 border-amber-400/30",
-  Billed: "bg-blue-500/15 text-blue-300 border-blue-400/30",
-  Current: "bg-emerald-500/15 text-emerald-300 border-emerald-400/30",
-  Overdue: "bg-red-500/15 text-red-300 border-red-400/30",
-  Active: "bg-emerald-500/15 text-emerald-300 border-emerald-400/30",
-  New: "bg-blue-500/15 text-blue-300 border-blue-400/30",
-  Triaged: "bg-amber-500/15 text-amber-300 border-amber-400/30",
-  "In Progress": "bg-purple-500/15 text-purple-300 border-purple-400/30",
-  "Pending External": "bg-slate-500/15 text-slate-300 border-slate-400/30",
+  Ready: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-400/30",
+  Blocked: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-400/30",
+  Pending: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-400/30",
+  Billed: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-400/30",
+  Current: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-400/30",
+  Overdue: "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-300 dark:border-red-400/30",
+  Active: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-400/30",
+  New: "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-400/30",
+  Triaged: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-400/30",
+  "In Progress": "bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-400/30",
+  "Pending External": "bg-slate-100 text-slate-700 border-slate-300 dark:bg-slate-500/15 dark:text-slate-300 dark:border-slate-400/30",
 };
 
 /* ────────── Mock data ────────── */
@@ -194,15 +243,15 @@ const LEFT_NAV_ITEMS: NavItem[] = [
 /* ────────── Reusable bits ────────── */
 
 function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("rounded-2xl border border-slate-800 bg-slate-900/70 shadow-2xl shadow-black/20", className)}>{children}</div>;
+  return <div className={cn("rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/70 dark:shadow-2xl dark:shadow-black/20", className)}>{children}</div>;
 }
 
 function Pill({ children, tone = "Low" }: { children: React.ReactNode; tone?: string }) {
-  return <span className={cn("inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium", riskClasses[tone] || statusClasses[tone] || "border-slate-700 bg-slate-800 text-slate-300")}>{children}</span>;
+  return <span className={cn("inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium", riskClasses[tone] || statusClasses[tone] || "bg-slate-100 text-slate-600 border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300")}>{children}</span>;
 }
 
 function StatusPill({ children }: { children: string }) {
-  return <span className={cn("inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium", statusClasses[children] || "border-slate-700 bg-slate-800 text-slate-300")}>{children}</span>;
+  return <span className={cn("inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-medium", statusClasses[children] || "bg-slate-100 text-slate-600 border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300")}>{children}</span>;
 }
 
 interface KpiCardProps {
@@ -215,16 +264,17 @@ interface KpiCardProps {
 }
 
 function KpiCard({ icon, title, value, sub, tone = "green", onClick }: KpiCardProps) {
+  const colors = useColors();
   const color = {
-    green: "text-emerald-300 bg-emerald-500/15 border-emerald-400/20",
-    blue: "text-blue-300 bg-blue-500/15 border-blue-400/20",
-    amber: "text-amber-300 bg-amber-500/15 border-amber-400/20",
-    red: "text-red-300 bg-red-500/15 border-red-400/20",
-    purple: "text-purple-300 bg-purple-500/15 border-purple-400/20",
+    green: "text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-300 dark:bg-emerald-500/15 dark:border-emerald-400/20",
+    blue: "text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-300 dark:bg-blue-500/15 dark:border-blue-400/20",
+    amber: "text-amber-700 bg-amber-50 border-amber-200 dark:text-amber-300 dark:bg-amber-500/15 dark:border-amber-400/20",
+    red: "text-red-700 bg-red-50 border-red-200 dark:text-red-300 dark:bg-red-500/15 dark:border-red-400/20",
+    purple: "text-purple-700 bg-purple-50 border-purple-200 dark:text-purple-300 dark:bg-purple-500/15 dark:border-purple-400/20",
   }[tone];
-  const sparkColor = tone === "red" ? COLORS.red : tone === "blue" ? COLORS.blue : tone === "amber" ? COLORS.amber : tone === "purple" ? COLORS.purple : COLORS.green;
+  const sparkColor = tone === "red" ? colors.red : tone === "blue" ? colors.blue : tone === "amber" ? colors.amber : tone === "purple" ? colors.purple : colors.green;
   return (
-    <button onClick={onClick} className="group rounded-2xl border border-slate-800 bg-slate-900/80 p-4 text-left shadow-2xl shadow-black/20 transition hover:-translate-y-0.5 hover:border-emerald-400/50">
+    <button onClick={onClick} className="group rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-500/60 dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-2xl dark:shadow-black/20 dark:hover:border-emerald-400/50">
       <div className="flex items-start justify-between">
         <div className={cn("rounded-2xl border p-2", color)}>
           <Icon name={icon} size={20} />
@@ -237,8 +287,8 @@ function KpiCard({ icon, title, value, sub, tone = "green", onClick }: KpiCardPr
           </ResponsiveContainer>
         </div>
       </div>
-      <div className="mt-3 text-xs text-slate-400">{title}</div>
-      <div className="mt-1 text-3xl font-semibold tracking-tight text-white">{value}</div>
+      <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">{title}</div>
+      <div className="mt-1 text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">{value}</div>
       <div className="mt-1 text-xs text-slate-500">{sub}</div>
     </button>
   );
@@ -246,10 +296,10 @@ function KpiCard({ icon, title, value, sub, tone = "green", onClick }: KpiCardPr
 
 function SelectLike({ label, value }: { label: string; value: string }) {
   return (
-    <button className="flex min-w-40 items-center justify-between rounded-xl border border-slate-800 bg-slate-900/80 px-4 py-3 text-left hover:border-slate-600">
+    <button className="flex min-w-40 items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 text-left hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900/80 dark:hover:border-slate-600">
       <span>
         <span className="block text-[11px] text-slate-500">{label}</span>
-        <span className="text-sm text-slate-200">{value}</span>
+        <span className="text-sm text-slate-700 dark:text-slate-200">{value}</span>
       </span>
       <Icon name="expand_more" size={16} className="text-slate-500" />
     </button>
@@ -260,8 +310,8 @@ function SectionHeader({ title, sub, action }: { title: string; sub?: string; ac
   return (
     <div className="mb-4 flex items-start justify-between gap-4">
       <div>
-        <h2 className="text-lg font-semibold text-white">{title}</h2>
-        {sub && <p className="mt-1 text-sm text-slate-400">{sub}</p>}
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h2>
+        {sub && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{sub}</p>}
       </div>
       {action}
     </div>
@@ -277,7 +327,7 @@ function ViewSwitcher({ activeView, setActiveView, selected }: { activeView: Vie
     { label: "Exceptions", view: "Exception Workspace", icon: "warning" },
   ];
   return (
-    <div className="flex items-center gap-1 rounded-2xl border border-slate-800 bg-slate-900/80 p-1">
+    <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900/80">
       {items.map(({ label, view, icon }) => {
         const active = activeView === view;
         return (
@@ -287,7 +337,9 @@ function ViewSwitcher({ activeView, setActiveView, selected }: { activeView: Vie
             onClick={() => setActiveView(view)}
             className={cn(
               "flex items-center gap-2 rounded-xl px-4 py-2 text-sm transition",
-              active ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/30" : "text-slate-300 hover:bg-slate-800 hover:text-white",
+              active
+                ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/30"
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white",
             )}
           >
             <Icon name={icon} size={16} />
@@ -300,11 +352,15 @@ function ViewSwitcher({ activeView, setActiveView, selected }: { activeView: Vie
   );
 }
 
+/** Dark-mode chart tooltip fallback. Components that mount inside a hook context should prefer `useChartTheme().tooltipStyle`. */
 const chartTooltipStyle: React.CSSProperties = { background: "#020617", border: "1px solid #334155", borderRadius: 12, color: "#e2e8f0" };
 
 /* ────────── Portfolio Overview ────────── */
 
 function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v: ViewKey) => void; openCustomer: (c: CustomerRecord) => void }) {
+  const colors = useColors();
+  const chart = useChartTheme();
+
   const portfolioCards: KpiCardProps[] = [
     { title: "Active Customers", value: "184", sub: "↑ 6 vs last month", icon: "group", tone: "green" },
     { title: "Active Sites", value: "12,486", sub: "↑ 312 vs last month", icon: "apartment", tone: "green" },
@@ -314,13 +370,20 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
     { title: "Open Exceptions", value: "1,287", sub: "Billing, meter data and market items", icon: "warning", tone: "amber" },
   ];
 
+  const billStatusLive = [
+    { name: "Ready", value: 82, amount: "$112.4m", color: colors.green },
+    { name: "Blocked", value: 7, amount: "$8.7m", color: colors.red },
+    { name: "Pending", value: 6, amount: "$7.8m", color: colors.amber },
+    { name: "Billed", value: 5, amount: "$6.8m", color: colors.blue },
+  ];
+
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-3 rounded-2xl border border-slate-800 bg-slate-900/40 p-3">
+      <div className="flex flex-wrap gap-3 rounded-2xl border border-slate-200 bg-white/60 p-3 dark:border-slate-800 dark:bg-slate-900/40">
         <SelectLike label="Portfolio Manager" value="All" />
         <SelectLike label="Segment" value="All C&I + Contracted SME" />
         <SelectLike label="Billing Cycle" value="May 2025 (Current)" />
-        <button type="button" className="ml-auto flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-emerald-300 hover:bg-emerald-500/10">
+        <button type="button" className="ml-auto flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-500/10">
           Reset filters <Icon name="refresh" size={14} />
         </button>
       </div>
@@ -334,50 +397,50 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
         <Panel className="p-5 xl:col-span-4">
           <SectionHeader title="Bill Status Distribution" action={<span className="text-xs text-slate-500">Current cycle</span>} />
-          <div className="flex h-12 overflow-hidden rounded-xl border border-slate-800 bg-slate-800">
-            {billStatus.map((s) => (
+          <div className="flex h-12 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 dark:border-slate-800 dark:bg-slate-800">
+            {billStatusLive.map((s) => (
               <div key={s.name} className="grid place-items-center text-xs font-semibold text-white" style={{ width: `${s.value}%`, backgroundColor: s.color }}>
                 {s.value}%
               </div>
             ))}
           </div>
           <div className="mt-5 grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
-            {billStatus.map((s) => (
-              <div key={s.name} className="flex items-center gap-2 text-slate-300">
+            {billStatusLive.map((s) => (
+              <div key={s.name} className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: s.color }} />
                 <span>{s.name}</span>
                 <span className="ml-auto text-slate-500">{s.amount}</span>
               </div>
             ))}
           </div>
-          <div className="mt-6 grid grid-cols-2 border-t border-slate-800 pt-5 text-sm">
+          <div className="mt-6 grid grid-cols-2 border-t border-slate-200 pt-5 text-sm dark:border-slate-800">
             <div>
               <div className="text-slate-500">Total Billed Value YTD</div>
-              <div className="mt-1 text-xl font-semibold text-white">$1,152.6m</div>
+              <div className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">$1,152.6m</div>
             </div>
             <div>
               <div className="text-slate-500">vs Prior Year</div>
-              <div className="mt-1 text-xl font-semibold text-emerald-300">↑ 9.4%</div>
+              <div className="mt-1 text-xl font-semibold text-emerald-700 dark:text-emerald-300">↑ 9.4%</div>
             </div>
           </div>
         </Panel>
 
         <Panel className="p-5 xl:col-span-4">
-          <SectionHeader title="Unbilled Exposure Trend" action={<button type="button" className="rounded-lg border border-slate-800 px-3 py-1 text-xs text-slate-300">6 Months</button>} />
+          <SectionHeader title="Unbilled Exposure Trend" action={<button type="button" className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-600 dark:border-slate-800 dark:text-slate-300">6 Months</button>} />
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trend} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
                 <defs>
                   <linearGradient id="exposureLm2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.green} stopOpacity={0.35} />
-                    <stop offset="95%" stopColor={COLORS.green} stopOpacity={0} />
+                    <stop offset="5%" stopColor={colors.green} stopOpacity={0.35} />
+                    <stop offset="95%" stopColor={colors.green} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
-                <XAxis dataKey="month" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}m`} />
-                <Tooltip contentStyle={chartTooltipStyle} />
-                <Area type="monotone" dataKey="exposure" stroke={COLORS.green} strokeWidth={3} fill="url(#exposureLm2)" />
+                <CartesianGrid stroke={chart.grid} strokeDasharray="3 3" />
+                <XAxis dataKey="month" tick={{ fill: chart.axis, fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: chart.axis, fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}m`} />
+                <Tooltip contentStyle={chart.tooltipStyle} />
+                <Area type="monotone" dataKey="exposure" stroke={colors.green} strokeWidth={3} fill="url(#exposureLm2)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -400,37 +463,37 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
                   dataKey="value"
                   paddingAngle={2}
                 >
-                  <Cell fill={COLORS.green} />
-                  <Cell fill={COLORS.blue} />
-                  <Cell fill={COLORS.amber} />
-                  <Cell fill={COLORS.red} />
+                  <Cell fill={colors.green} />
+                  <Cell fill={colors.blue} />
+                  <Cell fill={colors.amber} />
+                  <Cell fill={colors.red} />
                 </Pie>
-                <Tooltip contentStyle={chartTooltipStyle} />
+                <Tooltip contentStyle={chart.tooltipStyle} />
               </PieChart>
             </ResponsiveContainer>
           </div>
           <div className="mt-4 grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
             {[
-              { color: "bg-emerald-400", label: "Paid On Time", amount: "$736.9m" },
-              { color: "bg-blue-400", label: "Paid Late", amount: "$195.5m" },
-              { color: "bg-amber-400", label: "1-30 Days Overdue", amount: "$126.6m" },
-              { color: "bg-red-400", label: "31+ Days Overdue", amount: "$93.6m" },
+              { color: "bg-emerald-500 dark:bg-emerald-400", label: "Paid On Time", amount: "$736.9m" },
+              { color: "bg-blue-500 dark:bg-blue-400", label: "Paid Late", amount: "$195.5m" },
+              { color: "bg-amber-500 dark:bg-amber-400", label: "1-30 Days Overdue", amount: "$126.6m" },
+              { color: "bg-red-500 dark:bg-red-400", label: "31+ Days Overdue", amount: "$93.6m" },
             ].map((row) => (
-              <div key={row.label} className="flex min-w-0 items-center gap-2 text-slate-300">
+              <div key={row.label} className="flex min-w-0 items-center gap-2 text-slate-700 dark:text-slate-300">
                 <span className={cn("h-2.5 w-2.5 shrink-0 rounded-full", row.color)} />
                 <span className="min-w-0 truncate">{row.label}</span>
                 <span className="ml-auto whitespace-nowrap text-slate-500">{row.amount}</span>
               </div>
             ))}
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-800 pt-4 text-sm">
+          <div className="mt-4 grid grid-cols-2 gap-3 border-t border-slate-200 pt-4 text-sm dark:border-slate-800">
             <div className="min-w-0">
               <div className="text-slate-500">Total Billed</div>
-              <div className="mt-1 truncate text-xl font-semibold text-white">$1,152.6m</div>
+              <div className="mt-1 truncate text-xl font-semibold text-slate-900 dark:text-white">$1,152.6m</div>
             </div>
             <div className="min-w-0 text-right">
               <div className="text-slate-500">Collection Efficiency (YTD)</div>
-              <div className="mt-1 text-xl font-semibold text-emerald-300">92.1%</div>
+              <div className="mt-1 text-xl font-semibold text-emerald-700 dark:text-emerald-300">92.1%</div>
             </div>
           </div>
         </Panel>
@@ -439,9 +502,9 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
         <Panel className="p-5 xl:col-span-4">
           <SectionHeader title="Exception Volume by Type" sub="Last 7 days by operational category" />
-          <div className="overflow-hidden rounded-xl border border-slate-800 text-xs">
+          <div className="overflow-hidden rounded-xl border border-slate-200 text-xs dark:border-slate-800">
             <table className="w-full border-collapse">
-              <thead className="bg-slate-950/60 text-slate-400">
+              <thead className="bg-slate-50 text-slate-500 dark:bg-slate-950/60 dark:text-slate-400">
                 <tr>
                   <th className="p-2 text-left">Severity</th>
                   {["Billing", "Meter Data", "Market", "Payments", "Contract", "Other", "Total"].map((h) => (
@@ -454,25 +517,28 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
                   const cols = ["Billing", "Meter Data", "Market", "Payments", "Contract", "Other"] as const;
                   const total = cols.reduce((a, k) => a + ((row as unknown as Record<string, number>)[k] ?? 0), 0);
                   return (
-                    <tr key={row.severity} className="border-t border-slate-800">
-                      <td className="p-2 text-slate-300">{row.severity}</td>
+                    <tr key={row.severity} className="border-t border-slate-200 dark:border-slate-800">
+                      <td className="p-2 text-slate-700 dark:text-slate-300">{row.severity}</td>
                       {cols.map((k) => {
                         const v = (row as unknown as Record<string, number>)[k] ?? 0;
-                        const bg = row.severity === "High" ? `rgba(248,113,113,${0.12 + v / 180})` : row.severity === "Medium" ? `rgba(245,158,11,${0.12 + v / 220})` : `rgba(74,222,128,${0.08 + v / 220})`;
+                        const intensity = row.severity === "High" ? 0.12 + v / 180 : row.severity === "Medium" ? 0.12 + v / 220 : 0.08 + v / 220;
+                        const lightRgb = row.severity === "High" ? "220,38,38" : row.severity === "Medium" ? "217,119,6" : "16,185,129";
+                        const darkRgb = row.severity === "High" ? "248,113,113" : row.severity === "Medium" ? "245,158,11" : "74,222,128";
+                        const bg = `rgba(${chart.isLight ? lightRgb : darkRgb},${intensity})`;
                         return (
                           <td key={k} className="p-2 text-right" style={{ background: bg }}>
                             {v}
                           </td>
                         );
                       })}
-                      <td className="p-2 text-right font-semibold text-white">{total}</td>
+                      <td className="p-2 text-right font-semibold text-slate-900 dark:text-white">{total}</td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
-          <button type="button" onClick={() => setActiveView("Exception Workspace")} className="mt-4 text-sm text-emerald-300 hover:text-emerald-200">
+          <button type="button" onClick={() => setActiveView("Exception Workspace")} className="mt-4 text-sm text-emerald-700 hover:text-emerald-800 dark:text-emerald-300 dark:hover:text-emerald-200">
             View Exception Workspace →
           </button>
         </Panel>
@@ -481,11 +547,11 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
           <SectionHeader
             title="Customer Performance (Billed and Paid)"
             sub="Portfolio health based on expected bill value, billed value, paid value and payment performance."
-            action={<button type="button" className="text-sm text-emerald-300">View all ↗</button>}
+            action={<button type="button" className="text-sm text-emerald-700 dark:text-emerald-300">View all ↗</button>}
           />
-          <div className="overflow-auto rounded-xl border border-slate-800">
+          <div className="overflow-auto rounded-xl border border-slate-200 dark:border-slate-800">
             <table className="w-full text-sm">
-              <thead className="bg-slate-950/60 text-xs text-slate-400">
+              <thead className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-950/60 dark:text-slate-400">
                 <tr>
                   {["Customer", "Segment", "Manager", "Sites", "Expected Bill", "Billed $", "Paid $", "Payment Performance", "% Billed", "% Paid", "Exceptions"].map((h) => (
                     <th key={h} className="whitespace-nowrap px-3 py-3 text-left">{h}</th>
@@ -494,25 +560,25 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
               </thead>
               <tbody>
                 {customers.map((c) => (
-                  <tr key={c.id} onClick={() => openCustomer(c)} className="cursor-pointer border-t border-slate-800 hover:bg-emerald-500/5">
-                    <td className="whitespace-nowrap px-3 py-3 font-medium text-emerald-200">{c.name}</td>
-                    <td className="px-3 py-3 text-slate-300">{c.industry}</td>
-                    <td className="whitespace-nowrap px-3 py-3 text-slate-300">{c.manager}</td>
-                    <td className="px-3 py-3 text-slate-300">{c.sites.toLocaleString()}</td>
-                    <td className="whitespace-nowrap px-3 py-3 text-slate-300">${(c.unbilled + c.blockedRevenue + 20).toFixed(1)}m</td>
-                    <td className="px-3 py-3 text-slate-300">${(c.unbilled + 18).toFixed(1)}m</td>
-                    <td className="px-3 py-3 text-slate-300">${(c.unbilled + 15).toFixed(1)}m</td>
+                  <tr key={c.id} onClick={() => openCustomer(c)} className="cursor-pointer border-t border-slate-200 hover:bg-emerald-50 dark:border-slate-800 dark:hover:bg-emerald-500/5">
+                    <td className="whitespace-nowrap px-3 py-3 font-medium text-emerald-700 dark:text-emerald-200">{c.name}</td>
+                    <td className="px-3 py-3 text-slate-700 dark:text-slate-300">{c.industry}</td>
+                    <td className="whitespace-nowrap px-3 py-3 text-slate-700 dark:text-slate-300">{c.manager}</td>
+                    <td className="px-3 py-3 text-slate-700 dark:text-slate-300">{c.sites.toLocaleString()}</td>
+                    <td className="whitespace-nowrap px-3 py-3 text-slate-700 dark:text-slate-300">${(c.unbilled + c.blockedRevenue + 20).toFixed(1)}m</td>
+                    <td className="px-3 py-3 text-slate-700 dark:text-slate-300">${(c.unbilled + 18).toFixed(1)}m</td>
+                    <td className="px-3 py-3 text-slate-700 dark:text-slate-300">${(c.unbilled + 15).toFixed(1)}m</td>
                     <td className="px-3 py-3">
                       <div className="flex items-center gap-2">
-                        <div className="h-2 w-16 rounded bg-slate-800">
-                          <div className="h-2 rounded bg-emerald-400" style={{ width: `${Math.min(100, c.billReady)}%` }} />
+                        <div className="h-2 w-16 rounded bg-slate-200 dark:bg-slate-800">
+                          <div className="h-2 rounded bg-emerald-500 dark:bg-emerald-400" style={{ width: `${Math.min(100, c.billReady)}%` }} />
                         </div>
-                        <span className="text-slate-300">{c.billReady}%</span>
+                        <span className="text-slate-700 dark:text-slate-300">{c.billReady}%</span>
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-slate-300">{Math.max(81, c.billReady - 2)}%</td>
-                    <td className="px-3 py-3 text-slate-300">{Math.max(78, c.billReady - 1)}%</td>
-                    <td className="px-3 py-3 text-slate-300">{c.exceptions}</td>
+                    <td className="px-3 py-3 text-slate-700 dark:text-slate-300">{Math.max(81, c.billReady - 2)}%</td>
+                    <td className="px-3 py-3 text-slate-700 dark:text-slate-300">{Math.max(78, c.billReady - 1)}%</td>
+                    <td className="px-3 py-3 text-slate-700 dark:text-slate-300">{c.exceptions}</td>
                   </tr>
                 ))}
               </tbody>
@@ -602,6 +668,8 @@ const HIERARCHY: HierarchyNode[] = [
 ];
 
 function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
+  const colors = useColors();
+  const chart = useChartTheme();
   const [expandedContracts, setExpandedContracts] = useState<Record<string, boolean>>({});
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({ "node-corporate": true, "node-flagship": true, "node-metro": true });
   const [selectedEntity, setSelectedEntity] = useState<{ type: "site" | "node"; id: string; name: string }>({ type: "site", id: "site-melbourne-central", name: "Melbourne Central" });
@@ -645,15 +713,15 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
     const isOpen = expandedNodes[node.id];
     const isSelected = selectedEntity.type === "node" && selectedEntity.id === node.id;
     return (
-      <div key={node.id} className={level > 0 ? "ml-5 border-l border-slate-700/80 pl-4" : ""}>
-        <div className={cn("mb-2 flex items-center gap-2 rounded-lg px-2 py-2 transition", isSelected ? "bg-emerald-500/15 ring-1 ring-emerald-400/40" : "hover:bg-slate-800")}>
-          <button type="button" onClick={() => toggleNode(node.id)} className="text-slate-400 hover:text-white">
+      <div key={node.id} className={level > 0 ? "ml-5 border-l border-slate-200 pl-4 dark:border-slate-700/80" : ""}>
+        <div className={cn("mb-2 flex items-center gap-2 rounded-lg px-2 py-2 transition", isSelected ? "bg-emerald-50 ring-1 ring-emerald-300 dark:bg-emerald-500/15 dark:ring-emerald-400/40" : "hover:bg-slate-100 dark:hover:bg-slate-800")}>
+          <button type="button" onClick={() => toggleNode(node.id)} className="text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
             <Icon name={isOpen ? "expand_more" : "chevron_right"} size={15} />
           </button>
           <button type="button" onClick={() => selectNode(node)} className="flex min-w-0 flex-1 items-center gap-2 text-left">
-            <Icon name="apartment" size={15} className="text-emerald-300" />
-            <span className="truncate font-medium text-slate-200">{node.name}</span>
-            <span className="ml-auto rounded bg-slate-800 px-2 py-1 text-xs text-slate-500">{node.count}</span>
+            <Icon name="apartment" size={15} className="text-emerald-700 dark:text-emerald-300" />
+            <span className="truncate font-medium text-slate-800 dark:text-slate-200">{node.name}</span>
+            <span className="ml-auto rounded bg-slate-100 px-2 py-1 text-xs text-slate-500 dark:bg-slate-800">{node.count}</span>
           </button>
         </div>
         {isOpen && (
@@ -670,11 +738,13 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
                     onClick={() => selectSite(child)}
                     className={cn(
                       "block w-full rounded-lg px-4 py-2 text-left text-sm transition",
-                      siteSelected ? "bg-emerald-500/15 text-emerald-200 ring-1 ring-emerald-400/40" : "text-slate-400 hover:bg-slate-800 hover:text-emerald-200",
+                      siteSelected
+                        ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-200 dark:ring-emerald-400/40"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-emerald-700 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-emerald-200",
                     )}
                   >
                     <span>{site.site}</span>
-                    <span className="ml-2 text-xs text-slate-600">{site.nmi}</span>
+                    <span className="ml-2 text-xs text-slate-500 dark:text-slate-600">{site.nmi}</span>
                   </button>
                 );
               }
@@ -689,9 +759,9 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
   const contractPanel = (
     <Panel className="p-5 xl:col-span-12">
       <SectionHeader title="Contract Details" sub="Commercial contract structures and contract periods associated to this customer." />
-      <div className="overflow-hidden rounded-xl border border-slate-800">
+      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
         <table className="w-full text-sm">
-          <thead className="bg-slate-950/60 text-xs text-slate-400">
+          <thead className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-950/60 dark:text-slate-400">
             <tr>{["", "Contract", "Start Date", "End Date", "Products", "Sites"].map((h, i) => <th key={i} className="whitespace-nowrap px-4 py-3 text-left">{h}</th>)}</tr>
           </thead>
           <tbody>
@@ -699,33 +769,33 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
               const expanded = expandedContracts[contract.id];
               return (
                 <React.Fragment key={contract.id}>
-                  <tr className="border-t border-slate-800 hover:bg-slate-800/40">
+                  <tr className="border-t border-slate-200 hover:bg-slate-100/60 dark:border-slate-800 dark:hover:bg-slate-800/40">
                     <td className="px-4 py-3">
-                      <button type="button" onClick={() => toggleContract(contract.id)} className="rounded-md border border-slate-700 p-1 text-slate-300 hover:border-emerald-400/40 hover:text-emerald-300">
+                      <button type="button" onClick={() => toggleContract(contract.id)} className="rounded-md border border-slate-300 p-1 text-slate-600 hover:border-emerald-400/60 hover:text-emerald-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-emerald-400/40 dark:hover:text-emerald-300">
                         <Icon name={expanded ? "expand_more" : "chevron_right"} size={14} />
                       </button>
                     </td>
-                    <td className="px-4 py-3 font-medium text-white">{contract.name}</td>
-                    <td className="px-4 py-3 text-slate-300">{contract.startDate}</td>
-                    <td className="px-4 py-3 text-slate-300">{contract.endDate}</td>
-                    <td className="px-4 py-3 text-slate-300">{contract.products}</td>
-                    <td className="px-4 py-3 text-slate-300">{contract.sites.toLocaleString()} associated sites</td>
+                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{contract.name}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{contract.startDate}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{contract.endDate}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{contract.products}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{contract.sites.toLocaleString()} associated sites</td>
                   </tr>
                   {expanded && (
-                    <tr className="border-t border-slate-800 bg-slate-950/40">
+                    <tr className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/40">
                       <td colSpan={6} className="px-4 py-5">
                         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/60">
                             <div className="text-xs uppercase tracking-wide text-slate-500">Swap Amount</div>
-                            <div className="mt-2 text-lg font-semibold text-white">{contract.swapAmount}</div>
+                            <div className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{contract.swapAmount}</div>
                           </div>
-                          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/60">
                             <div className="text-xs uppercase tracking-wide text-slate-500">Associated Sites</div>
-                            <div className="mt-2 text-lg font-semibold text-white">{contract.sites.toLocaleString()} total sites covered</div>
+                            <div className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{contract.sites.toLocaleString()} total sites covered</div>
                           </div>
-                          <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/60">
                             <div className="text-xs uppercase tracking-wide text-slate-500">Contract Terms</div>
-                            <div className="mt-2 text-sm leading-relaxed text-slate-300">{contract.terms}</div>
+                            <div className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">{contract.terms}</div>
                           </div>
                         </div>
                       </td>
@@ -753,18 +823,23 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
 
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
         <Panel className="p-5 xl:col-span-4 xl:row-span-5">
-          <SectionHeader title="Customer Hierarchy" sub="Select a node for aggregated customer detail, or a site for operational detail." action={<button type="button" className="rounded-lg border border-slate-800 px-2 py-1 text-xs text-slate-300">Saved views</button>} />
-          <div className="mb-4 flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-950/70 px-3 py-2 text-sm text-slate-400">
+          <SectionHeader title="Customer Hierarchy" sub="Select a node for aggregated customer detail, or a site for operational detail." action={<button type="button" className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600 dark:border-slate-800 dark:text-slate-300">Saved views</button>} />
+          <div className="mb-4 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-400">
             <Icon name="search" size={15} />
-            <input placeholder="Search site, NMI, address or contract" className="w-full bg-transparent outline-none placeholder:text-slate-500" />
+            <input placeholder="Search site, NMI, address or contract" className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-500 dark:text-slate-100" />
           </div>
           <button
             type="button"
             onClick={() => setSelectedEntity({ type: "node", id: "node-retail-group", name: selected.name })}
-            className={cn("mb-4 flex w-full items-center gap-2 rounded-xl px-3 py-3 text-left font-semibold", selectedEntity.id === "node-retail-group" ? "bg-emerald-500/15 text-emerald-300 ring-1 ring-emerald-400/40" : "text-emerald-300 hover:bg-slate-800")}
+            className={cn(
+              "mb-4 flex w-full items-center gap-2 rounded-xl px-3 py-3 text-left font-semibold",
+              selectedEntity.id === "node-retail-group"
+                ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/40"
+                : "text-emerald-700 hover:bg-slate-100 dark:text-emerald-300 dark:hover:bg-slate-800",
+            )}
           >
             <Icon name="account_tree" size={16} /> {selected.name}
-            <span className="ml-auto rounded bg-slate-800 px-2 py-1 text-xs text-slate-400">{selected.sites.toLocaleString()} sites</span>
+            <span className="ml-auto rounded bg-slate-100 px-2 py-1 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">{selected.sites.toLocaleString()} sites</span>
           </button>
           <div className="max-h-[720px] overflow-auto pr-1 text-sm">
             {HIERARCHY.map((node) => renderNode(node))}
@@ -780,27 +855,27 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
                 action={
                   <div className="flex flex-wrap gap-2">
                     {selectedSite.creditTags.map((tag) => (
-                      <span key={tag} className="rounded-lg border border-slate-700 bg-slate-950/50 px-3 py-1.5 text-xs text-slate-300">{tag}</span>
+                      <span key={tag} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-950/50 dark:text-slate-300">{tag}</span>
                     ))}
                   </div>
                 }
               />
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4 md:col-span-2">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-medium text-white">
-                    <Icon name="location_on" size={16} className="text-emerald-300" /> Address
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50 md:col-span-2">
+                  <div className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-white">
+                    <Icon name="location_on" size={16} className="text-emerald-700 dark:text-emerald-300" /> Address
                   </div>
-                  <div className="text-sm text-slate-300">{selectedSite.address}</div>
+                  <div className="text-sm text-slate-700 dark:text-slate-300">{selectedSite.address}</div>
                   <div className="mt-3 text-xs text-slate-500">Group: {selectedSite.group}</div>
                 </div>
-                <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                   <div className="text-xs text-slate-500">NMI</div>
-                  <div className="mt-1 text-lg font-semibold text-white">{selectedSite.nmi}</div>
+                  <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">{selectedSite.nmi}</div>
                   <div className="mt-2 text-xs text-slate-500">Meter: {selectedSite.meterStatus}</div>
                 </div>
-                <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                   <div className="text-xs text-slate-500">Account</div>
-                  <div className="mt-1 text-lg font-semibold text-white">{selectedSite.account}</div>
+                  <div className="mt-1 text-lg font-semibold text-slate-900 dark:text-white">{selectedSite.account}</div>
                   <div className="mt-2 text-xs text-slate-500">{selectedSite.contract}</div>
                 </div>
               </div>
@@ -810,22 +885,22 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
               <Panel className="p-5 xl:col-span-6">
                 <SectionHeader title="Invoices" sub="Unbilled and overdue exposure." />
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                     <div className="text-xs text-slate-500">Unbilled</div>
-                    <div className="mt-1 text-2xl font-semibold text-white">{selectedSite.unbilled}</div>
+                    <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{selectedSite.unbilled}</div>
                   </div>
-                  <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                     <div className="text-xs text-slate-500">Overdue</div>
-                    <div className="mt-1 text-2xl font-semibold text-white">{selectedSite.overdue}</div>
+                    <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{selectedSite.overdue}</div>
                   </div>
                 </div>
               </Panel>
 
               <Panel className="p-5 xl:col-span-6">
                 <SectionHeader title="Meter Data" />
-                <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                   <div>
-                    <div className="text-sm font-medium text-white">{selectedSite.meterStatus}</div>
+                    <div className="text-sm font-medium text-slate-900 dark:text-white">{selectedSite.meterStatus}</div>
                     <div className="mt-1 text-xs text-slate-500">Latest interval file processed today</div>
                   </div>
                   <StatusPill>{selectedSite.meterStatus === "Complete" ? "Ready" : "Pending"}</StatusPill>
@@ -837,12 +912,12 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
                 <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
                     <RLineChart data={demandTrend}>
-                      <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
-                      <XAxis dataKey="month" tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                      <Tooltip contentStyle={chartTooltipStyle} />
-                      <Line type="monotone" dataKey="contract" stroke={COLORS.blue} strokeWidth={2} dot={false} />
-                      <Line type="monotone" dataKey="actual" stroke={COLORS.green} strokeWidth={3} />
+                      <CartesianGrid stroke={chart.grid} strokeDasharray="3 3" />
+                      <XAxis dataKey="month" tick={{ fill: chart.axis, fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: chart.axis, fontSize: 11 }} axisLine={false} tickLine={false} />
+                      <Tooltip contentStyle={chart.tooltipStyle} />
+                      <Line type="monotone" dataKey="contract" stroke={colors.blue} strokeWidth={2} dot={false} />
+                      <Line type="monotone" dataKey="actual" stroke={colors.green} strokeWidth={3} />
                     </RLineChart>
                   </ResponsiveContainer>
                 </div>
@@ -850,26 +925,26 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
 
               <Panel className="p-5 xl:col-span-6">
                 <SectionHeader title="Cert Details" />
-                <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                  <div className="flex items-center gap-2 text-sm font-medium text-white">
-                    <Icon name="verified_user" size={16} className="text-emerald-300" /> {selectedSite.cert}
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
+                  <div className="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-white">
+                    <Icon name="verified_user" size={16} className="text-emerald-700 dark:text-emerald-300" /> {selectedSite.cert}
                   </div>
                 </div>
               </Panel>
 
               <Panel className="p-5 xl:col-span-12">
                 <SectionHeader title="Pending Interest" />
-                <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                   <div className="text-xs text-slate-500">Pending interest</div>
-                  <div className="mt-1 text-2xl font-semibold text-white">{selectedSite.pendingInterest}</div>
+                  <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{selectedSite.pendingInterest}</div>
                 </div>
               </Panel>
 
               <Panel className="p-5 xl:col-span-12">
                 <SectionHeader title="Exceptions / Activities" />
-                <div className="flex items-center justify-between rounded-xl border border-slate-800 bg-slate-950/50 p-3 text-sm">
-                  <span className="text-slate-300">Open exceptions</span>
-                  <span className="font-semibold text-amber-300">{selectedSite.exceptions}</span>
+                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm dark:border-slate-800 dark:bg-slate-950/50">
+                  <span className="text-slate-700 dark:text-slate-300">Open exceptions</span>
+                  <span className="font-semibold text-amber-700 dark:text-amber-300">{selectedSite.exceptions}</span>
                 </div>
               </Panel>
             </div>
@@ -879,31 +954,31 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
             <Panel className="p-5 xl:col-span-8">
               <SectionHeader title={`Node Summary: ${selectedNode.name}`} sub="Aggregated customer view for the selected hierarchy node." />
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                   <div className="text-xs text-slate-500">Sites</div>
-                  <div className="mt-1 text-2xl font-semibold text-white">{selectedNode.sites.toLocaleString()}</div>
+                  <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{selectedNode.sites.toLocaleString()}</div>
                 </div>
-                <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                   <div className="text-xs text-slate-500">kWh</div>
-                  <div className="mt-1 text-2xl font-semibold text-white">{selectedNode.usage}</div>
+                  <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{selectedNode.usage}</div>
                 </div>
-                <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                   <div className="text-xs text-slate-500">Billed $</div>
-                  <div className="mt-1 text-2xl font-semibold text-white">{selectedNode.billed}</div>
+                  <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{selectedNode.billed}</div>
                 </div>
-                <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
                   <div className="text-xs text-slate-500">Unbilled</div>
-                  <div className="mt-1 text-2xl font-semibold text-white">{selectedNode.unbilled}</div>
+                  <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{selectedNode.unbilled}</div>
                 </div>
               </div>
             </Panel>
 
             <Panel className="p-5 xl:col-span-4">
               <SectionHeader title="Contact Details" />
-              <div className="rounded-xl border border-slate-800 bg-slate-950/50 p-4">
-                <div className="text-lg font-semibold text-white">{selectedNode.contact}</div>
-                <div className="mt-1 text-sm text-slate-400">{selectedNode.role}</div>
-                <div className="mt-4 space-y-2 text-sm text-slate-300">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
+                <div className="text-lg font-semibold text-slate-900 dark:text-white">{selectedNode.contact}</div>
+                <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">{selectedNode.role}</div>
+                <div className="mt-4 space-y-2 text-sm text-slate-700 dark:text-slate-300">
                   <div>{selectedNode.email}</div>
                   <div>{selectedNode.phone}</div>
                 </div>
@@ -918,9 +993,9 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={distributionData} layout="vertical" margin={{ left: 10, right: 20 }}>
                     <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" tick={{ fill: "#94a3b8", fontSize: 11 }} width={95} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={chartTooltipStyle} />
-                    <Bar dataKey="sites" fill={COLORS.green} radius={[0, 8, 8, 0]} />
+                    <YAxis dataKey="name" type="category" tick={{ fill: chart.axis, fontSize: 11 }} width={95} axisLine={false} tickLine={false} />
+                    <Tooltip contentStyle={chart.tooltipStyle} />
+                    <Bar dataKey="sites" fill={colors.green} radius={[0, 8, 8, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -936,11 +1011,11 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
                 ] as Array<[string, string, number]>).map(([label, value, width]) => (
                   <div key={label}>
                     <div className="mb-1 flex justify-between text-sm">
-                      <span className="text-slate-300">{label}</span>
-                      <span className="text-white">{value}</span>
+                      <span className="text-slate-700 dark:text-slate-300">{label}</span>
+                      <span className="text-slate-900 dark:text-white">{value}</span>
                     </div>
-                    <div className="h-2 rounded bg-slate-800">
-                      <div className="h-2 rounded bg-emerald-400" style={{ width: `${width}%` }} />
+                    <div className="h-2 rounded bg-slate-200 dark:bg-slate-800">
+                      <div className="h-2 rounded bg-emerald-500 dark:bg-emerald-400" style={{ width: `${width}%` }} />
                     </div>
                   </div>
                 ))}
@@ -949,9 +1024,9 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
 
             <Panel className="p-5 xl:col-span-4">
               <SectionHeader title="Payment Insights" />
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-                <div className="text-sm font-semibold text-emerald-300">Insight</div>
-                <p className="mt-2 text-sm leading-relaxed text-slate-300">{selectedNode.paymentInsight}</p>
+              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+                <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Insight</div>
+                <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">{selectedNode.paymentInsight}</p>
               </div>
             </Panel>
           </>
@@ -964,13 +1039,15 @@ function CustomerDrilldown({ selected }: { selected: CustomerRecord }) {
 /* ────────── Exception Workspace ────────── */
 
 function ExceptionWorkspace() {
+  const colors = useColors();
+  const chart = useChartTheme();
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-3 rounded-2xl border border-slate-800 bg-slate-900/40 p-3">
+      <div className="flex flex-wrap gap-3 rounded-2xl border border-slate-200 bg-white/60 p-3 dark:border-slate-800 dark:bg-slate-900/40">
         {["Severity", "Owner", "Root Cause", "Customer", "SLA Risk", "Region"].map((f) => (
           <SelectLike key={f} label={f} value="All" />
         ))}
-        <button type="button" className="ml-auto flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-emerald-300 hover:bg-emerald-500/10">
+        <button type="button" className="ml-auto flex items-center gap-2 rounded-xl px-4 py-2 text-sm text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-500/10">
           Reset filters <Icon name="refresh" size={14} />
         </button>
       </div>
@@ -989,18 +1066,18 @@ function ExceptionWorkspace() {
           <SectionHeader title="Exception Lifecycle" />
           <div className="space-y-2">
             {([
-              ["New", 112, "36%", COLORS.green],
-              ["Triaged", 68, "22%", COLORS.amber],
-              ["In Progress", 74, "24%", COLORS.red],
-              ["Pending External", 36, "12%", COLORS.blue],
-              ["Resolved", 22, "7%", COLORS.purple],
+              ["New", 112, "36%", colors.green],
+              ["Triaged", 68, "22%", colors.amber],
+              ["In Progress", 74, "24%", colors.red],
+              ["Pending External", 36, "12%", colors.blue],
+              ["Resolved", 22, "7%", colors.purple],
             ] as Array<[string, number, string, string]>).map(([name, v, pct, color], i) => (
               <div key={name} className="mx-auto grid h-12 place-items-center rounded-lg text-sm font-semibold text-white" style={{ width: `${100 - i * 11}%`, backgroundColor: color }}>
                 {v} ({pct}) <span className="ml-2 font-normal text-white/70">{name}</span>
               </div>
             ))}
           </div>
-          <div className="mt-4 text-center text-sm text-slate-400">Total 312</div>
+          <div className="mt-4 text-center text-sm text-slate-500 dark:text-slate-400">Total 312</div>
         </Panel>
 
         <Panel className="p-5 xl:col-span-3">
@@ -1008,11 +1085,11 @@ function ExceptionWorkspace() {
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={rootCauses} margin={{ left: -20, right: 5 }}>
-                <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
-                <XAxis dataKey="name" tick={{ fill: "#94a3b8", fontSize: 10 }} interval={0} angle={-30} textAnchor="end" height={70} />
-                <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={chartTooltipStyle} />
-                <Bar dataKey="value" fill={COLORS.green} radius={[8, 8, 0, 0]} />
+                <CartesianGrid stroke={chart.grid} strokeDasharray="3 3" />
+                <XAxis dataKey="name" tick={{ fill: chart.axis, fontSize: 10 }} interval={0} angle={-30} textAnchor="end" height={70} />
+                <YAxis tick={{ fill: chart.axis, fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={chart.tooltipStyle} />
+                <Bar dataKey="value" fill={colors.green} radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -1020,9 +1097,9 @@ function ExceptionWorkspace() {
 
         <Panel className="p-5 xl:col-span-3">
           <SectionHeader title="SLA Risk by Owner & Severity" />
-          <div className="overflow-hidden rounded-xl border border-slate-800 text-xs">
+          <div className="overflow-hidden rounded-xl border border-slate-200 text-xs dark:border-slate-800">
             <table className="w-full">
-              <thead className="bg-slate-950/60 text-slate-400">
+              <thead className="bg-slate-50 text-slate-500 dark:bg-slate-950/60 dark:text-slate-400">
                 <tr>
                   <th className="p-2 text-left">Team</th>
                   {["Critical", "High", "Medium", "Low", "Total"].map((h) => (
@@ -1039,10 +1116,14 @@ function ExceptionWorkspace() {
                   ["Customer Ops", 2, 6, 10, 5],
                   ["RA", 1, 3, 4, 2],
                 ] as Array<[string, number, number, number, number]>).map(([team, c, h, m, l]) => (
-                  <tr key={team} className="border-t border-slate-800">
-                    <td className="p-2 text-slate-300">{team}</td>
+                  <tr key={team} className="border-t border-slate-200 dark:border-slate-800">
+                    <td className="p-2 text-slate-700 dark:text-slate-300">{team}</td>
                     {[c, h, m, l, c + h + m + l].map((v, i) => {
-                      const bg = i === 0 ? `rgba(248,113,113,${0.12 + v / 18})` : i === 1 ? `rgba(245,158,11,${0.12 + v / 24})` : i === 2 ? `rgba(234,179,8,${0.10 + v / 25})` : i === 3 ? `rgba(74,222,128,${0.08 + v / 20})` : "transparent";
+                      const intensity = i === 0 ? 0.12 + v / 18 : i === 1 ? 0.12 + v / 24 : i === 2 ? 0.10 + v / 25 : i === 3 ? 0.08 + v / 20 : 0;
+                      const darkRgb = i === 0 ? "248,113,113" : i === 1 ? "245,158,11" : i === 2 ? "234,179,8" : i === 3 ? "74,222,128" : null;
+                      const lightRgb = i === 0 ? "220,38,38" : i === 1 ? "217,119,6" : i === 2 ? "202,138,4" : i === 3 ? "16,185,129" : null;
+                      const rgb = chart.isLight ? lightRgb : darkRgb;
+                      const bg = rgb ? `rgba(${rgb},${intensity})` : "transparent";
                       return (
                         <td key={i} className="p-2 text-right" style={{ background: bg }}>
                           {v}
@@ -1057,21 +1138,21 @@ function ExceptionWorkspace() {
         </Panel>
 
         <Panel className="p-5 xl:col-span-3">
-          <SectionHeader title="Exception Volume Trend" action={<button type="button" className="rounded-lg border border-slate-800 px-3 py-1 text-xs text-slate-300">Last 30 Days</button>} />
+          <SectionHeader title="Exception Volume Trend" action={<button type="button" className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-600 dark:border-slate-800 dark:text-slate-300">Last 30 Days</button>} />
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={exceptionTrend} margin={{ left: -20, right: 5 }}>
                 <defs>
                   <linearGradient id="exceptionTrendLm2" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={COLORS.green} stopOpacity={0.35} />
-                    <stop offset="95%" stopColor={COLORS.green} stopOpacity={0} />
+                    <stop offset="5%" stopColor={colors.green} stopOpacity={0.35} />
+                    <stop offset="95%" stopColor={colors.green} stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid stroke="#1e293b" strokeDasharray="3 3" />
-                <XAxis dataKey="day" tick={{ fill: "#94a3b8", fontSize: 10 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: "#94a3b8", fontSize: 11 }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={chartTooltipStyle} />
-                <Area type="monotone" dataKey="exceptions" stroke={COLORS.green} strokeWidth={3} fill="url(#exceptionTrendLm2)" />
+                <CartesianGrid stroke={chart.grid} strokeDasharray="3 3" />
+                <XAxis dataKey="day" tick={{ fill: chart.axis, fontSize: 10 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: chart.axis, fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip contentStyle={chart.tooltipStyle} />
+                <Area type="monotone" dataKey="exceptions" stroke={colors.green} strokeWidth={3} fill="url(#exceptionTrendLm2)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -1083,16 +1164,16 @@ function ExceptionWorkspace() {
           <SectionHeader
             title="Priority Exception Queue"
             action={
-              <div className="flex items-center gap-3 text-slate-400">
-                <button type="button" className="text-sm text-emerald-300">View all exceptions →</button>
+              <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+                <button type="button" className="text-sm text-emerald-700 dark:text-emerald-300">View all exceptions →</button>
                 <Icon name="refresh" size={16} />
                 <Icon name="filter_alt" size={16} />
               </div>
             }
           />
-          <div className="overflow-auto rounded-xl border border-slate-800">
+          <div className="overflow-auto rounded-xl border border-slate-200 dark:border-slate-800">
             <table className="w-full text-sm">
-              <thead className="bg-slate-950/60 text-xs text-slate-400">
+              <thead className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-950/60 dark:text-slate-400">
                 <tr>
                   {["", "Customer", "Site", "Issue", "Severity", "Financial Impact", "Age", "Owner", "Status", "SLA Risk"].map((h, i) => (
                     <th key={i} className="whitespace-nowrap px-3 py-3 text-left">{h}</th>
@@ -1101,17 +1182,17 @@ function ExceptionWorkspace() {
               </thead>
               <tbody>
                 {exceptionRows.map((r) => (
-                  <tr key={r.customer + r.site + r.issue} className="border-t border-slate-800 hover:bg-slate-800/50">
+                  <tr key={r.customer + r.site + r.issue} className="border-t border-slate-200 hover:bg-slate-100/70 dark:border-slate-800 dark:hover:bg-slate-800/50">
                     <td className="px-3 py-3">
-                      <input type="checkbox" className="rounded border-slate-700 bg-slate-900" />
+                      <input type="checkbox" className="rounded border-slate-300 bg-white dark:border-slate-700 dark:bg-slate-900" />
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3 font-medium text-white">{r.customer}</td>
-                    <td className="whitespace-nowrap px-3 py-3 text-slate-300">{r.site}</td>
-                    <td className="whitespace-nowrap px-3 py-3 text-slate-300">{r.issue}</td>
+                    <td className="whitespace-nowrap px-3 py-3 font-medium text-slate-900 dark:text-white">{r.customer}</td>
+                    <td className="whitespace-nowrap px-3 py-3 text-slate-700 dark:text-slate-300">{r.site}</td>
+                    <td className="whitespace-nowrap px-3 py-3 text-slate-700 dark:text-slate-300">{r.issue}</td>
                     <td className="px-3 py-3"><Pill tone={r.severity}>{r.severity}</Pill></td>
-                    <td className="px-3 py-3 text-slate-300">{r.impact}</td>
-                    <td className="px-3 py-3 text-red-300">{r.age}</td>
-                    <td className="whitespace-nowrap px-3 py-3 text-slate-300">{r.owner}</td>
+                    <td className="px-3 py-3 text-slate-700 dark:text-slate-300">{r.impact}</td>
+                    <td className="px-3 py-3 text-red-700 dark:text-red-300">{r.age}</td>
+                    <td className="whitespace-nowrap px-3 py-3 text-slate-700 dark:text-slate-300">{r.owner}</td>
                     <td className="px-3 py-3"><StatusPill>{r.status}</StatusPill></td>
                     <td className="px-3 py-3"><Pill tone={r.sla}>{r.sla}</Pill></td>
                   </tr>
@@ -1125,25 +1206,25 @@ function ExceptionWorkspace() {
           </div>
         </Panel>
 
-        <Panel className="border-emerald-500/30 p-5 xl:col-span-3">
+        <Panel className="border-emerald-300 p-5 dark:border-emerald-500/30 xl:col-span-3">
           <div className="mb-4 flex items-center gap-2">
-            <Icon name="auto_awesome" size={20} className="text-emerald-300" />
-            <h2 className="text-lg font-semibold text-white">AI Triage Assistant</h2>
-            <span className="rounded bg-purple-500/20 px-2 py-0.5 text-xs text-purple-300">BETA</span>
+            <Icon name="auto_awesome" size={20} className="text-emerald-700 dark:text-emerald-300" />
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">AI Triage Assistant</h2>
+            <span className="rounded bg-purple-100 px-2 py-0.5 text-xs text-purple-700 dark:bg-purple-500/20 dark:text-purple-300">BETA</span>
           </div>
-          <div className="text-sm font-semibold text-white">Triage Summary</div>
+          <div className="text-sm font-semibold text-slate-900 dark:text-white">Triage Summary</div>
           <p className="mt-1 text-xs text-slate-500">Based on financial impact and urgency</p>
           <div className="mt-5 space-y-5">
             <div>
               <div className="flex gap-3">
-                <div className="grid h-8 w-8 place-items-center rounded-full bg-red-500/20 text-red-300">1</div>
+                <div className="grid h-8 w-8 place-items-center rounded-full bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300">1</div>
                 <div>
-                  <div className="font-medium text-white">Missing interval data</div>
-                  <div className="text-sm text-slate-300">$3.1m impacted (36%)</div>
+                  <div className="font-medium text-slate-900 dark:text-white">Missing interval data</div>
+                  <div className="text-sm text-slate-700 dark:text-slate-300">$3.1m impacted (36%)</div>
                   <p className="mt-1 text-xs text-slate-500">Interval gaps or delays causing estimated billing and revenue leakage.</p>
                 </div>
               </div>
-              <div className="mt-3 space-y-1 pl-11 text-xs text-emerald-300">
+              <div className="mt-3 space-y-1 pl-11 text-xs text-emerald-700 dark:text-emerald-300">
                 <div>✓ Backfill missing interval data</div>
                 <div>✓ Validate meter communications</div>
                 <div>✓ Reprocess billing for affected sites</div>
@@ -1151,25 +1232,25 @@ function ExceptionWorkspace() {
             </div>
             <div>
               <div className="flex gap-3">
-                <div className="grid h-8 w-8 place-items-center rounded-full bg-amber-500/20 text-amber-300">2</div>
+                <div className="grid h-8 w-8 place-items-center rounded-full bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">2</div>
                 <div>
-                  <div className="font-medium text-white">Bill validation failure</div>
-                  <div className="text-sm text-slate-300">$2.6m impacted (30%)</div>
+                  <div className="font-medium text-slate-900 dark:text-white">Bill validation failure</div>
+                  <div className="text-sm text-slate-700 dark:text-slate-300">$2.6m impacted (30%)</div>
                   <p className="mt-1 text-xs text-slate-500">Pricing, tariff or data validation failures blocking accurate billing.</p>
                 </div>
               </div>
-              <div className="mt-3 space-y-1 pl-11 text-xs text-emerald-300">
+              <div className="mt-3 space-y-1 pl-11 text-xs text-emerald-700 dark:text-emerald-300">
                 <div>✓ Review validation rules and edits</div>
                 <div>✓ Correct source data or mappings</div>
                 <div>✓ Re-run validation and re-bill</div>
               </div>
             </div>
           </div>
-          <div className="mt-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-            <div className="text-sm text-slate-300">Estimated recoverable revenue if acted on today</div>
-            <div className="mt-1 text-3xl font-semibold text-emerald-300">$4.7m</div>
+          <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+            <div className="text-sm text-slate-700 dark:text-slate-300">Estimated recoverable revenue if acted on today</div>
+            <div className="mt-1 text-3xl font-semibold text-emerald-700 dark:text-emerald-300">$4.7m</div>
           </div>
-          <button type="button" className="mt-4 w-full rounded-xl border border-emerald-400/50 px-4 py-3 text-sm font-medium text-emerald-300 hover:bg-emerald-500/10">
+          <button type="button" className="mt-4 w-full rounded-xl border border-emerald-400/60 px-4 py-3 text-sm font-medium text-emerald-700 hover:bg-emerald-50 dark:border-emerald-400/50 dark:text-emerald-300 dark:hover:bg-emerald-500/10">
             View AI recommendations →
           </button>
         </Panel>
@@ -1180,7 +1261,7 @@ function ExceptionWorkspace() {
 
 /* ────────── Dashboard header (within main pane) ────────── */
 
-function DashboardHeader({ activeView, selected, setActiveView, setSelectedCustomer, compact }: { activeView: ViewKey; selected: CustomerRecord; setActiveView: (v: ViewKey) => void; setSelectedCustomer: (c: CustomerRecord) => void; compact: boolean }) {
+function DashboardHeader({ activeView, selected, setActiveView, setSelectedCustomer, compact, onOpenInsightSheet }: { activeView: ViewKey; selected: CustomerRecord; setActiveView: (v: ViewKey) => void; setSelectedCustomer: (c: CustomerRecord) => void; compact: boolean; onOpenInsightSheet?: () => void }) {
   const [customerSearch, setCustomerSearch] = useState("");
   const [showCustomerPicker, setShowCustomerPicker] = useState(false);
   const isCustomer = activeView === "Customer Hierarchy";
@@ -1199,29 +1280,29 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
         type="button"
         onClick={() => setShowCustomerPicker((v) => !v)}
         className={cn(
-          "flex items-center gap-3 rounded-2xl border border-slate-800 bg-slate-900/70 text-left transition hover:border-emerald-400/40 hover:bg-slate-900",
+          "flex items-center gap-3 rounded-2xl border border-slate-200 bg-white text-left transition hover:border-emerald-500/60 hover:bg-emerald-50/40 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-emerald-400/40 dark:hover:bg-slate-900",
           compact ? "px-3 py-1.5" : "px-5 py-3",
         )}
       >
         <div>
           {!compact && <div className="text-[11px] uppercase tracking-wide text-slate-500">Customer</div>}
-          <div className={cn("font-semibold tracking-tight text-white", compact ? "text-base" : "text-3xl")}>{selected.name}</div>
+          <div className={cn("font-semibold tracking-tight text-slate-900 dark:text-white", compact ? "text-base" : "text-3xl")}>{selected.name}</div>
         </div>
         <Icon name="expand_more" size={compact ? 16 : 18} className={cn("text-slate-500 transition", !compact && "mt-1", showCustomerPicker && "rotate-180")} />
       </button>
 
       {showCustomerPicker && (
-        <div className="absolute left-0 top-full z-50 mt-3 w-[520px] rounded-2xl border border-slate-800 bg-slate-950/95 p-4 shadow-2xl shadow-black/40 backdrop-blur-xl">
-          <div className="mb-3 flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 px-3 py-3 text-sm text-slate-400">
+        <div className="absolute left-0 top-full z-50 mt-3 w-[520px] rounded-2xl border border-slate-200 bg-white p-4 shadow-xl backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/95 dark:shadow-2xl dark:shadow-black/40">
+          <div className="mb-3 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
             <Icon name="search" size={15} />
             <input
               value={customerSearch}
               onChange={(e) => setCustomerSearch(e.target.value)}
               placeholder="Search customer, segment or manager"
-              className="w-full bg-transparent outline-none placeholder:text-slate-500"
+              className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-500 dark:text-slate-100"
             />
           </div>
-          <div className="max-h-[420px] overflow-auto rounded-xl border border-slate-800">
+          <div className="max-h-[420px] overflow-auto rounded-xl border border-slate-200 dark:border-slate-800">
             {filteredCustomers.map((customer) => (
               <button
                 key={customer.id}
@@ -1232,15 +1313,15 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
                   setCustomerSearch("");
                 }}
                 className={cn(
-                  "flex w-full items-center gap-4 border-b border-slate-800 px-4 py-4 text-left transition last:border-b-0 hover:bg-emerald-500/5",
-                  selected.id === customer.id && "bg-emerald-500/10",
+                  "flex w-full items-center gap-4 border-b border-slate-200 px-4 py-4 text-left transition last:border-b-0 hover:bg-emerald-50 dark:border-slate-800 dark:hover:bg-emerald-500/5",
+                  selected.id === customer.id && "bg-emerald-50/80 dark:bg-emerald-500/10",
                 )}
               >
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-emerald-500/15 text-sm font-semibold text-emerald-300">
+                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-emerald-100 text-sm font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
                   {customer.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium text-white">{customer.name}</div>
+                  <div className="truncate text-sm font-medium text-slate-900 dark:text-white">{customer.name}</div>
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                     <span>{customer.segment}</span>
                     <span>•</span>
@@ -1250,8 +1331,8 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
                   </div>
                 </div>
                 <div className="text-right text-xs">
-                  <div className="text-slate-400">Bill Ready</div>
-                  <div className={cn("mt-1 font-semibold", customer.billReady < 60 ? "text-red-300" : customer.billReady < 80 ? "text-amber-300" : "text-emerald-300")}>
+                  <div className="text-slate-500 dark:text-slate-400">Bill Ready</div>
+                  <div className={cn("mt-1 font-semibold", customer.billReady < 60 ? "text-red-700 dark:text-red-300" : customer.billReady < 80 ? "text-amber-700 dark:text-amber-300" : "text-emerald-700 dark:text-emerald-300")}>
                     {customer.billReady}%
                   </div>
                 </div>
@@ -1263,6 +1344,8 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
     </div>
   );
 
+  const hasInsight = activeView !== "Exception Workspace";
+
   const actions = (
     <div className="flex items-center gap-2">
       {isCustomer && (
@@ -1270,7 +1353,7 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
           type="button"
           onClick={() => setActiveView("Portfolio Overview")}
           className={cn(
-            "flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-200 hover:border-slate-600",
+            "flex items-center gap-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600",
             compact ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
           )}
         >
@@ -1281,7 +1364,7 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
         <button
           type="button"
           className={cn(
-            "rounded-xl border border-slate-800 bg-slate-900 text-slate-200 hover:border-slate-600",
+            "rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600",
             compact ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
           )}
         >
@@ -1291,11 +1374,24 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
         <button
           type="button"
           className={cn(
-            "flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-200 hover:border-slate-600",
+            "flex items-center gap-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600",
             compact ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
           )}
         >
           <Icon name="download" size={compact ? 14 : 16} /> Export
+        </button>
+      )}
+      {hasInsight && onOpenInsightSheet && (
+        <button
+          type="button"
+          onClick={onOpenInsightSheet}
+          aria-label="Open AI insight panel"
+          className={cn(
+            "flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-400/40 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20 xl:hidden",
+            compact ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
+          )}
+        >
+          <Icon name="auto_awesome" size={compact ? 14 : 16} /> AI Insight
         </button>
       )}
     </div>
@@ -1304,7 +1400,7 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
   return (
     <div
       className={cn(
-        "sticky top-0 z-20 border-b border-slate-800 bg-slate-950/85 backdrop-blur-xl transition-[padding] duration-200",
+        "sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur-xl transition-[padding] duration-200 dark:border-slate-800 dark:bg-slate-950/85",
         compact ? "px-7 py-2" : "px-7 py-5",
       )}
     >
@@ -1314,7 +1410,7 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
             {isCustomer ? (
               customerPicker
             ) : (
-              <h1 className="truncate text-lg font-semibold tracking-tight text-white">{title}</h1>
+              <h1 className="truncate text-lg font-semibold tracking-tight text-slate-900 dark:text-white">{title}</h1>
             )}
           </div>
           <div className="flex items-center gap-3">
@@ -1333,12 +1429,12 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
               {isCustomer ? (
                 customerPicker
               ) : (
-                <h1 className="text-3xl font-semibold tracking-tight text-white">{title}</h1>
+                <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">{title}</h1>
               )}
-              <p className="mt-1 text-sm text-slate-400">{subtitle}</p>
+              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{subtitle}</p>
               {isCustomer && (
-                <div className="mt-2 text-xs text-blue-300">
-                  Portfolio Overview <span className="text-slate-600">›</span> {selected.name}
+                <div className="mt-2 text-xs text-blue-700 dark:text-blue-300">
+                  Portfolio Overview <span className="text-slate-400 dark:text-slate-600">›</span> {selected.name}
                 </div>
               )}
             </div>
@@ -1348,7 +1444,7 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
 
           <div className="mt-4 flex items-center justify-end gap-2 text-xs text-slate-500">
             <Icon name="refresh" size={13} /> Last updated: 8:32 AM AEST
-            {isCustomer && <span className="ml-3 rounded-full bg-emerald-500/15 px-2 py-1 text-emerald-300">Auto refresh •</span>}
+            {isCustomer && <span className="ml-3 rounded-full bg-emerald-100 px-2 py-1 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">Auto refresh •</span>}
           </div>
         </>
       )}
@@ -1358,10 +1454,8 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
 
 /* ────────── Right insight rail ────────── */
 
-function RightInsightRail({ activeView, selected }: { activeView: ViewKey; selected: CustomerRecord }) {
+function InsightContent({ activeView, selected }: { activeView: ViewKey; selected: CustomerRecord }) {
   const isCustomer = activeView === "Customer Hierarchy";
-  const isPortfolio = activeView === "Portfolio Overview";
-  if (!isCustomer && !isPortfolio) return null;
 
   const insightTitle = isCustomer ? `${selected.name} needs focused billing attention` : "Billing and collections performance improving";
 
@@ -1370,18 +1464,18 @@ function RightInsightRail({ activeView, selected }: { activeView: ViewKey; selec
     : "Portfolio billed performance improved month-on-month, with payment timeliness strongest across Health and Facilities segments.";
 
   return (
-    <aside className="hidden w-80 shrink-0 overflow-y-auto border-l border-slate-800 bg-slate-950/95 p-5 backdrop-blur-xl xl:flex xl:flex-col">
-      <Panel className="border-emerald-500/30 p-5">
+    <>
+      <Panel className="border-emerald-300 p-5 dark:border-emerald-500/30">
         <div className="mb-4 flex items-center gap-2">
-          <Icon name="auto_awesome" size={20} className="text-emerald-300" />
-          <h2 className="text-lg font-semibold text-white">AI Insight</h2>
-          <span className="rounded bg-purple-500/20 px-2 py-0.5 text-xs text-purple-300">BETA</span>
+          <Icon name="auto_awesome" size={20} className="text-emerald-700 dark:text-emerald-300" />
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">AI Insight</h2>
+          <span className="rounded bg-purple-100 px-2 py-0.5 text-xs text-purple-700 dark:bg-purple-500/20 dark:text-purple-300">BETA</span>
         </div>
-        <div className="text-base font-semibold text-white">{insightTitle}</div>
-        <p className="mt-3 text-sm leading-relaxed text-slate-400">{insightBody}</p>
-        <div className="mt-5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
-          <div className="text-sm font-semibold text-emerald-300">Next best action</div>
-          <div className="mt-1 text-sm text-slate-300">
+        <div className="text-base font-semibold text-slate-900 dark:text-white">{insightTitle}</div>
+        <p className="mt-3 text-sm leading-relaxed text-slate-600 dark:text-slate-400">{insightBody}</p>
+        <div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+          <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Next best action</div>
+          <div className="mt-1 text-sm text-slate-700 dark:text-slate-300">
             {isCustomer ? "Resolve blocked billing drivers for the highest-value sites first." : "Prioritise customers with high billed value but low paid percentage this cycle."}
           </div>
         </div>
@@ -1395,7 +1489,7 @@ function RightInsightRail({ activeView, selected }: { activeView: ViewKey; selec
               <button
                 key={action}
                 type="button"
-                className="flex w-full items-center justify-between rounded-xl border border-slate-800 bg-slate-950/50 px-4 py-3 text-sm text-slate-200 transition hover:border-emerald-400/40 hover:bg-slate-900"
+                className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition hover:border-emerald-400/60 hover:bg-white dark:border-slate-800 dark:bg-slate-950/50 dark:text-slate-200 dark:hover:border-emerald-400/40 dark:hover:bg-slate-900"
               >
                 <span>{action}</span>
                 <Icon name="chevron_right" size={15} className="text-slate-500" />
@@ -1404,6 +1498,69 @@ function RightInsightRail({ activeView, selected }: { activeView: ViewKey; selec
           </div>
         </Panel>
       )}
+    </>
+  );
+}
+
+function RightInsightRail({
+  activeView,
+  selected,
+  collapsed,
+  onToggle,
+}: {
+  activeView: ViewKey;
+  selected: CustomerRecord;
+  collapsed: boolean;
+  onToggle: () => void;
+}) {
+  const isCustomer = activeView === "Customer Hierarchy";
+  const isPortfolio = activeView === "Portfolio Overview";
+  if (!isCustomer && !isPortfolio) return null;
+
+  if (collapsed) {
+    return (
+      <aside className="hidden w-14 shrink-0 flex-col items-center border-l border-slate-200 bg-white/85 py-4 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/95 xl:flex">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label="Expand AI insight panel"
+          title="AI Insight"
+          className="group relative flex h-10 w-10 items-center justify-center rounded-lg text-emerald-700 transition-colors hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-500/15"
+        >
+          <Icon name="auto_awesome" size={20} className="text-emerald-700 dark:text-emerald-300" />
+          <span
+            aria-hidden
+            className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)] dark:bg-emerald-400 dark:shadow-[0_0_6px_rgba(52,211,153,0.8)]"
+          />
+        </button>
+        <div className="mt-auto">
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label="Expand AI insight panel"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-100"
+          >
+            <Icon name="chevron_left" size={20} />
+          </button>
+        </div>
+      </aside>
+    );
+  }
+
+  return (
+    <aside className="hidden w-80 shrink-0 overflow-y-auto border-l border-slate-200 bg-white/85 p-5 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/95 xl:flex xl:flex-col">
+      <div className="mb-3 flex justify-end">
+        <button
+          type="button"
+          onClick={onToggle}
+          aria-label="Collapse AI insight panel"
+          title="Collapse"
+          className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-gray-100"
+        >
+          <Icon name="chevron_right" size={18} />
+        </button>
+      </div>
+      <InsightContent activeView={activeView} selected={selected} />
     </aside>
   );
 }
@@ -1427,8 +1584,23 @@ function GlassVisionLM2Content() {
   const [isExpanded, setIsExpanded] = useState(searchParams.get("expanded") === "true");
   const [navCollapsed, setNavCollapsed] = useState(true);
   const [headerCompact, setHeaderCompact] = useState(false);
+  const [aiRailCollapsed, setAiRailCollapsed] = useState(false);
+  const [aiSheetOpen, setAiSheetOpen] = useState(false);
   const headerSentinelRef = React.useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem("glass-vision-ai-rail-collapsed");
+      if (stored === "true") setAiRailCollapsed(true);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("glass-vision-ai-rail-collapsed", aiRailCollapsed ? "true" : "false");
+    } catch {}
+  }, [aiRailCollapsed]);
 
   const [flyoutParentId, setFlyoutParentId] = useState<string | null>(null);
   const [flyoutPos, setFlyoutPos] = useState<{ top: number; left: number } | null>(null);
@@ -1485,14 +1657,6 @@ function GlassVisionLM2Content() {
     };
   }, [isExpanded]);
 
-  useEffect(() => {
-    const floatingControls = document.querySelector(".fixed.bottom-6.right-6") as HTMLElement | null;
-    if (floatingControls) floatingControls.style.display = "none";
-    return () => {
-      if (floatingControls) floatingControls.style.display = "";
-    };
-  }, []);
-
   const openCustomer = (customer: CustomerRecord) => {
     setSelectedCustomer(customer);
     setActiveView("Customer Hierarchy");
@@ -1504,30 +1668,32 @@ function GlassVisionLM2Content() {
     return <ExceptionWorkspace />;
   }, [activeView, selectedCustomer]);
 
+  const theme = useResolvedTheme();
+  const isLight = theme === "light";
+
   return (
-    <div className="flex h-full flex-col overflow-hidden" style={{ backgroundColor: DARKEST_NAVY }}>
+    <div className="flex h-full flex-col overflow-hidden bg-[#F9F9FB] dark:bg-[#161B2E]">
       <div className="flex min-h-0 flex-1 flex-col">
         {/* ────── Glass header chrome ────── */}
         <header className="flex h-14 shrink-0 items-center gap-4 px-6">
           <div className="flex shrink-0 items-center gap-3">
             <Link href="/" className="flex items-center">
-              <Image src="/GlassLogoTest_darkmode.svg" alt="Tally Glass" width={140} height={40} className="h-8 w-auto" priority />
+              <Image src={isLight ? "/GlassLogoTest.svg" : "/GlassLogoTest_darkmode.svg"} alt="Tally Glass" width={140} height={40} className="h-8 w-auto" priority />
             </Link>
-            <div className="h-6 w-px bg-white/30" />
+            <div className="h-6 w-px bg-slate-300 dark:bg-white/30" />
             <Link href="/pages/tally-large-market" className="flex items-center transition-opacity hover:opacity-80">
-              <Image src="/TallyCIS_Test.svg" alt="Tally CIS" width={140} height={34} className="h-7 w-auto brightness-0 invert" />
+              <Image src="/TallyCIS_Test.svg" alt="Tally CIS" width={140} height={34} className={cn("h-7 w-auto", isLight ? "" : "brightness-0 invert")} />
             </Link>
           </div>
           <div className="flex flex-1 justify-center">
             <div className="relative w-full max-w-md">
-              <Icon name="search" size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Icon name="search" size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 dark:text-gray-400" />
               <input
                 type="search"
                 placeholder="Search Tally..."
-                className="h-10 w-full rounded-lg border-0 pl-10 pr-20 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D2A2]/50"
-                style={{ backgroundColor: DARK_NAVY }}
+                className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-20 text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#00D2A2]/50 dark:border-0 dark:bg-[#212946] dark:text-white dark:placeholder:text-gray-400"
               />
-              <kbd className="absolute right-2 top-1/2 -translate-y-1/2 rounded border border-white/20 bg-white/10 px-2 py-0.5 text-xs text-gray-400">⌘K</kbd>
+              <kbd className="absolute right-2 top-1/2 -translate-y-1/2 rounded border border-slate-300 bg-slate-100 px-2 py-0.5 text-xs text-slate-500 dark:border-white/20 dark:bg-white/10 dark:text-gray-400">⌘K</kbd>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-3">
@@ -1535,7 +1701,7 @@ function GlassVisionLM2Content() {
               <Image src="/AdoraDot.svg" alt="" width={16} height={16} className="h-4 w-4" />
               Adora
             </button>
-            <button type="button" className="relative rounded-lg p-2 text-gray-300 transition-colors hover:bg-white/10 hover:text-white" aria-label="Notifications">
+            <button type="button" className="relative rounded-lg p-2 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-white" aria-label="Notifications">
               <Icon name="notifications" size={22} />
               <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#E8560A]" aria-hidden />
             </button>
@@ -1573,10 +1739,12 @@ function GlassVisionLM2Content() {
                         type="button"
                         className={cn(
                           "group flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors",
-                          parentActive ? "bg-white/10 text-[#00D2A2]" : "text-gray-400 hover:bg-white/10 hover:text-gray-100",
+                          parentActive
+                            ? "bg-emerald-50 text-[#0F9C7A] dark:bg-white/10 dark:text-[#00D2A2]"
+                            : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-100",
                         )}
                       >
-                        <Icon name={item.icon} size={20} className={cn("shrink-0", parentActive ? "text-[#00D2A2]" : "text-gray-400 group-hover:text-gray-100")} />
+                        <Icon name={item.icon} size={20} className={cn("shrink-0", parentActive ? "text-[#0F9C7A] dark:text-[#00D2A2]" : "text-slate-500 group-hover:text-slate-900 dark:text-gray-400 dark:group-hover:text-gray-100")} />
                       </button>
                     </div>
                   );
@@ -1589,15 +1757,17 @@ function GlassVisionLM2Content() {
                       onClick={() => handleParentClick(item)}
                       className={cn(
                         "group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-normal transition-colors",
-                        parentActive || isOpen ? "bg-white/10 text-[#00D2A2]" : "text-gray-400 hover:bg-white/10 hover:text-gray-100",
+                        parentActive || isOpen
+                          ? "bg-emerald-50 text-[#0F9C7A] dark:bg-white/10 dark:text-[#00D2A2]"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-100",
                       )}
                     >
-                      <Icon name={item.icon} size={20} className={cn("shrink-0", parentActive || isOpen ? "text-[#00D2A2]" : "text-gray-400 group-hover:text-gray-100")} />
+                      <Icon name={item.icon} size={20} className={cn("shrink-0", parentActive || isOpen ? "text-[#0F9C7A] dark:text-[#00D2A2]" : "text-slate-500 group-hover:text-slate-900 dark:text-gray-400 dark:group-hover:text-gray-100")} />
                       <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                      {hasChildren && <Icon name={isOpen ? "expand_less" : "expand_more"} size={20} className="shrink-0 text-gray-500" />}
+                      {hasChildren && <Icon name={isOpen ? "expand_less" : "expand_more"} size={20} className="shrink-0 text-slate-400 dark:text-gray-500" />}
                     </button>
                     {hasChildren && isOpen && (
-                      <ul className="ml-4 mt-0.5 space-y-0.5 border-l border-white/10 pl-2">
+                      <ul className="ml-4 mt-0.5 space-y-0.5 border-l border-slate-200 pl-2 dark:border-white/10">
                         {item.children!.map((child) => (
                           <li key={child.id}>
                             <button
@@ -1605,7 +1775,9 @@ function GlassVisionLM2Content() {
                               onClick={() => setActiveNavId(child.id)}
                               className={cn(
                                 "flex w-full items-center rounded-lg py-2 pl-2 pr-3 text-left text-sm font-normal transition-colors",
-                                activeNavId === child.id ? "bg-white/10 text-[#00D2A2]" : "text-gray-400 hover:bg-white/10 hover:text-gray-100",
+                                activeNavId === child.id
+                                  ? "bg-emerald-50 text-[#0F9C7A] dark:bg-white/10 dark:text-[#00D2A2]"
+                                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-100",
                               )}
                             >
                               {child.label}
@@ -1618,11 +1790,11 @@ function GlassVisionLM2Content() {
                 );
               })}
             </nav>
-            <div className="shrink-0 border-t border-white/10 p-2 flex flex-col items-center gap-0.5">
+            <div className="shrink-0 border-t border-slate-200 p-2 flex flex-col items-center gap-0.5 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => setIsExpanded((v) => !v)}
-                className="group flex h-10 w-10 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-white/10 hover:text-gray-100"
+                className="group flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-100"
                 aria-label={isExpanded ? "Exit full screen" : "Enter full screen"}
               >
                 <Icon name={isExpanded ? "close_fullscreen" : "open_in_full"} size={20} />
@@ -1630,7 +1802,7 @@ function GlassVisionLM2Content() {
               <button
                 type="button"
                 onClick={() => setNavCollapsed((v) => !v)}
-                className="group flex h-10 w-10 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-white/10 hover:text-gray-100"
+                className="group flex h-10 w-10 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-white/10 dark:hover:text-gray-100"
                 aria-label={navCollapsed ? "Expand navigation" : "Collapse navigation"}
               >
                 <Icon name={navCollapsed ? "chevron_right" : "chevron_left"} size={20} />
@@ -1644,13 +1816,13 @@ function GlassVisionLM2Content() {
             if (!parentItem?.children?.length) return null;
             return (
               <div
-                className="fixed z-[100] min-w-[180px] rounded-md border border-gray-600 bg-gray-800 py-2"
-                style={{ top: flyoutPos.top, left: flyoutPos.left, boxShadow: "0 4px 16px rgba(0,0,0,0.3)" }}
+                className="fixed z-[100] min-w-[180px] rounded-md border border-slate-200 bg-white py-2 shadow-lg dark:border-gray-600 dark:bg-gray-800 dark:shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
+                style={{ top: flyoutPos.top, left: flyoutPos.left }}
                 onMouseEnter={cancelHideFlyout}
                 onMouseLeave={hideFlyout}
               >
-                <div className="px-4 pb-1 pt-1.5 text-sm font-normal text-gray-300">{parentItem.label}</div>
-                <div className="relative ml-4 border-l border-gray-600">
+                <div className="px-4 pb-1 pt-1.5 text-sm font-normal text-slate-700 dark:text-gray-300">{parentItem.label}</div>
+                <div className="relative ml-4 border-l border-slate-200 dark:border-gray-600">
                   {parentItem.children.map((child) => (
                     <button
                       key={child.id}
@@ -1658,7 +1830,9 @@ function GlassVisionLM2Content() {
                       onClick={() => { setActiveNavId(child.id); setOpenParentId(parentItem.id); hideFlyout(); }}
                       className={cn(
                         "flex w-full items-center py-2 pl-3 pr-4 text-left text-sm font-normal transition-colors",
-                        activeNavId === child.id ? "mx-2 rounded-lg bg-[#00D2A2]/20 font-medium text-[#00D2A2]" : "text-gray-400 hover:text-gray-100",
+                        activeNavId === child.id
+                          ? "mx-2 rounded-lg bg-emerald-100 font-medium text-[#0F9C7A] dark:bg-[#00D2A2]/20 dark:text-[#00D2A2]"
+                          : "text-slate-600 hover:text-slate-900 dark:text-gray-400 dark:hover:text-gray-100",
                       )}
                     >
                       {child.label}
@@ -1671,16 +1845,54 @@ function GlassVisionLM2Content() {
 
           {/* ────── Main pane: dashboard with radial glow + right rail ────── */}
           <main
-            className="flex min-w-0 flex-1 overflow-hidden rounded-tl-[1.5rem] text-slate-100"
-            style={{ background: "radial-gradient(circle at top left, #123024 0, #020617 32%, #020617 100%)" }}
+            className="flex min-w-0 flex-1 overflow-hidden rounded-tl-[1.5rem] text-slate-700 dark:text-slate-100"
+            style={{
+              background: isLight
+                ? "radial-gradient(circle at top left, #DCFCE7 0, #F9F9FB 38%, #F9F9FB 100%)"
+                : "radial-gradient(circle at top left, #123024 0, #020617 32%, #020617 100%)",
+            }}
           >
             <div ref={scrollContainerRef} className="flex min-w-0 flex-1 flex-col overflow-y-auto">
               <div ref={headerSentinelRef} className="h-px shrink-0" aria-hidden />
-              <DashboardHeader activeView={activeView} selected={selectedCustomer} setActiveView={setActiveView} setSelectedCustomer={setSelectedCustomer} compact={headerCompact} />
+              <DashboardHeader
+                activeView={activeView}
+                selected={selectedCustomer}
+                setActiveView={setActiveView}
+                setSelectedCustomer={setSelectedCustomer}
+                compact={headerCompact}
+                onOpenInsightSheet={() => setAiSheetOpen(true)}
+              />
               <div className="p-7">{content}</div>
             </div>
-            <RightInsightRail activeView={activeView} selected={selectedCustomer} />
+            <RightInsightRail
+              activeView={activeView}
+              selected={selectedCustomer}
+              collapsed={aiRailCollapsed}
+              onToggle={() => setAiRailCollapsed((v) => !v)}
+            />
           </main>
+          <Sheet open={aiSheetOpen} onOpenChange={setAiSheetOpen}>
+            <SheetContent
+              side="right"
+              className="!bg-white !border-slate-200 text-slate-900 w-full overflow-y-auto p-5 sm:!max-w-md dark:!bg-slate-950 dark:!border-slate-800 dark:text-slate-100"
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-slate-500">
+                  <Icon name="auto_awesome" size={14} className="text-emerald-700 dark:text-emerald-300" />
+                  AI Insight
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAiSheetOpen(false)}
+                  aria-label="Close AI insight panel"
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-gray-100"
+                >
+                  <Icon name="close" size={18} />
+                </button>
+              </div>
+              <InsightContent activeView={activeView} selected={selectedCustomer} />
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </div>
