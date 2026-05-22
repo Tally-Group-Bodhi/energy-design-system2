@@ -97,6 +97,13 @@ const pages = [
     icon: "storefront",
     tags: ["Sales", "CRM", "Pipeline", "Forecast", "Leads"],
   },
+  {
+    title: "EOS",
+    description: "Energy Operations System — enrollment search, batch uploads, customer accounts, and work queue (Tally+ & EOS brands)",
+    href: "/pages/eos",
+    icon: "bolt",
+    tags: ["EOS", "Enrollment", "Operations", "Search", "Forms"],
+  },
 ];
 
 export default function PagesIndex() {
