@@ -63,6 +63,20 @@ const pages = [
     tags: ["Call Centre", "Glass", "Dashboard", "Demo"],
   },
   {
+    title: "Glass Vision – Demo Version",
+    description: "Working copy of Glass Vision for demo iterations",
+    href: "/pages/glass-vision-demo-version",
+    icon: "visibility",
+    tags: ["Call Centre", "Glass", "Dashboard", "Demo"],
+  },
+  {
+    title: "Glass Vision Demo V2",
+    description: "Second working copy of Glass Vision Demo for further demo iterations",
+    href: "/pages/glass-vision-demo-v2",
+    icon: "visibility",
+    tags: ["Call Centre", "Glass", "Dashboard", "Demo"],
+  },
+  {
     title: "Glass Vision – Large Market",
     description: "Tally Glass Vision interface tailored for Large Market commercial accounts with CIS navigation",
     href: "/pages/glass-vision-lm",
@@ -75,6 +89,13 @@ const pages = [
     href: "/pages/glass-vision-lm-2",
     icon: "monitor_heart",
     tags: ["Large Market", "Glass", "Operations", "Exceptions", "Dashboard"],
+  },
+  {
+    title: "Glass Vision LM 2 – Demo Version",
+    description: "Working copy of Glass Vision LM 2 for demo iterations",
+    href: "/pages/glass-vision-lm-2-demo-version",
+    icon: "monitor_heart",
+    tags: ["Large Market", "Glass", "Operations", "Exceptions", "Dashboard", "Demo"],
   },
   {
     title: "Tally Orion",
@@ -103,6 +124,13 @@ const pages = [
     href: "/pages/eos",
     icon: "bolt",
     tags: ["EOS", "Enrollment", "Operations", "Search", "Forms"],
+  },
+  {
+    title: "EOS Glass",
+    description: "EOS call centre agent view with a Residential ⇄ C&I switcher, Adora AI rail, and Japan-localised customer data",
+    href: "/pages/eos-glass",
+    icon: "support_agent",
+    tags: ["EOS", "Glass", "Call centre", "Residential", "C&I"],
   },
 ];
 

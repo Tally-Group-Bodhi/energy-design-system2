@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Sidebar from "@/components/Sidebar/Sidebar";
-import ThemeModeSwitch from "@/components/ThemeModeSwitch/ThemeModeSwitch";
-import DensityModeSwitch from "@/components/DensityModeSwitch/DensityModeSwitch";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -116,8 +114,11 @@ const navigationSections = [
       { label: "Tally+ Small Market", href: "/pages/small-market" },
       { label: "Tally+ Large Market", href: "/pages/tally-large-market" },
       { label: "Glass Vision", href: "/pages/glass-vision" },
+      { label: "Glass Vision – Demo Version", href: "/pages/glass-vision-demo-version" },
+      { label: "Glass Vision Demo V2", href: "/pages/glass-vision-demo-v2" },
       { label: "Glass Vision – LM", href: "/pages/glass-vision-lm" },
       { label: "Glass Vision LM 2", href: "/pages/glass-vision-lm-2" },
+      { label: "Glass Vision LM 2 – Demo Version", href: "/pages/glass-vision-lm-2-demo-version" },
       { label: "Tally Orion", href: "/pages/tally-orion" },
       { label: "Tally Acquire", href: "/pages/tally-acquire" },
       { label: "Beta Test Dashboard", href: "/pages/beta-test-dashboard" },
@@ -125,6 +126,7 @@ const navigationSections = [
       { label: "Tally CRM", href: "/crm/dashboard" },
       { label: "Tally Digital", href: "/pages/tally-digital" },
       { label: "EOS", href: "/pages/eos" },
+      { label: "EOS Glass", href: "/pages/eos-glass" },
     ],
   },
 ];
@@ -153,10 +155,6 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased">
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2">
-          <DensityModeSwitch />
-          <ThemeModeSwitch />
-        </div>
         <div className="flex h-screen overflow-hidden">
           <Sidebar sections={navigationSections} />
           <main className="min-w-0 flex-1 overflow-y-auto">{children}</main>
