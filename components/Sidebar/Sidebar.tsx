@@ -68,6 +68,7 @@ export default function Sidebar({ sections }: SidebarProps) {
   const [flyoutPos, setFlyoutPos] = useState<{
     top: number;
     left: number;
+    maxHeight: number;
   } | null>(null);
   const flyoutTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -119,7 +120,18 @@ export default function Sidebar({ sections }: SidebarProps) {
     if (!collapsed) return;
     if (flyoutTimeout.current) clearTimeout(flyoutTimeout.current);
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    setFlyoutPos({ top: rect.top, left: rect.right + 8 });
+    const margin = 8;
+    // Lift the flyout when the icon sits low enough that a long list would run off-screen
+    const minUsableHeight = 280;
+    let top = rect.top;
+    if (window.innerHeight - top - margin < minUsableHeight) {
+      top = Math.max(margin, window.innerHeight - margin - minUsableHeight);
+    }
+    setFlyoutPos({
+      top,
+      left: rect.right + 8,
+      maxHeight: window.innerHeight - top - margin,
+    });
     setHoveredSectionIndex(sectionIdx);
     hideTooltip();
   };
@@ -359,10 +371,11 @@ export default function Sidebar({ sections }: SidebarProps) {
           const sectionHref = SECTION_LINKS[section.title];
           return (
             <div
-              className="fixed z-[100] min-w-[180px] rounded-md border border-gray-200 bg-white py-2 dark:border-gray-600 dark:bg-gray-800"
+              className="fixed z-[100] flex min-w-[180px] flex-col overflow-y-auto overscroll-contain rounded-md border border-gray-200 bg-white py-2 dark:border-gray-600 dark:bg-gray-800"
               style={{
                 top: flyoutPos.top,
                 left: flyoutPos.left,
+                maxHeight: flyoutPos.maxHeight,
                 boxShadow:
                   "0 2px 2px -1px rgba(10,13,18,0.04), 0 4px 6px -2px rgba(10,13,18,0.03), 0 12px 16px -4px rgba(10,13,18,0.08)",
               }}
@@ -375,17 +388,17 @@ export default function Sidebar({ sections }: SidebarProps) {
               {sectionHref ? (
                 <Link
                   href={sectionHref}
-                  className="block px-4 pb-1 pt-1.5 text-sm font-medium text-gray-900 transition-colors hover:text-[#2C365D] dark:text-gray-100 dark:hover:text-white"
+                  className="block shrink-0 px-4 pb-1 pt-1.5 text-sm font-medium text-gray-900 transition-colors hover:text-[#2C365D] dark:text-gray-100 dark:hover:text-white"
                 >
                   {section.title}
                 </Link>
               ) : (
-                <div className="px-4 pb-1 pt-1.5 text-sm font-medium text-gray-900 dark:text-gray-100">
+                <div className="shrink-0 px-4 pb-1 pt-1.5 text-sm font-medium text-gray-900 dark:text-gray-100">
                   {section.title}
                 </div>
               )}
               {/* Item links */}
-              <div className="relative ml-4 border-l border-gray-200 dark:border-gray-600">
+              <div className="relative ml-4 shrink-0 border-l border-gray-200 dark:border-gray-600">
                 {section.items.map((item, itemIndex) => (
                   <Link
                     key={itemIndex}
