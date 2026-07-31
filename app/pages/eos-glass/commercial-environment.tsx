@@ -24,6 +24,7 @@ import {
 } from "recharts";
 import { Icon } from "@/components/ui/icon";
 import { Avatar, AvatarFallback } from "@/components/Avatar/Avatar";
+import Button from "@/components/Button/Button";
 import { Sheet, SheetContent } from "@/components/Sheet/Sheet";
 import { Dialog, DialogContent } from "@/components/Dialog/Dialog";
 import { cn } from "@/lib/utils";
@@ -1603,12 +1604,28 @@ interface KpiCardProps {
   tone?: "green" | "blue" | "amber" | "red" | "purple";
   compact?: boolean;
   showSparkline?: boolean;
+  sparklineData?: Array<{ label: string; value: number }>;
+  sparklineValueFormatter?: (value: number) => string;
   emphasizeValue?: boolean;
   onClick?: () => void;
 }
 
-function KpiCard({ icon, title, value, sub, tone = "green", compact = false, showSparkline = true, emphasizeValue = false, onClick }: KpiCardProps) {
+function KpiCard({
+  icon,
+  title,
+  value,
+  sub,
+  tone = "green",
+  compact = false,
+  showSparkline = true,
+  sparklineData,
+  sparklineValueFormatter,
+  emphasizeValue = false,
+  onClick,
+}: KpiCardProps) {
   const colors = useColors();
+  const chart = useChartTheme();
+  const sparklineFillId = React.useId().replace(/:/g, "");
   const color = {
     green: "text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-300 dark:bg-emerald-500/15 dark:border-emerald-400/20",
     blue: "text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-300 dark:bg-blue-500/15 dark:border-blue-400/20",
@@ -1628,7 +1645,7 @@ function KpiCard({ icon, title, value, sub, tone = "green", compact = false, sho
     <button
       onClick={onClick}
       className={cn(
-        "group w-full rounded-xl border border-slate-200 bg-white text-left shadow-sm transition dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/20",
+        "group w-full overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-sm transition dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/20",
         compact ? "px-3.5 py-3 hover:border-slate-300 dark:hover:border-slate-700" : "rounded-2xl p-4 hover:-translate-y-0.5 hover:border-emerald-500/60 dark:hover:border-emerald-400/50",
       )}
     >
@@ -1642,6 +1659,47 @@ function KpiCard({ icon, title, value, sub, tone = "green", compact = false, sho
           </div>
           <div className={cn("mt-1 text-2xl font-semibold leading-none tracking-tight", valueColor)}>{value}</div>
           {sub ? <div className="mt-1.5 truncate text-[11px] leading-none text-slate-500">{sub}</div> : <div className="mt-1.5 h-[11px]" />}
+          {showSparkline && sparklineData?.length ? (
+            <div
+              className="-mx-3.5 -mb-3 mt-2 h-12 w-[calc(100%+1.75rem)]"
+              aria-label={`${title} trend`}
+            >
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={sparklineData} margin={{ top: 8, right: 0, bottom: 0, left: 0 }}>
+                  <defs>
+                    <linearGradient id={sparklineFillId} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={sparkColor} stopOpacity={0.28} />
+                      <stop offset="95%" stopColor={sparkColor} stopOpacity={0.03} />
+                    </linearGradient>
+                  </defs>
+                  <Tooltip
+                    contentStyle={{
+                      ...chart.tooltipStyle,
+                      borderRadius: 8,
+                      padding: "5px 8px",
+                      fontSize: 11,
+                    }}
+                    cursor={{ stroke: sparkColor, strokeDasharray: "3 3", strokeWidth: 1 }}
+                    labelFormatter={(label) => String(label)}
+                    formatter={(raw) => [
+                      sparklineValueFormatter
+                        ? sparklineValueFormatter(Number(raw))
+                        : Number(raw).toLocaleString(),
+                      title,
+                    ]}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke={sparkColor}
+                    strokeWidth={1.75}
+                    fill={`url(#${sparklineFillId})`}
+                    activeDot={{ r: 3, fill: sparkColor, stroke: "#fff", strokeWidth: 1.5 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          ) : null}
         </>
       ) : (
         <>
@@ -1884,29 +1942,31 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex flex-wrap items-end gap-2">
         <SelectLike compact label="Segment" value={segment} options={segmentOptions} onChange={setSegment} />
         <SelectLike compact label="Period" value={period} options={periodOptions} onChange={setPeriod} />
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => {
             setSegment(segmentOptions[0]);
             setPeriod(periodOptions[0]);
           }}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 shadow-sm hover:border-slate-400 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+          className="gap-1.5 text-slate-600 dark:text-slate-300 dark:hover:text-white"
         >
           <Icon name="refresh" size={14} /> Reset filters
-        </button>
+        </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
         {portfolioCards.map((card) => (
           <KpiCard key={card.title} {...card} onClick={() => card.title.includes("Exception") && setActiveView("Exception Workspace")} />
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <AdoraDefenderPanel />
 
         <Panel className="p-5">
@@ -1927,7 +1987,7 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
         </Panel>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel className="p-5">
           <SectionHeader
             title="Active sites"
@@ -2052,7 +2112,7 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
         </Panel>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel className="p-5">
           <SectionHeader title="Exception Volume by Type" sub="Open exceptions by severity and area" action={<WidgetDownloadAction />} />
           <div className="overflow-hidden rounded-xl border border-slate-200 text-xs dark:border-slate-800">
@@ -2227,6 +2287,116 @@ interface HierarchyNode {
   children: Array<HierarchyNode | string>;
 }
 
+const JAPAN_MAP_PATHS = {
+  hokkaido: "M191 20 221 23 237 39 229 59 209 72 187 63 177 45Z",
+  honshu: "M190 77C181 84 175 94 167 101C157 109 154 120 145 128C134 138 128 148 118 157C106 168 94 172 83 181C72 190 61 192 51 201L59 214C72 207 84 203 94 196C106 188 118 184 128 174C139 164 147 154 157 145C168 135 172 124 181 115C191 104 198 92 202 82Z",
+  shikoku: "M76 204 101 198 111 207 94 218 72 216 65 210Z",
+  kyushu: "M48 207 63 217 61 235 50 249 35 244 27 229 34 214Z",
+};
+
+const JAPAN_REGION_POINTS: Record<string, { x: number; y: number }> = {
+  Hokkaido: { x: 207, y: 45 },
+  Tohoku: { x: 175, y: 103 },
+  Tokyo: { x: 153, y: 139 },
+  Kanto: { x: 153, y: 139 },
+  Chubu: { x: 127, y: 159 },
+  Kansai: { x: 101, y: 181 },
+  Chugoku: { x: 72, y: 198 },
+  Shikoku: { x: 88, y: 208 },
+  Kyushu: { x: 46, y: 229 },
+  "Multi-area": { x: 126, y: 155 },
+  Other: { x: 126, y: 155 },
+};
+
+function JapanDistributionMap({ regions, mode }: { regions: Region[]; mode: "region" | "site" }) {
+  const totalSites = regions.reduce((sum, region) => sum + region.sites, 0);
+  const maxSites = Math.max(...regions.map((region) => region.sites), 1);
+
+  return (
+    <>
+      <div className="h-44">
+        <svg
+          viewBox="0 0 260 270"
+          className="h-full w-full"
+          role="img"
+          aria-label={`Map of Japan showing ${totalSites.toLocaleString()} active sites`}
+        >
+          <defs>
+            <clipPath id="japan-distribution-clip">
+              <path d={JAPAN_MAP_PATHS.hokkaido} />
+              <path d={JAPAN_MAP_PATHS.honshu} />
+              <path d={JAPAN_MAP_PATHS.shikoku} />
+              <path d={JAPAN_MAP_PATHS.kyushu} />
+            </clipPath>
+          </defs>
+          <g className="fill-slate-100 stroke-white dark:fill-slate-800 dark:stroke-slate-900" strokeWidth="2">
+            <path d={JAPAN_MAP_PATHS.hokkaido} />
+            <path d={JAPAN_MAP_PATHS.honshu} />
+            <path d={JAPAN_MAP_PATHS.shikoku} />
+            <path d={JAPAN_MAP_PATHS.kyushu} />
+            <circle cx="20" cy="248" r="4" />
+            <circle cx="11" cy="258" r="2.5" />
+          </g>
+
+          {mode === "region" && (
+            <g clipPath="url(#japan-distribution-clip)">
+              {regions.map((region) => {
+                const point = JAPAN_REGION_POINTS[region.name] || JAPAN_REGION_POINTS.Other;
+                const intensity = 0.34 + (region.sites / maxSites) * 0.66;
+                const radius = Math.max(18, Math.min(37, 18 + region.share * 0.22));
+                return (
+                  <circle
+                    key={region.name}
+                    cx={point.x}
+                    cy={point.y}
+                    r={radius}
+                    fill={ACCENT}
+                    fillOpacity={intensity}
+                  >
+                    <title>{`${region.name}: ${region.sites.toLocaleString()} active sites`}</title>
+                  </circle>
+                );
+              })}
+            </g>
+          )}
+
+          {mode === "site" && regions.flatMap((region, regionIndex) => {
+            const point = JAPAN_REGION_POINTS[region.name] || JAPAN_REGION_POINTS.Other;
+            const markerCount = Math.min(region.sites, 8);
+            return Array.from({ length: markerCount }, (_, markerIndex) => {
+              const angle = (markerIndex / Math.max(markerCount, 1)) * Math.PI * 2 + regionIndex;
+              const distance = markerIndex === 0 ? 0 : 5 + (markerIndex % 3) * 3;
+              return (
+                <circle
+                  key={`${region.name}-${markerIndex}`}
+                  cx={point.x + Math.cos(angle) * distance}
+                  cy={point.y + Math.sin(angle) * distance}
+                  r="3.5"
+                  fill={ACCENT}
+                  stroke="white"
+                  strokeWidth="1.5"
+                >
+                  <title>{region.name}</title>
+                </circle>
+              );
+            });
+          })}
+        </svg>
+      </div>
+      <div className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+        {totalSites.toLocaleString()} active {totalSites === 1 ? "site" : "sites"} across {regions.length} {regions.length === 1 ? "region" : "regions"}
+      </div>
+      <div className="mt-2 flex items-center gap-2 text-[10px] text-slate-500">
+        <span>Low</span>
+        <span className="h-2 flex-1 overflow-hidden rounded-full border border-slate-400 dark:border-slate-600">
+          <span className="block h-full bg-gradient-to-r from-emerald-100 via-emerald-300 to-emerald-600" />
+        </span>
+        <span>High</span>
+      </div>
+    </>
+  );
+}
+
 const HIERARCHY: HierarchyNode[] = [
   {
     id: "node-corporate",
@@ -2244,15 +2414,13 @@ const HIERARCHY: HierarchyNode[] = [
 function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerRecord; initialSiteId?: string | null }) {
   const colors = useColors();
   const chart = useChartTheme();
-  const [expandedContracts, setExpandedContracts] = useState<Record<string, boolean>>({});
+  const [distributionMode, setDistributionMode] = useState<"region" | "site">("region");
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({ "node-corporate": true, "node-flagship": true, "node-metro": true });
   const [selectedEntity, setSelectedEntity] = useState<{ type: "site" | "node"; id: string; name: string }>(() => {
     const site = SITE_ROWS.find((row) => row.id === initialSiteId);
     if (site) return { type: "site", id: site.id, name: site.site };
     return { type: "site", id: "site-hakata", name: "Hakata Ekimae" };
   });
-
-  const customerContracts = contracts.filter((contract) => contract.customerId === selected.id);
 
   const siteById = useMemo(() => Object.fromEntries(SITE_ROWS.map((row) => [row.id, row])), []);
   const selectedSite = selectedEntity.type === "site" ? siteById[selectedEntity.id] || SITE_ROWS[0] : SITE_ROWS[0];
@@ -2271,17 +2439,25 @@ function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerReco
   const selectedNode = selectedEntity.type === "node" ? nodeMetrics[selectedEntity.id] || nodeMetrics["node-retail-group"] : nodeMetrics["node-retail-group"];
 
   const demandTrend = [
-    { month: "Jan", contract: selectedSite.contractDemand, actual: selectedSite.actualDemand - 0.4 },
-    { month: "Feb", contract: selectedSite.contractDemand, actual: selectedSite.actualDemand - 0.2 },
-    { month: "Mar", contract: selectedSite.contractDemand, actual: selectedSite.actualDemand + 0.1 },
-    { month: "Apr", contract: selectedSite.contractDemand, actual: selectedSite.actualDemand - 0.1 },
-    { month: "May", contract: selectedSite.contractDemand, actual: selectedSite.actualDemand },
+    { month: "Aug", actual: selectedSite.actualDemand - 0.7 },
+    { month: "Oct", actual: selectedSite.actualDemand - 0.5 },
+    { month: "Dec", actual: selectedSite.actualDemand - 0.4 },
+    { month: "Feb", actual: selectedSite.actualDemand - 0.6 },
+    { month: "Apr", actual: selectedSite.actualDemand - 0.2 },
+    { month: "Jun", actual: selectedSite.actualDemand - 1.1 },
+  ];
+  const nodeUsageTrend = [
+    { month: "Aug", actual: 58 },
+    { month: "Oct", actual: 61 },
+    { month: "Dec", actual: 63 },
+    { month: "Feb", actual: 62 },
+    { month: "Apr", actual: 57 },
+    { month: "Jun", actual: 43 },
   ];
 
   const distributionData = selected.regions.map((region) => ({ name: region.name, sites: region.sites, usage: region.usage }));
 
   const toggleNode = (id: string) => setExpandedNodes((prev) => ({ ...prev, [id]: !prev[id] }));
-  const toggleContract = (id: string) => setExpandedContracts((prev) => ({ ...prev, [id]: !prev[id] }));
   const selectSite = (siteId: string) => {
     const site = siteById[siteId];
     if (site) setSelectedEntity({ type: "site", id: siteId, name: site.site });
@@ -2298,9 +2474,9 @@ function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerReco
             <Icon name={isOpen ? "expand_more" : "chevron_right"} size={15} />
           </button>
           <button type="button" onClick={() => selectNode(node)} className="flex min-w-0 flex-1 items-center gap-2 text-left">
-            <Icon name="apartment" size={15} className="text-emerald-700 dark:text-emerald-300" />
-            <span className="truncate font-medium text-slate-800 dark:text-slate-200">{node.name}</span>
-            <span className="ml-auto rounded bg-slate-100 px-2 py-1 text-xs text-slate-500 dark:bg-slate-800">{node.count}</span>
+            <Icon name="apartment" size={15} className="shrink-0 text-emerald-700 dark:text-emerald-300" />
+            <span className="min-w-0 flex-1 truncate font-medium text-slate-800 dark:text-slate-200">{node.name}</span>
+            <span className="shrink-0 rounded bg-slate-100 px-2 py-1 text-xs text-slate-500 dark:bg-slate-800">{node.count}</span>
           </button>
         </div>
         {isOpen && (
@@ -2335,73 +2511,127 @@ function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerReco
     );
   };
 
-  const contractPanel = (
-    <Panel className="p-5 xl:col-span-12">
-      <SectionHeader title="Contract Details" sub="Commercial contract structures and contract periods associated to this customer." />
-      <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-950/60 dark:text-slate-400">
-            <tr>{["", "Contract", "Start Date", "End Date", "Products", "Sites"].map((h, i) => <th key={i} className="whitespace-nowrap px-4 py-3 text-left">{h}</th>)}</tr>
-          </thead>
-          <tbody>
-            {customerContracts.map((contract) => {
-              const expanded = expandedContracts[contract.id];
-              return (
-                <React.Fragment key={contract.id}>
-                  <tr className="border-t border-slate-200 hover:bg-slate-100/60 dark:border-slate-800 dark:hover:bg-slate-800/40">
-                    <td className="px-4 py-3">
-                      <button type="button" onClick={() => toggleContract(contract.id)} className="rounded-md border border-slate-300 p-1 text-slate-600 hover:border-emerald-400/60 hover:text-emerald-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-emerald-400/40 dark:hover:text-emerald-300">
-                        <Icon name={expanded ? "expand_more" : "chevron_right"} size={14} />
-                      </button>
-                    </td>
-                    <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">{contract.name}</td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{contract.startDate}</td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{contract.endDate}</td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{contract.products}</td>
-                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{contract.sites.toLocaleString()} associated sites</td>
-                  </tr>
-                  {expanded && (
-                    <tr className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/40">
-                      <td colSpan={6} className="px-4 py-5">
-                        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/60">
-                            <div className="text-xs uppercase tracking-wide text-slate-500">Swap Amount</div>
-                            <div className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{contract.swapAmount}</div>
-                          </div>
-                          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/60">
-                            <div className="text-xs uppercase tracking-wide text-slate-500">Associated Sites</div>
-                            <div className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">{contract.sites.toLocaleString()} total sites covered</div>
-                          </div>
-                          <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900/60">
-                            <div className="text-xs uppercase tracking-wide text-slate-500">Contract Terms</div>
-                            <div className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">{contract.terms}</div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </Panel>
-  );
+  const SPARK_POINT_COUNT = 24;
+  const sparkLabels = Array.from({ length: SPARK_POINT_COUNT }, (_, index) => {
+    const date = new Date(2026, 6, 31);
+    date.setDate(date.getDate() - (SPARK_POINT_COUNT - 1 - index));
+    return date.toLocaleDateString("en-AU", { day: "numeric", month: "short" });
+  });
+  /** Build a 24-point series that ends on `endValue`, with wave + jitter for Google-style movement. */
+  const makeSparkTrend = (
+    endValue: number,
+    shape: "rise" | "ease" | "volatile" | "decline",
+    precision = 0,
+  ) => {
+    const startFactor =
+      shape === "rise" ? 0.62 : shape === "ease" ? 1.28 : shape === "decline" ? 1.55 : 0.84;
+    const waveAmp =
+      shape === "volatile" ? 0.14 : shape === "rise" ? 0.07 : shape === "ease" ? 0.06 : 0.09;
+    const waveFreq = shape === "volatile" ? 2.4 : shape === "decline" ? 1.5 : 1.8;
+    // Deterministic jitter so each series reads differently without random flicker on re-render
+    const jitterSeed =
+      shape === "rise" ? 1.7 : shape === "ease" ? 2.3 : shape === "decline" ? 3.1 : 4.2;
+    // Small integer KPIs need additive wobble or rounding collapses the line to a flat step
+    const additiveAmp =
+      endValue === 0
+        ? shape === "decline"
+          ? 2.4
+          : 1.2
+        : endValue < 8 && precision === 0
+          ? Math.max(1.8, endValue * 0.9)
+          : endValue * waveAmp;
+    const base = endValue === 0 ? (shape === "decline" ? 6 : 1.5) : endValue;
+
+    return sparkLabels.map((label, index) => {
+      const t = index / (SPARK_POINT_COUNT - 1);
+      const drift = startFactor + (1 - startFactor) * t;
+      const wave = Math.sin(t * Math.PI * waveFreq + jitterSeed) * additiveAmp;
+      const jitter = Math.sin(index * 1.37 + jitterSeed * 2.1) * (additiveAmp * 0.35);
+      // Force the final point to land exactly on the KPI's current value
+      const raw =
+        index === SPARK_POINT_COUNT - 1
+          ? endValue
+          : endValue === 0
+            ? Math.max(0, base * (1 - t) + wave + jitter)
+            : base * drift + wave + jitter;
+      return {
+        label,
+        value: Number(Math.max(0, raw).toFixed(precision)),
+      };
+    });
+  };
+  const usageValue = Number.parseFloat(selected.usage.replace(/,/g, "")) || 0;
+  const unbilledValue = selected.unbilled * 100;
+  const debtValue = selected.debt * 100;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
-        <KpiCard compact showSparkline={false} icon="apartment" title="Sites" value={selected.sites.toLocaleString()} sub="Across customer hierarchy" tone="green" />
-        <KpiCard compact showSparkline={false} icon="bolt" title="Usage" value={selected.usage} sub="Current billing period" tone="green" />
-        <KpiCard compact showSparkline={false} icon="description" title="Draft Invoices" value="0" sub="Pending release" tone="blue" />
-        <KpiCard compact showSparkline={false} icon="credit_card" title="Unbilled Exposure" value={`¥${(selected.unbilled * 100).toFixed(0)}M`} sub="Open this cycle" tone="purple" />
-        <KpiCard compact showSparkline={false} emphasizeValue icon="warning" title="Open Exceptions" value={selected.exceptions} sub="Across customer sites" tone="amber" />
-        <KpiCard compact showSparkline={false} icon="account_balance" title="Outstanding Debt" value={`¥${(selected.debt * 100).toFixed(0)}M`} sub="Due or overdue" tone="green" />
+        <KpiCard
+          compact
+          icon="apartment"
+          title="Sites"
+          value={selected.sites.toLocaleString()}
+          sub="Across customer hierarchy"
+          tone="green"
+          sparklineData={makeSparkTrend(selected.sites, "rise")}
+          sparklineValueFormatter={(value) => `${value.toLocaleString()} sites`}
+        />
+        <KpiCard
+          compact
+          icon="bolt"
+          title="Usage"
+          value={selected.usage}
+          sub="Current billing period"
+          tone="green"
+          sparklineData={makeSparkTrend(usageValue, "volatile", 2)}
+          sparklineValueFormatter={(value) => `${value.toLocaleString()} GWh`}
+        />
+        <KpiCard
+          compact
+          icon="description"
+          title="Draft Invoices"
+          value="0"
+          sub="Pending release"
+          tone="blue"
+          sparklineData={makeSparkTrend(0, "decline")}
+          sparklineValueFormatter={(value) => `${value.toLocaleString()} invoices`}
+        />
+        <KpiCard
+          compact
+          icon="credit_card"
+          title="Unbilled Exposure"
+          value={`¥${unbilledValue.toFixed(0)}M`}
+          sub="Open this cycle"
+          tone="purple"
+          sparklineData={makeSparkTrend(unbilledValue, "volatile", 1)}
+          sparklineValueFormatter={(value) => `¥${value.toLocaleString()}M`}
+        />
+        <KpiCard
+          compact
+          emphasizeValue
+          icon="warning"
+          title="Open Exceptions"
+          value={selected.exceptions}
+          sub="Across customer sites"
+          tone="amber"
+          sparklineData={makeSparkTrend(Number(selected.exceptions), "ease")}
+          sparklineValueFormatter={(value) => `${value.toLocaleString()} exceptions`}
+        />
+        <KpiCard
+          compact
+          icon="account_balance"
+          title="Outstanding Debt"
+          value={`¥${debtValue.toFixed(0)}M`}
+          sub="Due or overdue"
+          tone="green"
+          sparklineData={makeSparkTrend(debtValue, "ease", 1)}
+          sparklineValueFormatter={(value) => `¥${value.toLocaleString()}M`}
+        />
       </div>
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-12">
-        <Panel className="min-h-[660px] p-5 xl:col-span-4 xl:row-span-5">
+      <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-12">
+        <Panel className="min-h-[420px] min-w-0 overflow-hidden p-5 xl:sticky xl:top-20 xl:z-10 xl:col-span-4 xl:flex xl:h-[calc(100vh-10rem)] xl:min-h-0 xl:self-start xl:flex-col">
           <SectionHeader title="Customer Hierarchy" sub="Select an account or site to view its details." />
           <div className="mb-4 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-400">
             <Icon name="search" size={15} />
@@ -2411,16 +2641,17 @@ function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerReco
             type="button"
             onClick={() => setSelectedEntity({ type: "node", id: "node-retail-group", name: selected.name })}
             className={cn(
-              "mb-4 flex w-full items-center gap-2 rounded-xl px-3 py-3 text-left font-semibold",
+              "mb-4 flex w-full min-w-0 items-center gap-2 rounded-xl px-3 py-3 text-left font-semibold",
               selectedEntity.id === "node-retail-group"
                 ? "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/40"
                 : "text-emerald-700 hover:bg-slate-100 dark:text-emerald-300 dark:hover:bg-slate-800",
             )}
           >
-            <Icon name="account_tree" size={16} /> {selected.name}
-            <span className="ml-auto rounded bg-slate-100 px-2 py-1 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">{selected.sites.toLocaleString()} sites</span>
+            <Icon name="account_tree" size={16} className="shrink-0" />
+            <span className="min-w-0 flex-1 truncate">{selected.name}</span>
+            <span className="ml-auto shrink-0 rounded bg-slate-100 px-2 py-1 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">{selected.sites.toLocaleString()} sites</span>
           </button>
-          <div className="max-h-[720px] overflow-auto pr-1 text-sm">
+          <div className="min-h-0 flex-1 overflow-y-auto pr-1 text-sm">
             {selected.sites === 1 ? (
               <button
                 type="button"
@@ -2438,15 +2669,16 @@ function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerReco
         </Panel>
 
         {isSite ? (
-          <div className="space-y-4 xl:col-span-8">
+          <div className="min-w-0 space-y-4 xl:col-span-8">
             <Panel className="p-5">
               <SectionHeader
                 title={`Site Details: ${displaySiteName}`}
                 action={
                   <div className="flex flex-wrap gap-2">
-                    {selectedSite.creditTags.map((tag) => (
-                      <span key={tag} className="rounded-md bg-slate-100 px-2 py-1 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">{tag}</span>
-                    ))}
+                    <span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{selectedSite.state}</span>
+                    <span className="rounded-md bg-blue-50 px-2 py-1 text-[10px] font-medium text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">{selectedSite.billing}</span>
+                    <span className="rounded-md bg-slate-100 px-2 py-1 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">{selectedSite.payment}</span>
+                    <span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300">{selectedSite.nmi.slice(-10)}</span>
                   </div>
                 }
               />
@@ -2518,7 +2750,7 @@ function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerReco
 
               <Panel className="p-4">
                 <SectionHeader title="Meter Data" action={<WidgetDownloadAction />} />
-                <p className={cn("text-sm font-medium", selectedSite.meterStatus === "Complete" ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300")}>
+                <p className={cn("text-sm font-medium", selectedSite.meterStatus === "Complete" ? "text-emerald-700 dark:text-amber-300" : "text-amber-700 dark:text-amber-300")}>
                   {selectedSite.meterStatus === "Complete" ? "Complete — interval data available" : `Incomplete — ${selectedSite.meterStatus}`}
                 </p>
                 <p className="mt-2 text-xs text-slate-500">Checked for interval data on the latest processing date.</p>
@@ -2541,9 +2773,23 @@ function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerReco
 
               <Panel className="p-4">
                 <SectionHeader title="Certificate Details" action={<WidgetDownloadAction />} />
-                <p className="text-xs text-slate-500">
-                  {selectedSite.cert || "No environmental certificate products for this site account."}
+                <p className="mb-3 text-xs leading-relaxed text-slate-500">
+                  {selectedSite.cert || "Certificate reconciliation aligned with the current reporting period."}
                 </p>
+                <div className="overflow-hidden rounded-lg border border-slate-200 text-[10px] dark:border-slate-800">
+                  <div className="grid grid-cols-[1.4fr_1fr_.8fr] bg-slate-50 px-3 py-2 font-semibold text-slate-500 dark:bg-slate-950/60 dark:text-slate-400">
+                    <span>Certificate type</span><span>Consumption</span><span>Mandate</span>
+                  </div>
+                  {[
+                    ["LRET Certificates", "—", "0%"],
+                    ["SRET Certificates", "—", "0%"],
+                    ["Non-fossil Certificates", selectedSite.cert.includes("active") ? selectedSite.usage : "—", selectedSite.cert.includes("active") ? "100%" : "0%"],
+                  ].map(([type, consumption, mandate]) => (
+                    <div key={type} className="grid grid-cols-[1.4fr_1fr_.8fr] border-t border-slate-200 px-3 py-2 text-slate-700 dark:border-slate-800 dark:text-slate-300">
+                      <span>{type}</span><span>{consumption}</span><span>{mandate}</span>
+                    </div>
+                  ))}
+                </div>
               </Panel>
 
               <Panel className="min-h-28 p-4">
@@ -2566,86 +2812,164 @@ function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerReco
             <LoadDisaggregationPanel siteId={selectedSite.id} siteName={displaySiteName} customerId={selected.id} />
           </div>
         ) : (
-          <>
-            <Panel className="p-5 xl:col-span-8">
-              <SectionHeader title={`Node Summary: ${selectedNode.name}`} sub="Aggregated customer view for the selected hierarchy node." />
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
-                  <div className="text-xs text-slate-500">Sites</div>
-                  <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{selectedNode.sites.toLocaleString()}</div>
+          <div className="min-w-0 space-y-4 xl:col-span-8">
+            <Panel className="p-5">
+              <SectionHeader
+                title={`Account Details: ${selectedNode.name}`}
+                action={
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">Active</span>
+                    <span className="rounded-md bg-blue-50 px-2 py-1 text-[10px] font-medium text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">Billing</span>
+                    <span className="rounded-md bg-slate-100 px-2 py-1 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">Direct debit</span>
+                  </div>
+                }
+              />
+              <div className="flex items-center gap-3 border-b border-slate-200 pb-4 dark:border-slate-800">
+                <div className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-500/20 dark:text-purple-300">
+                  {selectedNode.name.split(" ").map((part) => part[0]).slice(0, 2).join("").slice(0, 2) || "AC"}
+                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900" />
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
-                  <div className="text-xs text-slate-500">kWh</div>
-                  <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{selectedNode.usage}</div>
-                </div>
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
-                  <div className="text-xs text-slate-500">Billed ¥</div>
-                  <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{selectedNode.billed}</div>
-                </div>
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
-                  <div className="text-xs text-slate-500">Unbilled</div>
-                  <div className="mt-1 text-2xl font-semibold text-slate-900 dark:text-white">{selectedNode.unbilled}</div>
-                </div>
-              </div>
-            </Panel>
-
-            <Panel className="p-5 xl:col-span-4">
-              <SectionHeader title="Contact Details" />
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
-                <div className="text-lg font-semibold text-slate-900 dark:text-white">{selectedNode.contact}</div>
-                <div className="mt-1 text-sm text-slate-500 dark:text-slate-400">{selectedNode.role}</div>
-                <div className="mt-4 space-y-2 text-sm text-slate-700 dark:text-slate-300">
-                  <div>{selectedNode.email}</div>
-                  <div>{selectedNode.phone}</div>
+                <div className="min-w-0">
+                  <div className="truncate text-base font-semibold text-slate-900 dark:text-white">TA{String(selectedNode.sites).padStart(6, "0")}</div>
+                  <div className="mt-0.5 truncate text-xs text-slate-500">{selectedNode.name}</div>
+                  <div className="text-xs text-slate-500">{selected.segment}</div>
                 </div>
               </div>
-            </Panel>
 
-            {contractPanel}
-
-            <Panel className="p-5 xl:col-span-4">
-              <SectionHeader title="Geographic Distribution" sub="Sites in the selected contract or node." />
-              <div className="h-56">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={distributionData} layout="vertical" margin={{ left: 10, right: 20 }}>
-                    <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" tick={{ fill: chart.axis, fontSize: 11 }} width={95} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={chart.tooltipStyle} />
-                    <Bar dataKey="sites" fill={colors.green} radius={[0, 8, 8, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </Panel>
-
-            <Panel className="p-5 xl:col-span-4">
-              <SectionHeader title="Customer Performance" sub="Billed and paid performance." />
-              <div className="space-y-4">
-                {([
-                  ["Billed", selectedNode.billed, 86],
-                  ["Paid", selectedNode.paid, 74],
-                  ["Overdue", selectedNode.overdue, 18],
-                ] as Array<[string, string, number]>).map(([label, value, width]) => (
+              <div className="grid grid-cols-3 gap-x-6 gap-y-4 border-b border-slate-200 py-4 sm:grid-cols-6 dark:border-slate-800">
+                {[
+                  ["Sites", selectedNode.sites.toLocaleString()],
+                  ["Usage", selectedNode.usage],
+                  ["Billed", selectedNode.billed],
+                  ["Unbilled", selectedNode.unbilled],
+                  ["Overdue", selectedNode.overdue],
+                  ["Balance", selectedNode.overdue],
+                ].map(([label, value]) => (
                   <div key={label}>
-                    <div className="mb-1 flex justify-between text-sm">
-                      <span className="text-slate-700 dark:text-slate-300">{label}</span>
-                      <span className="text-slate-900 dark:text-white">{value}</span>
-                    </div>
-                    <div className="h-2 rounded bg-slate-200 dark:bg-slate-800">
-                      <div className="h-2 rounded bg-emerald-500 dark:bg-emerald-400" style={{ width: `${width}%` }} />
-                    </div>
+                    <div className="text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
+                    <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">{value}</div>
                   </div>
                 ))}
               </div>
-            </Panel>
 
-            <Panel className="p-5 xl:col-span-4">
-              <SectionHeader title="Payment Insights" />
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
-                <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Insight</div>
-                <p className="mt-2 text-sm leading-relaxed text-slate-700 dark:text-slate-300">{selectedNode.paymentInsight}</p>
+              <div className="grid grid-cols-1 gap-5 pt-4 text-xs md:grid-cols-3">
+                <div>
+                  <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Account details</div>
+                  <div className="space-y-2 text-slate-700 dark:text-slate-300">
+                    <div className="flex items-start gap-2"><Icon name="badge" size={14} className="text-emerald-600" /><span>TA{String(selectedNode.sites).padStart(6, "0")}</span></div>
+                    <div className="flex items-start gap-2"><Icon name="folder" size={14} className="text-emerald-600" /><span>{selectedNode.name}</span></div>
+                    <div className="flex items-start gap-2"><Icon name="bolt" size={14} className="text-emerald-600" /><span>{selected.segment}</span></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Primary contact</div>
+                  <div className="space-y-2 text-slate-700 dark:text-slate-300">
+                    <div className="flex items-start gap-2"><Icon name="person" size={14} className="text-emerald-600" /><span>{selectedNode.contact}</span></div>
+                    <div className="flex min-w-0 items-start gap-2"><Icon name="mail" size={14} className="shrink-0 text-emerald-600" /><span className="truncate">{selectedNode.email}</span></div>
+                    <div className="flex items-start gap-2"><Icon name="phone" size={14} className="text-emerald-600" /><span>{selectedNode.phone}</span></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Financial summary</div>
+                  <div className="space-y-2">
+                    <div className="flex justify-between gap-3"><span className="text-slate-500">Account balance</span><span className="font-medium text-emerald-700 dark:text-emerald-300">{selectedNode.overdue}</span></div>
+                    <div className="flex justify-between gap-3"><span className="text-slate-500">Last payment</span><span className="font-medium text-slate-900 dark:text-white">{selectedNode.paid}</span></div>
+                    <div className="flex justify-between gap-3"><span className="text-slate-500">Contract end</span><span className="font-medium text-slate-900 dark:text-white">—</span></div>
+                    <div className="flex justify-between gap-3"><span className="text-slate-500">Annual consumption</span><span className="font-medium text-slate-900 dark:text-white">{selectedNode.usage}</span></div>
+                  </div>
+                </div>
               </div>
             </Panel>
-          </>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Panel className="min-h-36 p-4">
+                <SectionHeader title="Invoices" action={<WidgetDownloadAction />} />
+                <div className="grid grid-cols-2 gap-6">
+                  <div><div className="text-[10px] uppercase tracking-wide text-slate-400">Unbilled exposure</div><div className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">{selectedNode.unbilled}</div></div>
+                  <div><div className="text-[10px] uppercase tracking-wide text-slate-400">Overdue</div><div className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">{selectedNode.overdue}</div></div>
+                </div>
+              </Panel>
+
+              <Panel className="min-h-36 p-4">
+                <SectionHeader title="Billing & payments" action={<WidgetDownloadAction />} />
+                <p className="mb-4 text-xs text-slate-500">Billed and paid performance for the current quarter.</p>
+                <div className="space-y-3 text-xs">
+                  <div>
+                    <div className="mb-1 flex justify-between"><span>Billed</span><span className="font-semibold">{selectedNode.billed}</span></div>
+                    <div className="h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800"><div className="h-full w-[86%] rounded-full bg-slate-400 dark:bg-slate-500" /></div>
+                    <div className="mt-1 flex gap-3 text-[10px] text-slate-500"><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-500" />Paid {selectedNode.paid}</span><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-slate-300" />Not paid</span></div>
+                  </div>
+                  <div>
+                    <div className="mb-1 flex justify-between"><span>Pending to be billed</span><span className="font-semibold">{selectedNode.unbilled}</span></div>
+                    <div className="h-2 overflow-hidden rounded-full bg-rose-100 dark:bg-rose-500/15"><div className="h-full w-[78%] rounded-full bg-emerald-500" /></div>
+                    <div className="mt-1 flex gap-3 text-[10px] text-slate-500"><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-emerald-500" />Ready to send</span><span><i className="mr-1 inline-block h-2 w-2 rounded-full bg-rose-400" />Needs action</span></div>
+                  </div>
+                </div>
+              </Panel>
+
+              <Panel className="p-4">
+                <SectionHeader title="Usage trend" action={<span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">Monthly</span>} />
+                <div className="h-36">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RLineChart data={nodeUsageTrend}>
+                      <CartesianGrid stroke={chart.grid} strokeDasharray="3 3" />
+                      <XAxis dataKey="month" tick={{ fill: chart.axis, fontSize: 10 }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: chart.axis, fontSize: 10 }} axisLine={false} tickLine={false} width={30} />
+                      <Tooltip contentStyle={chart.tooltipStyle} />
+                      <Line type="monotone" dataKey="actual" stroke={colors.green} strokeWidth={2} dot={false} />
+                    </RLineChart>
+                  </ResponsiveContainer>
+                </div>
+              </Panel>
+
+              <Panel className="p-4">
+                <SectionHeader
+                  title="Geographic distribution"
+                  action={
+                    <div className="flex rounded-lg bg-slate-100 p-0.5 text-[10px] dark:bg-slate-800">
+                      {(["region", "site"] as const).map((mode) => (
+                        <button
+                          key={mode}
+                          type="button"
+                          onClick={() => setDistributionMode(mode)}
+                          className={cn(
+                            "rounded-md px-2.5 py-1 font-medium capitalize transition",
+                            distributionMode === mode
+                              ? "bg-white text-emerald-700 shadow-sm dark:bg-slate-700 dark:text-emerald-300"
+                              : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200",
+                          )}
+                        >
+                          {mode}
+                        </button>
+                      ))}
+                    </div>
+                  }
+                />
+                <p className="text-xs text-slate-500">
+                  {distributionMode === "region"
+                    ? "Active site count by region — darker teal indicates more sites."
+                    : "Active site locations across the selected account."}
+                </p>
+                <JapanDistributionMap regions={selected.regions} mode={distributionMode} />
+              </Panel>
+
+              <Panel className="min-h-36 p-4">
+                <SectionHeader title="Contract Details" />
+                <p className="text-xs text-slate-500">No active contract for this account.</p>
+              </Panel>
+
+              <Panel className="min-h-36 p-4">
+                <SectionHeader title="Exceptions" action={<WidgetDownloadAction />} />
+                <div className="grid grid-cols-2 gap-4 text-xs">
+                  <div><div className="text-[10px] uppercase tracking-wide text-slate-400">Open exceptions</div><div className="mt-1 text-sm font-semibold text-amber-700 dark:text-amber-300">{selected.exceptions}</div></div>
+                  <div><div className="text-[10px] uppercase tracking-wide text-slate-400">Breached SLA</div><div className="mt-1 text-sm font-semibold text-amber-700 dark:text-amber-300">{Math.max(0, Math.round(selected.exceptions * 0.14))}</div></div>
+                  <div><div className="text-[10px] uppercase tracking-wide text-slate-400">Due this week</div><div className="mt-1 font-medium text-slate-900 dark:text-white">0</div></div>
+                  <div><div className="text-[10px] uppercase tracking-wide text-slate-400">Due today</div><div className="mt-1 font-medium text-slate-900 dark:text-white">0</div></div>
+                  <div><div className="text-[10px] uppercase tracking-wide text-slate-400">Billing due this month</div><div className="mt-1 font-medium text-slate-900 dark:text-white">0</div></div>
+                </div>
+              </Panel>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -2697,23 +3021,25 @@ function ExceptionWorkspace() {
   const [period, setPeriod] = useState(periodOptions[0]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex flex-wrap items-end gap-2">
         <SelectLike compact label="Segment" value={segment} options={segmentOptions} onChange={setSegment} />
         <SelectLike compact label="Period" value={period} options={periodOptions} onChange={setPeriod} />
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => {
             setSegment(segmentOptions[0]);
             setPeriod(periodOptions[0]);
           }}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 shadow-sm hover:border-slate-400 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+          className="gap-1.5 text-slate-600 dark:text-slate-300 dark:hover:text-white"
         >
           <Icon name="refresh" size={14} /> Reset filters
-        </button>
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-6">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
         <KpiCard compact showSparkline={false} emphasizeValue icon="warning" title="Open Exceptions" value="3,857" sub="Currently unresolved" tone="amber" />
         <KpiCard compact showSparkline={false} emphasizeValue icon="priority_high" title="High Severity" value="3,669" sub="Critical and high priority" tone="red" />
         <KpiCard compact showSparkline={false} icon="task_alt" title="Resolved" value="51" sub="Closed in current month" tone="green" />
@@ -2722,7 +3048,7 @@ function ExceptionWorkspace() {
         <KpiCard compact showSparkline={false} icon="autorenew" title="Auto-Resolved" value="98%" sub="Avg close rate in period" tone="green" />
       </div>
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Panel className="p-5">
           <SectionHeader title="Open by Sub-status" sub="Workflow state for unresolved exceptions" action={<WidgetDownloadAction />} />
           <div className="mt-8">
@@ -2765,7 +3091,7 @@ function ExceptionWorkspace() {
         </Panel>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Panel className="p-5">
           <SectionHeader title="Exception Volume Trend" sub="Created vs resolved — last 12 months" action={<WidgetDownloadAction />} />
           <div className="h-64">
@@ -2817,7 +3143,7 @@ function ExceptionWorkspace() {
         </Panel>
       </div>
 
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <Panel className="p-5">
           <SectionHeader title="Exception Volume by Type" sub="Open exceptions by severity and area" action={<WidgetDownloadAction />} />
           <div className="overflow-hidden rounded-xl border border-slate-200 text-xs dark:border-slate-800">
@@ -3078,7 +3404,7 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
   return (
     <div
       className={cn(
-        "sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur-xl transition-[padding] duration-200 dark:border-slate-800 dark:bg-slate-950/85",
+        "sticky top-0 z-20 border-b border-slate-200 bg-[#F3F4F6]/95 backdrop-blur-xl transition-[padding] duration-200 dark:border-slate-700 dark:bg-slate-900/90",
         compact ? "px-7 py-2" : "px-7 py-5",
       )}
     >
@@ -3134,6 +3460,11 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
 
 const PANEL_TABS = ["Adora", "Control Panel", "X-Sell"] as const;
 type PanelTab = (typeof PANEL_TABS)[number];
+const PANEL_TAB_ICONS: Record<PanelTab, string> = {
+  Adora: "auto_awesome",
+  "Control Panel": "tune",
+  "X-Sell": "add_shopping_cart",
+};
 
 const TASK_CATEGORIES = [
   { name: "Account Tasks", count: null, icon: "group" as const, hot: false },
@@ -3737,14 +4068,20 @@ function InsightContent({
   selected,
   onClose,
   showRailHeader = false,
+  activePanelTab: controlledPanelTab,
+  onPanelTabChange,
 }: {
   activeView: ViewKey;
   selected: CustomerRecord;
   onClose?: () => void;
   showRailHeader?: boolean;
+  activePanelTab?: PanelTab;
+  onPanelTabChange?: (tab: PanelTab) => void;
 }) {
   const isCustomer = activeView === "Customer Hierarchy";
-  const [activePanelTab, setActivePanelTab] = useState<PanelTab>("Adora");
+  const [internalPanelTab, setInternalPanelTab] = useState<PanelTab>("Adora");
+  const activePanelTab = controlledPanelTab ?? internalPanelTab;
+  const setActivePanelTab = onPanelTabChange ?? setInternalPanelTab;
   const [xSellView, setXSellView] = useState<string | null>(null);
 
   return (
@@ -3810,22 +4147,45 @@ function RightInsightRail({
   collapsed: boolean;
   onToggle: () => void;
 }) {
+  const [activePanelTab, setActivePanelTab] = useState<PanelTab>("Adora");
+
   if (collapsed) {
     return (
-      <aside className="hidden w-14 shrink-0 flex-col items-center border-l border-slate-200 bg-white/85 py-4 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/95 xl:flex">
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-label="Expand portfolio summary panel"
-          title="Portfolio Summary"
-          className="group relative flex h-10 w-10 items-center justify-center rounded-lg text-emerald-700 transition-colors hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-500/15"
-        >
-          <Icon name="auto_awesome" size={20} className="text-emerald-700 dark:text-emerald-300" />
-          <span
-            aria-hidden
-            className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)] dark:bg-emerald-400 dark:shadow-[0_0_6px_rgba(52,211,153,0.8)]"
-          />
-        </button>
+      <aside
+        className={cn(
+          "hidden w-14 shrink-0 flex-col items-center py-4 xl:flex",
+          IOS_CHROME_CLASS
+        )}
+        aria-label="Insight panel"
+      >
+        <div className="flex flex-col items-center gap-2">
+          {PANEL_TABS.map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => {
+                setActivePanelTab(tab);
+                onToggle();
+              }}
+              aria-label={`Open ${tab}`}
+              title={tab}
+              className={cn(
+                "group relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+                activePanelTab === tab
+                  ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                  : "text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
+              )}
+            >
+              <Icon name={PANEL_TAB_ICONS[tab]} size={20} />
+              {tab === "Adora" ? (
+                <span
+                  aria-hidden
+                  className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)] dark:bg-emerald-400 dark:shadow-[0_0_6px_rgba(52,211,153,0.8)]"
+                />
+              ) : null}
+            </button>
+          ))}
+        </div>
         <div className="mt-auto">
           <button
             type="button"
@@ -3841,12 +4201,19 @@ function RightInsightRail({
   }
 
   return (
-    <aside className="hidden w-80 shrink-0 overflow-hidden border-l border-slate-200 bg-white/85 p-3 backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/95 xl:flex xl:flex-col">
+    <aside
+      className={cn(
+        "hidden w-80 shrink-0 overflow-hidden p-3 xl:flex xl:flex-col",
+        IOS_CHROME_CLASS
+      )}
+    >
       <InsightContent
         activeView={activeView}
         selected={selected}
         onClose={onToggle}
         showRailHeader
+        activePanelTab={activePanelTab}
+        onPanelTabChange={setActivePanelTab}
       />
     </aside>
   );
@@ -4168,9 +4535,13 @@ function CommercialEnvironmentContent({
             );
           })()}
 
-          {/* ────── Main pane: dashboard with radial glow + right rail ────── */}
+          {/* ────── Main pane: dashboard with radial glow ────── */}
           <main
-            className="flex min-w-0 flex-1 overflow-hidden rounded-tl-[1.5rem] text-slate-700 dark:text-slate-100"
+            className={cn(
+              "flex min-w-0 flex-1 overflow-hidden rounded-tl-[1.5rem] text-slate-700 dark:text-slate-100",
+              // Mirror the left-nav curve on the right when the insight rail is collapsed
+              aiRailCollapsed && "xl:rounded-tr-[1.5rem]"
+            )}
             style={{
               background: isLight
                 ? "radial-gradient(circle at top left, #EBEDF2 0, #F9F9FB 38%, #F9F9FB 100%)"
@@ -4189,13 +4560,13 @@ function CommercialEnvironmentContent({
               />
               <div className="p-7">{content}</div>
             </div>
-            <RightInsightRail
-              activeView={activeView}
-              selected={selectedCustomer}
-              collapsed={aiRailCollapsed}
-              onToggle={() => setAiRailCollapsed((v) => !v)}
-            />
           </main>
+          <RightInsightRail
+            activeView={activeView}
+            selected={selectedCustomer}
+            collapsed={aiRailCollapsed}
+            onToggle={() => setAiRailCollapsed((v) => !v)}
+          />
           <Sheet open={aiSheetOpen} onOpenChange={setAiSheetOpen}>
             <SheetContent
               side="right"

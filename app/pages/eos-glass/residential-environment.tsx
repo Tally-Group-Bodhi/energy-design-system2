@@ -415,6 +415,12 @@ const COMBINED_FORECAST = [
 ];
 
 const PANEL_TABS = ["Adora", "Control Panel", "X-Sell"] as const;
+type PanelTab = (typeof PANEL_TABS)[number];
+const PANEL_TAB_ICONS: Record<PanelTab, string> = {
+  Adora: "auto_awesome",
+  "Control Panel": "tune",
+  "X-Sell": "add_shopping_cart",
+};
 
 /* ────────── Bill Compare data ────────── */
 const BILL_COMPARE_BILLS = [
@@ -1192,7 +1198,7 @@ function ResidentialEnvironmentContent({
   const [selectedAccountAddress, setSelectedAccountAddress] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(searchParams.get("expanded") === "true");
   const [controlPanelOpen, setControlPanelOpen] = useState(true);
-  const [activePanelTab, setActivePanelTab] = useState<(typeof PANEL_TABS)[number]>("Adora");
+  const [activePanelTab, setActivePanelTab] = useState<PanelTab>("Adora");
   const [adoraPhase, setAdoraPhase] = useState<"idle" | "thinking" | "typing" | "done">("idle");
   const [adoraCharCount, setAdoraCharCount] = useState(0);
   const [callDemoStep, setCallDemoStep] = useState<CallDemoStep>("waiting");
@@ -1696,17 +1702,6 @@ function ResidentialEnvironmentContent({
 
             {/* Scrollable content — glass background */}
             <div className="relative min-w-0 flex-1 overflow-y-auto bg-transparent">
-              {/* Control panel toggle (collapsed state) */}
-              {!controlPanelOpen && (
-                <button
-                  type="button"
-                  onClick={() => setControlPanelOpen(true)}
-                  className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-lg backdrop-blur-xl border border-gray-200/80 text-gray-600 transition-all hover:bg-white hover:text-[#2C365D] hover:shadow-xl dark:bg-white/[0.08] dark:border-white/[0.12] dark:text-slate-400 dark:hover:bg-white/[0.12] dark:hover:text-[#00D2A2]"
-                  aria-label="Open control panel"
-                >
-                  <Icon name="left_panel_open" size={20} />
-                </button>
-              )}
         <div className="min-h-full w-full px-6 py-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="mb-6 flex justify-center">
@@ -3110,10 +3105,61 @@ function ResidentialEnvironmentContent({
             {/* Right-hand control panel */}
             <aside
               className={cn(
-                "shrink-0 overflow-hidden py-4 pr-3 transition-[width,padding] duration-300 ease-in-out",
-                controlPanelOpen ? "w-[306px]" : "w-0 pr-0"
+                "shrink-0 overflow-hidden transition-[width,padding] duration-300 ease-in-out",
+                controlPanelOpen
+                  ? "w-[306px] py-4 pr-3"
+                  : cn("relative w-14 overflow-visible py-4", IOS_CHROME_CLASS)
               )}
+              aria-label="Insight panel"
             >
+              {!controlPanelOpen ? (
+                <div className="flex h-full flex-col items-center">
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "pointer-events-none absolute -left-6 top-0 h-6 w-6",
+                      IOS_CHROME_CLASS
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "block h-full w-full rounded-tr-[1.5rem]",
+                        PANE_LIGHT,
+                        PANE_DARK
+                      )}
+                    />
+                  </span>
+                  <div className="flex flex-col items-center gap-2">
+                    {PANEL_TABS.map((tab) => (
+                      <button
+                        key={tab}
+                        type="button"
+                        onClick={() => {
+                          setActivePanelTab(tab);
+                          if (tab !== "X-Sell") setXSellView(null);
+                          setControlPanelOpen(true);
+                        }}
+                        aria-label={`Open ${tab}`}
+                        title={tab}
+                        className={cn(
+                          "group relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+                          activePanelTab === tab
+                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                            : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
+                        )}
+                      >
+                        <Icon name={PANEL_TAB_ICONS[tab]} size={20} />
+                        {tab === "Adora" ? (
+                          <span
+                            aria-hidden
+                            className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)] dark:bg-emerald-400 dark:shadow-[0_0_6px_rgba(52,211,153,0.8)]"
+                          />
+                        ) : null}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
               <div
                 className={cn(
                   "flex h-full min-w-[290px] flex-col overflow-hidden rounded-2xl",
@@ -3447,6 +3493,7 @@ function ResidentialEnvironmentContent({
                 )}
               </div>
               </div>
+              )}
             </aside>
           </main>
         </div>
