@@ -41,7 +41,7 @@ import {
 import DensityModeSwitch from "@/components/DensityModeSwitch/DensityModeSwitch";
 import ThemeModeSwitch from "@/components/ThemeModeSwitch/ThemeModeSwitch";
 import { Avatar, AvatarFallback } from "@/components/Avatar/Avatar";
-import CompanionWidget from "@/components/CompanionWidget/CompanionWidget";
+import CompanionWidget, { CompanionCompactIcon } from "@/components/CompanionWidget/CompanionWidget";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { secondaryColors } from "@/lib/tokens/colors";
@@ -1199,6 +1199,7 @@ function ResidentialEnvironmentContent({
   const [isExpanded, setIsExpanded] = useState(searchParams.get("expanded") === "true");
   const [controlPanelOpen, setControlPanelOpen] = useState(true);
   const [activePanelTab, setActivePanelTab] = useState<PanelTab>("Adora");
+  const [companionOpen, setCompanionOpen] = useState(false);
   const [adoraPhase, setAdoraPhase] = useState<"idle" | "thinking" | "typing" | "done">("idle");
   const [adoraCharCount, setAdoraCharCount] = useState(0);
   const [callDemoStep, setCallDemoStep] = useState<CallDemoStep>("waiting");
@@ -3158,6 +3159,20 @@ function ResidentialEnvironmentContent({
                       </button>
                     ))}
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setCompanionOpen(true)}
+                    aria-label="Open Companion"
+                    title="Companion"
+                    className={cn(
+                      "mt-auto group relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+                      companionOpen
+                        ? "bg-orange-50 text-[#E65100] dark:bg-orange-500/15 dark:text-orange-300"
+                        : "text-gray-500 hover:bg-orange-50 hover:text-[#E65100] dark:text-slate-400 dark:hover:bg-orange-500/10 dark:hover:text-orange-300"
+                    )}
+                  >
+                    <CompanionCompactIcon />
+                  </button>
                 </div>
               ) : (
               <div
@@ -3583,7 +3598,12 @@ function ResidentialEnvironmentContent({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <CompanionWidget />
+      <CompanionWidget
+        open={companionOpen}
+        onOpenChange={setCompanionOpen}
+        // The collapsed control panel already carries a Companion icon
+        launcherClassName={controlPanelOpen ? undefined : "hidden"}
+      />
     </div>
   );
 }

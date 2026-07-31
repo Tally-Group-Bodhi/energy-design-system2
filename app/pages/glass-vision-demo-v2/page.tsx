@@ -41,7 +41,9 @@ import {
 import DensityModeSwitch from "@/components/DensityModeSwitch/DensityModeSwitch";
 import ThemeModeSwitch from "@/components/ThemeModeSwitch/ThemeModeSwitch";
 import { Avatar, AvatarFallback } from "@/components/Avatar/Avatar";
-import CompanionWidget from "@/components/CompanionWidget/CompanionWidget";
+import CompanionWidget, {
+  CompanionCompactIcon,
+} from "@/components/CompanionWidget/CompanionWidget";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { secondaryColors } from "@/lib/tokens/colors";
@@ -403,6 +405,12 @@ const COMBINED_FORECAST = [
 ];
 
 const PANEL_TABS = ["Adora", "Control Panel", "X-Sell"] as const;
+type PanelTab = (typeof PANEL_TABS)[number];
+const PANEL_TAB_ICONS: Record<PanelTab, string> = {
+  Adora: "auto_awesome",
+  "Control Panel": "tune",
+  "X-Sell": "add_shopping_cart",
+};
 
 /* ────────── Bill Compare data ────────── */
 const BILL_COMPARE_BILLS = [
@@ -1177,7 +1185,8 @@ function GlassVisionContent() {
   const [selectedAccountAddress, setSelectedAccountAddress] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(searchParams.get("expanded") === "true");
   const [controlPanelOpen, setControlPanelOpen] = useState(true);
-  const [activePanelTab, setActivePanelTab] = useState<(typeof PANEL_TABS)[number]>("Adora");
+  const [activePanelTab, setActivePanelTab] = useState<PanelTab>("Adora");
+  const [companionOpen, setCompanionOpen] = useState(false);
   const [adoraPhase, setAdoraPhase] = useState<"idle" | "thinking" | "typing" | "done">("idle");
   const [adoraCharCount, setAdoraCharCount] = useState(0);
   const [callDemoStep, setCallDemoStep] = useState<CallDemoStep>("waiting");
@@ -1534,6 +1543,7 @@ function GlassVisionContent() {
           <main
             className={cn(
               "flex min-w-0 flex-1 overflow-hidden rounded-tl-[1.5rem]",
+              !controlPanelOpen && "rounded-tr-[1.5rem]",
               PANE_LIGHT,
               PANE_DARK
             )}
@@ -1669,17 +1679,6 @@ function GlassVisionContent() {
 
             {/* Scrollable content — glass background */}
             <div className="relative min-w-0 flex-1 overflow-y-auto bg-transparent">
-              {/* Control panel toggle (collapsed state) */}
-              {!controlPanelOpen && (
-                <button
-                  type="button"
-                  onClick={() => setControlPanelOpen(true)}
-                  className="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 shadow-lg backdrop-blur-xl border border-gray-200/80 text-gray-600 transition-all hover:bg-white hover:text-[#2C365D] hover:shadow-xl dark:bg-white/[0.08] dark:border-white/[0.12] dark:text-slate-400 dark:hover:bg-white/[0.12] dark:hover:text-[#00D2A2]"
-                  aria-label="Open control panel"
-                >
-                  <Icon name="left_panel_open" size={20} />
-                </button>
-              )}
         <div className="min-h-full w-full px-6 py-4">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="mb-6 flex justify-center">
@@ -2291,7 +2290,7 @@ function GlassVisionContent() {
                     />
                   </button>
                   {!collapsedAccountSections.has(section.type) && (
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {sectionAccounts.map((acc) => {
                 const typeIcon = acc.type === "Residential" ? "home" : acc.type === "Commercial" ? "business" : "store";
                 const typeIconBg =
@@ -2325,15 +2324,15 @@ function GlassVisionContent() {
                         {/* Card summary — keeps its column width when expanded */}
                         <div className={cn(isSelected ? "w-72 shrink-0" : "")}>
                           {/* Header */}
-                          <div className="px-5 pt-5 pb-3">
-                            <div className="flex items-start justify-between mb-3">
+                          <div className="px-4 pb-2 pt-4">
+                            <div className="mb-2 flex items-start justify-between">
                               <div
                                 className={cn(
-                                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
+                                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
                                   typeIconBg
                                 )}
                               >
-                                <Icon name={typeIcon} size={20} />
+                                <Icon name={typeIcon} size={17} />
                               </div>
                               <div className="flex items-center gap-2">
                                 <span
@@ -2361,28 +2360,28 @@ function GlassVisionContent() {
                                 )}
                               </div>
                             </div>
-                            <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">
+                            <p className="text-xs font-semibold leading-snug text-gray-900 dark:text-slate-100">
                               {acc.address}
                             </p>
-                            <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-500">
+                            <p className="mt-0.5 text-[10px] text-gray-500 dark:text-slate-500">
                               NMI: {acc.nmi}
                               {acc.accNumber ? ` · ACC#: ${acc.accNumber}` : ""}
                             </p>
                           </div>
 
                           {/* Badges */}
-                          <div className="flex flex-wrap items-center gap-1.5 px-5 pb-3">
-                            <span className={cn("rounded-lg px-2 py-0.5 text-[11px] font-medium", typeIconBg)}>
+                          <div className="flex flex-wrap items-center gap-1 px-4 pb-2">
+                            <span className={cn("rounded-md px-1.5 py-0.5 text-[10px] font-medium", typeIconBg)}>
                               {acc.type}
                             </span>
-                            <span className="rounded-lg bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:bg-slate-600/40 dark:text-slate-400">
+                            <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-slate-600/40 dark:text-slate-400">
                               {acc.fuel}
                             </span>
                             {acc.tags?.map((tag) => (
                               <span
                                 key={tag.label}
                                 className={cn(
-                                  "rounded-lg px-2 py-0.5 text-[11px] font-medium",
+                                  "rounded-md px-1.5 py-0.5 text-[10px] font-medium",
                                   tag.variant === "hardship"
                                     ? "text-red-700 dark:text-red-300"
                                     : "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
@@ -2395,10 +2394,10 @@ function GlassVisionContent() {
 
                           {/* Key metrics row */}
                           <div className="grid grid-cols-3 gap-px border-t border-gray-100 bg-gray-100 dark:border-white/[0.06] dark:bg-white/[0.04]">
-                            <div className="bg-white/90 px-4 py-3 dark:bg-white/[0.06]">
-                              <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">Balance</p>
+                            <div className="bg-white/90 px-3 py-2 dark:bg-white/[0.06]">
+                              <p className="text-[9px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">Balance</p>
                               <p className={cn(
-                                "mt-0.5 text-sm font-semibold",
+                                "mt-0.5 text-xs font-semibold",
                                 balancePillGreen
                                   ? "text-emerald-700 dark:text-emerald-300"
                                   : "text-red-700 dark:text-red-300"
@@ -2406,24 +2405,24 @@ function GlassVisionContent() {
                                 {acc.balance}
                               </p>
                             </div>
-                            <div className="bg-white/90 px-4 py-3 dark:bg-white/[0.06]">
-                              <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">Plan</p>
-                              <p className="mt-0.5 truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{acc.plan ?? "—"}</p>
+                            <div className="bg-white/90 px-3 py-2 dark:bg-white/[0.06]">
+                              <p className="text-[9px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">Plan</p>
+                              <p className="mt-0.5 truncate text-xs font-semibold text-gray-900 dark:text-slate-100">{acc.plan ?? "—"}</p>
                             </div>
-                            <div className="bg-white/90 px-4 py-3 dark:bg-white/[0.06]">
-                              <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">Billing</p>
-                              <p className="mt-0.5 truncate text-sm font-semibold text-gray-900 dark:text-slate-100">{acc.billing ?? "—"}</p>
+                            <div className="bg-white/90 px-3 py-2 dark:bg-white/[0.06]">
+                              <p className="text-[9px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">Billing</p>
+                              <p className="mt-0.5 truncate text-xs font-semibold text-gray-900 dark:text-slate-100">{acc.billing ?? "—"}</p>
                             </div>
                           </div>
 
                           {/* Sparkline + trend */}
                           {sparkline.length > 0 && !acc.isClosed && (
-                            <div className="px-5 pt-4 pb-1">
-                              <div className="flex items-center justify-between mb-2">
-                                <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">Usage trend (kWh)</p>
+                            <div className="px-4 pb-1 pt-3">
+                              <div className="mb-1.5 flex items-center justify-between">
+                                <p className="text-[9px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">Usage trend (kWh)</p>
                                 {trendPct && (
                                   <span className={cn(
-                                    "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[11px] font-medium",
+                                    "inline-flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium",
                                     acc.billVsPreviousUp
                                       ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"
                                       : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
@@ -2433,7 +2432,7 @@ function GlassVisionContent() {
                                   </span>
                                 )}
                               </div>
-                              <div className="h-16 w-full">
+                              <div className="h-12 w-full">
                                 <ResponsiveContainer width="100%" height="100%">
                                   <AreaChart data={sparkline.map((v, i) => ({ i, v }))} margin={{ top: 4, right: 2, bottom: 0, left: 2 }}>
                                     <defs>
@@ -2458,8 +2457,8 @@ function GlassVisionContent() {
                           )}
 
                           {/* Footer details */}
-                          <div className="flex items-center justify-between gap-3 border-t border-gray-100 px-5 py-3 dark:border-white/[0.06]">
-                            <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-slate-500">
+                          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-gray-100 px-4 py-2 dark:border-white/[0.06]">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-gray-500 dark:text-slate-500">
                               <span className="flex items-center gap-1">
                                 <Icon name="calendar_today" size={12} />
                                 {acc.commenced ?? "—"}
@@ -2473,7 +2472,7 @@ function GlassVisionContent() {
                             </div>
                             {acc.bestOffer && !acc.isClosed && (
                               <span className={cn(
-                                "rounded-md px-2 py-0.5 text-[11px] font-medium",
+                                "rounded-md px-1.5 py-0.5 text-[10px] font-medium",
                                 acc.bestOffer === "Currently on best"
                                   ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400"
                                   : acc.bestOffer === "Review recommended"
@@ -3079,14 +3078,63 @@ function GlassVisionContent() {
           </Tabs>
         </div>
             </div>
+          </main>
 
             {/* Right-hand control panel */}
             <aside
               className={cn(
-                "shrink-0 overflow-hidden py-4 pr-3 transition-[width,padding] duration-300 ease-in-out",
-                controlPanelOpen ? "w-[306px]" : "w-0 pr-0"
+                "dark shrink-0 overflow-hidden bg-[#161B2E] transition-[width,padding] duration-300 ease-in-out",
+                controlPanelOpen ? "w-80 p-3" : "w-14 py-4"
               )}
+              aria-label="Insight panel"
             >
+              {!controlPanelOpen ? (
+                <div className="flex h-full flex-col items-center">
+                  <div className="flex flex-col items-center gap-2">
+                    {PANEL_TABS.map((tab) => (
+                      <button
+                        key={tab}
+                        type="button"
+                        onClick={() => {
+                          setActivePanelTab(tab);
+                          if (tab !== "X-Sell") setXSellView(null);
+                          setControlPanelOpen(true);
+                        }}
+                        aria-label={`Open ${tab}`}
+                        title={tab}
+                        className={cn(
+                          "group relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+                          activePanelTab === tab
+                            ? "bg-emerald-500/15 text-emerald-300"
+                            : "text-slate-400 hover:bg-white/10 hover:text-slate-100"
+                        )}
+                      >
+                        <Icon name={PANEL_TAB_ICONS[tab]} size={20} />
+                        {tab === "Adora" ? (
+                          <span
+                            aria-hidden
+                            className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"
+                          />
+                        ) : null}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setCompanionOpen(true)}
+                    aria-label="Open Companion"
+                    title="Companion"
+                    className={cn(
+                      "group relative mt-auto flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+                      companionOpen
+                        ? "bg-orange-500/15 text-orange-300"
+                        : "text-slate-400 hover:bg-orange-500/10 hover:text-orange-300"
+                    )}
+                  >
+                    <CompanionCompactIcon />
+                  </button>
+                </div>
+              ) : (
               <div
                 className={cn(
                   "flex h-full min-w-[290px] flex-col overflow-hidden rounded-2xl",
@@ -3420,8 +3468,8 @@ function GlassVisionContent() {
                 )}
               </div>
               </div>
+              )}
             </aside>
-          </main>
         </div>
       </div>
 
@@ -3509,7 +3557,12 @@ function GlassVisionContent() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <CompanionWidget />
+      <CompanionWidget
+        open={companionOpen}
+        onOpenChange={setCompanionOpen}
+        // The collapsed rail already carries a dedicated Companion control.
+        launcherClassName={controlPanelOpen ? undefined : "hidden"}
+      />
     </div>
   );
 }

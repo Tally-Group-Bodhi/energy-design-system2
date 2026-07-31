@@ -37,6 +37,7 @@ import {
   type AdoraDefenderSection,
 } from "@/lib/mock-data/adora-defender-issues";
 import EnvironmentSwitch from "./EnvironmentSwitch";
+import CompanionWidget, { CompanionCompactIcon } from "@/components/CompanionWidget/CompanionWidget";
 import {
   EOS_ACCENT,
   IOS_CHROME_ACTIVE_CLASS,
@@ -4320,11 +4321,15 @@ function RightInsightRail({
   selected,
   collapsed,
   onToggle,
+  companionOpen,
+  onOpenCompanion,
 }: {
   activeView: ViewKey;
   selected: CustomerRecord | null;
   collapsed: boolean;
   onToggle: () => void;
+  companionOpen: boolean;
+  onOpenCompanion: () => void;
 }) {
   const [activePanelTab, setActivePanelTab] = useState<PanelTab>("Adora");
 
@@ -4365,7 +4370,21 @@ function RightInsightRail({
             </button>
           ))}
         </div>
-        <div className="mt-auto">
+        <div className="mt-auto flex flex-col items-center gap-2">
+          <button
+            type="button"
+            onClick={onOpenCompanion}
+            aria-label="Open Companion"
+            title="Companion"
+            className={cn(
+              "group relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
+              companionOpen
+                ? "bg-orange-50 text-[#E65100] dark:bg-orange-500/15 dark:text-orange-300"
+                : "text-slate-500 hover:bg-orange-50 hover:text-[#E65100] dark:text-slate-400 dark:hover:bg-orange-500/10 dark:hover:text-orange-300"
+            )}
+          >
+            <CompanionCompactIcon />
+          </button>
           <button
             type="button"
             onClick={onToggle}
@@ -4434,6 +4453,7 @@ function CommercialEnvironmentContent({
   const [headerCompact, setHeaderCompact] = useState(false);
   const [aiRailCollapsed, setAiRailCollapsed] = useState(false);
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
+  const [companionOpen, setCompanionOpen] = useState(false);
   const headerSentinelRef = React.useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -4753,6 +4773,14 @@ function CommercialEnvironmentContent({
             selected={selectedCustomer}
             collapsed={aiRailCollapsed}
             onToggle={() => setAiRailCollapsed((v) => !v)}
+            companionOpen={companionOpen}
+            onOpenCompanion={() => setCompanionOpen(true)}
+          />
+          <CompanionWidget
+            open={companionOpen}
+            onOpenChange={setCompanionOpen}
+            // The collapsed rail already carries a Companion icon at xl and up
+            launcherClassName={aiRailCollapsed ? "xl:hidden" : undefined}
           />
           <Sheet open={aiSheetOpen} onOpenChange={setAiSheetOpen}>
             <SheetContent

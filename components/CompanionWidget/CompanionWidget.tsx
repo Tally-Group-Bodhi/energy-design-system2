@@ -29,6 +29,30 @@ const CHAT_RESPONSE_DELAY_MS = 1400;
 const ACT_ORANGE = "#E65100";
 const ACT_CARD = "rounded-xl border border-[#BFD9F2] bg-[#EAF4FC] p-4 text-sm text-[#2C365D]";
 
+export function CompanionCompactIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={cn("h-6 w-6 text-[#E65100]", className)}
+    >
+      <path
+        fill="currentColor"
+        d="M6 3h12a4 4 0 0 1 4 4v7a4 4 0 0 1-4 4h-8l-5.45 3.27A1 1 0 0 1 3 20.41V7a4 4 0 0 1 3-3.87V3Z"
+      />
+      <circle cx="9" cy="9.25" r="1" fill="white" />
+      <circle cx="15" cy="9.25" r="1" fill="white" />
+      <path
+        d="M8.25 12.5c.9 1.35 2.15 2 3.75 2s2.85-.65 3.75-2"
+        fill="none"
+        stroke="white"
+        strokeLinecap="round"
+        strokeWidth="1.5"
+      />
+    </svg>
+  );
+}
+
 function useDelayedReveal(delayMs = CHAT_RESPONSE_DELAY_MS) {
   const [ready, setReady] = useState(false);
 
@@ -99,12 +123,29 @@ const MODE_CONFIG: Record<
 
 export interface CompanionWidgetProps {
   docsProvider?: CompanionDocsProvider;
+  /** Controlled open state. When omitted, the widget manages open state internally. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  /**
+   * Extra classes for the fixed bottom-right launcher. Pass a hiding utility
+   * (e.g. `xl:hidden`) when another control already opens Companion.
+   */
+  launcherClassName?: string;
 }
 
 export default function CompanionWidget({
   docsProvider = localCompanionDocsProvider,
+  open: openProp,
+  onOpenChange,
+  launcherClassName,
 }: CompanionWidgetProps) {
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const isControlled = openProp !== undefined;
+  const open = isControlled ? openProp : uncontrolledOpen;
+  const setOpen = (next: boolean) => {
+    if (!isControlled) setUncontrolledOpen(next);
+    onOpenChange?.(next);
+  };
   const [activeTab, setActiveTab] = useState<CompanionTab>("chat");
   const [selectedDoc, setSelectedDoc] = useState<CompanionDoc | null>(null);
   const [docs, setDocs] = useState<CompanionDoc[]>([]);
@@ -238,7 +279,7 @@ export default function CompanionWidget({
   };
 
   if (!open) {
-    return (
+    const launcher = (
       <Button
         type="button"
         data-companion-widget=""
@@ -255,6 +296,9 @@ export default function CompanionWidget({
         />
       </Button>
     );
+
+    // Wrapped rather than merged, so display utilities can't lose to the Button's own
+    return launcherClassName ? <div className={launcherClassName}>{launcher}</div> : launcher;
   }
 
   return (
