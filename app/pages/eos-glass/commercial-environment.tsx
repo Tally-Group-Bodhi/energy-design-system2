@@ -1610,6 +1610,49 @@ interface KpiCardProps {
   onClick?: () => void;
 }
 
+type KpiSparkShape = "rise" | "ease" | "volatile" | "decline";
+
+/** Builds a deterministic 24-day trend that finishes on the displayed KPI value. */
+function makeKpiSparkTrend(endValue: number, shape: KpiSparkShape, precision = 0) {
+  const pointCount = 24;
+  const startFactor =
+    shape === "rise" ? 0.62 : shape === "ease" ? 1.28 : shape === "decline" ? 1.55 : 0.84;
+  const waveAmp =
+    shape === "volatile" ? 0.14 : shape === "rise" ? 0.07 : shape === "ease" ? 0.06 : 0.09;
+  const waveFreq = shape === "volatile" ? 2.4 : shape === "decline" ? 1.5 : 1.8;
+  const jitterSeed =
+    shape === "rise" ? 1.7 : shape === "ease" ? 2.3 : shape === "decline" ? 3.1 : 4.2;
+  const additiveAmp =
+    endValue === 0
+      ? shape === "decline"
+        ? 2.4
+        : 1.2
+      : endValue < 8 && precision === 0
+        ? Math.max(1.8, endValue * 0.9)
+        : endValue * waveAmp;
+  const base = endValue === 0 ? (shape === "decline" ? 6 : 1.5) : endValue;
+
+  return Array.from({ length: pointCount }, (_, index) => {
+    const date = new Date(2026, 6, 31);
+    date.setDate(date.getDate() - (pointCount - 1 - index));
+    const t = index / (pointCount - 1);
+    const drift = startFactor + (1 - startFactor) * t;
+    const wave = Math.sin(t * Math.PI * waveFreq + jitterSeed) * additiveAmp;
+    const jitter = Math.sin(index * 1.37 + jitterSeed * 2.1) * (additiveAmp * 0.35);
+    const raw =
+      index === pointCount - 1
+        ? endValue
+        : endValue === 0
+          ? Math.max(0, base * (1 - t) + wave + jitter)
+          : base * drift + wave + jitter;
+
+    return {
+      label: date.toLocaleDateString("en-AU", { day: "numeric", month: "short" }),
+      value: Number(Math.max(0, raw).toFixed(precision)),
+    };
+  });
+}
+
 function KpiCard({
   icon,
   title,
@@ -1641,11 +1684,15 @@ function KpiCard({
         : "text-slate-900 dark:text-white"
     : "text-slate-900 dark:text-white";
   const sparkColor = tone === "red" ? colors.red : tone === "blue" ? colors.blue : tone === "amber" ? colors.amber : tone === "purple" ? colors.purple : colors.green;
+  const hasSparkline = compact && showSparkline && Boolean(sparklineData?.length);
   return (
     <button
       onClick={onClick}
       className={cn(
-        "group w-full overflow-hidden rounded-xl border border-slate-200 bg-white text-left shadow-sm transition dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/20",
+        "group w-full rounded-xl border border-slate-200 bg-white text-left shadow-sm transition dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/20",
+        // The sparkline tooltip must be able to render outside the card, so clipping
+        // is moved onto the chart surface itself when a sparkline is present.
+        hasSparkline ? "overflow-visible" : "overflow-hidden",
         compact ? "px-3.5 py-3 hover:border-slate-300 dark:hover:border-slate-700" : "rounded-2xl p-4 hover:-translate-y-0.5 hover:border-emerald-500/60 dark:hover:border-emerald-400/50",
       )}
     >
@@ -1661,7 +1708,7 @@ function KpiCard({
           {sub ? <div className="mt-1.5 truncate text-[11px] leading-none text-slate-500">{sub}</div> : <div className="mt-1.5 h-[11px]" />}
           {showSparkline && sparklineData?.length ? (
             <div
-              className="-mx-3.5 -mb-3 mt-2 h-12 w-[calc(100%+1.75rem)]"
+              className="-mx-3.5 -mb-3 mt-2 h-12 w-[calc(100%+1.75rem)] [&_.recharts-surface]:rounded-b-[11px]"
               aria-label={`${title} trend`}
             >
               <ResponsiveContainer width="100%" height="100%">
@@ -1673,11 +1720,15 @@ function KpiCard({
                     </linearGradient>
                   </defs>
                   <Tooltip
+                    allowEscapeViewBox={{ x: false, y: true }}
+                    offset={12}
+                    wrapperStyle={{ zIndex: 60, pointerEvents: "none" }}
                     contentStyle={{
                       ...chart.tooltipStyle,
                       borderRadius: 8,
                       padding: "5px 8px",
                       fontSize: 11,
+                      whiteSpace: "nowrap",
                     }}
                     cursor={{ stroke: sparkColor, strokeDasharray: "3 3", strokeWidth: 1 }}
                     labelFormatter={(label) => String(label)}
@@ -1826,6 +1877,63 @@ function SectionHeader({ title, sub, action }: { title: string; sub?: string; ac
   );
 }
 
+/** Compact sticky identity + KPI strip for the Customer drilldown right column. */
+function DetailsContextStrip({
+  kind,
+  title,
+  accountId,
+  subtitle,
+  segment,
+  initials,
+  badges,
+  metrics,
+}: {
+  kind: "site" | "account";
+  title: string;
+  accountId: string;
+  subtitle: string;
+  segment: string;
+  initials: string;
+  badges: React.ReactNode;
+  metrics: Array<[string, string]>;
+}) {
+  return (
+    <Panel className="xl:sticky xl:top-20 xl:z-20 border-emerald-200/70 bg-white/95 p-3.5 shadow-md backdrop-blur-xl dark:border-emerald-400/20 dark:bg-slate-900/95">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+            {kind === "site" ? "Site details" : "Account details"}
+          </div>
+          <div className="mt-1 truncate text-sm font-semibold text-slate-900 dark:text-white">{title}</div>
+        </div>
+        <div className="flex flex-wrap gap-1.5">{badges}</div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-purple-100 text-xs font-semibold text-purple-700 dark:bg-purple-500/20 dark:text-purple-300">
+          {initials}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-semibold tabular-nums text-slate-900 dark:text-white">{accountId}</div>
+          <div className="truncate text-[11px] text-slate-500">
+            {subtitle}
+            <span className="mx-1.5 text-slate-300 dark:text-slate-600">·</span>
+            {segment}
+          </div>
+        </div>
+        <div className="flex min-w-0 flex-wrap gap-x-4 gap-y-1 sm:gap-x-5">
+          {metrics.map(([label, value]) => (
+            <div key={label} className="min-w-0">
+              <div className="text-[9px] uppercase tracking-wide text-slate-400">{label}</div>
+              <div className="mt-0.5 truncate text-xs font-semibold tabular-nums text-slate-900 dark:text-white">{value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Panel>
+  );
+}
+
 function WidgetDownloadAction({ periodLabel }: { periodLabel?: string }) {
   return (
     <div className="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
@@ -1878,7 +1986,17 @@ function ExceptionHeatmapCell({ severity, value }: { severity: ExceptionHeatmapR
 
 type ViewKey = "Portfolio Overview" | "Customer Hierarchy" | "Exception Workspace" | "Interactions";
 
-function ViewSwitcher({ activeView, setActiveView, selected }: { activeView: ViewKey; setActiveView: (v: ViewKey) => void; selected: CustomerRecord }) {
+function ViewSwitcher({
+  activeView,
+  setActiveView,
+  selected,
+  onSelectCustomerView,
+}: {
+  activeView: ViewKey;
+  setActiveView: (v: ViewKey) => void;
+  selected: CustomerRecord | null;
+  onSelectCustomerView?: () => void;
+}) {
   const items: Array<{ label: string; view: ViewKey; icon: string }> = [
     { label: "Portfolio", view: "Portfolio Overview", icon: "dashboard" },
     { label: "Exceptions", view: "Exception Workspace", icon: "warning" },
@@ -1893,7 +2011,13 @@ function ViewSwitcher({ activeView, setActiveView, selected }: { activeView: Vie
           <button
             key={view}
             type="button"
-            onClick={() => setActiveView(view)}
+            onClick={() => {
+              if (view === "Customer Hierarchy" && onSelectCustomerView) {
+                onSelectCustomerView();
+              } else {
+                setActiveView(view);
+              }
+            }}
             className={cn(
               "flex items-center gap-2 rounded-xl px-4 py-2 text-sm transition",
               active
@@ -1903,7 +2027,9 @@ function ViewSwitcher({ activeView, setActiveView, selected }: { activeView: Vie
           >
             <Icon name={icon} size={16} />
             <span>{label}</span>
-            {view === "Customer Hierarchy" && <span className="hidden max-w-36 truncate text-xs text-slate-500 lg:inline">{selected.name}</span>}
+            {view === "Customer Hierarchy" && selected && (
+              <span className="hidden max-w-36 truncate text-xs text-slate-500 lg:inline">{selected.name}</span>
+            )}
           </button>
         );
       })}
@@ -1926,12 +2052,12 @@ function PortfolioOverview({ setActiveView, openCustomer }: { setActiveView: (v:
   const [period, setPeriod] = useState(periodOptions[0]);
 
   const portfolioCards: KpiCardProps[] = [
-    { title: "Active Customers", value: "50", sub: "Across portfolio", icon: "group", tone: "green", compact: true },
-    { title: "Active Sites", value: "797", sub: "Across customer hierarchy", icon: "apartment", tone: "green", compact: true },
-    { title: "Bills Ready", value: "—", sub: "", icon: "description", tone: "blue", compact: true },
-    { title: "Blocked Bills", value: "0", sub: "¥0 held from release", icon: "lock", tone: "red", compact: true },
-    { title: "Unbilled Exposure", value: "¥1.17B", sub: "Open this cycle", icon: "credit_card", tone: "purple", compact: true },
-    { title: "Open Exceptions", value: "226", sub: "Across customer sites", icon: "warning", tone: "amber", compact: true },
+    { title: "Active Customers", value: "50", sub: "Across portfolio", icon: "group", tone: "green", compact: true, sparklineData: makeKpiSparkTrend(50, "rise"), sparklineValueFormatter: (value) => `${value.toLocaleString()} customers` },
+    { title: "Active Sites", value: "797", sub: "Across customer hierarchy", icon: "apartment", tone: "green", compact: true, sparklineData: makeKpiSparkTrend(797, "rise"), sparklineValueFormatter: (value) => `${value.toLocaleString()} sites` },
+    { title: "Bills Ready", value: "—", sub: "", icon: "description", tone: "blue", compact: true, sparklineData: makeKpiSparkTrend(0, "decline"), sparklineValueFormatter: (value) => `${value.toLocaleString()} bills` },
+    { title: "Blocked Bills", value: "0", sub: "¥0 held from release", icon: "lock", tone: "red", compact: true, sparklineData: makeKpiSparkTrend(0, "decline"), sparklineValueFormatter: (value) => `${value.toLocaleString()} blocked bills` },
+    { title: "Unbilled Exposure", value: "¥1.17B", sub: "Open this cycle", icon: "credit_card", tone: "purple", compact: true, sparklineData: makeKpiSparkTrend(1.17, "volatile", 2), sparklineValueFormatter: (value) => `¥${value.toLocaleString()}B` },
+    { title: "Open Exceptions", value: "226", sub: "Across customer sites", icon: "warning", tone: "amber", compact: true, emphasizeValue: true, sparklineData: makeKpiSparkTrend(226, "ease"), sparklineValueFormatter: (value) => `${value.toLocaleString()} exceptions` },
   ];
 
   const billStatusLive = [
@@ -2411,6 +2537,75 @@ const HIERARCHY: HierarchyNode[] = [
   { id: "node-franchise", name: "Franchise / Managed Sites", count: "605 sites", children: [] },
 ];
 
+function CustomerLanding({ onSelect }: { onSelect: (customer: CustomerRecord) => void }) {
+  const [search, setSearch] = useState("");
+  const filtered = customers.filter((customer) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      customer.name.toLowerCase().includes(q) ||
+      customer.segment.toLowerCase().includes(q) ||
+      customer.industry.toLowerCase().includes(q) ||
+      customer.manager.toLowerCase().includes(q)
+    );
+  });
+
+  return (
+    <Panel className="mx-auto max-w-3xl p-8">
+      <div className="text-center">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+          <Icon name="group" size={28} />
+        </div>
+        <h2 className="mt-4 text-xl font-semibold tracking-tight text-slate-900 dark:text-white">Select a customer</h2>
+        <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
+          Choose a customer to open hierarchy, site details, billing, usage and exceptions.
+        </p>
+      </div>
+
+      <div className="mt-6 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-500 dark:border-slate-800 dark:bg-slate-950/70 dark:text-slate-400">
+        <Icon name="search" size={16} />
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search customer, segment or manager"
+          className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-500 dark:text-slate-100"
+          autoFocus
+        />
+      </div>
+
+      <div className="mt-4 max-h-[28rem] overflow-auto rounded-xl border border-slate-200 dark:border-slate-800">
+        {filtered.length === 0 ? (
+          <div className="px-4 py-10 text-center text-sm text-slate-500">No customers match “{search}”.</div>
+        ) : (
+          filtered.map((customer) => (
+            <button
+              key={customer.id}
+              type="button"
+              onClick={() => onSelect(customer)}
+              className="flex w-full items-center gap-4 border-b border-slate-200 px-4 py-4 text-left transition last:border-b-0 hover:bg-emerald-50 dark:border-slate-800 dark:hover:bg-emerald-500/5"
+            >
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-emerald-100 text-sm font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+                {customer.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-medium text-slate-900 dark:text-white">{customer.name}</div>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                  <span>{customer.segment}</span>
+                  <span>•</span>
+                  <span>{customer.industry}</span>
+                  <span>•</span>
+                  <span>{customer.sites.toLocaleString()} sites</span>
+                </div>
+              </div>
+              <Icon name="chevron_right" size={18} className="shrink-0 text-slate-300 dark:text-slate-600" />
+            </button>
+          ))
+        )}
+      </div>
+    </Panel>
+  );
+}
+
 function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerRecord; initialSiteId?: string | null }) {
   const colors = useColors();
   const chart = useChartTheme();
@@ -2670,46 +2865,33 @@ function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerReco
 
         {isSite ? (
           <div className="min-w-0 space-y-4 xl:col-span-8">
+            <DetailsContextStrip
+              kind="site"
+              title={displaySiteName}
+              accountId={selectedSite.account}
+              subtitle={selected.name}
+              segment={selected.segment}
+              initials={selected.name.split(" ").map((part) => part[0]).slice(0, 2).join("")}
+              badges={
+                <>
+                  <span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{selectedSite.state}</span>
+                  <span className="rounded-md bg-blue-50 px-2 py-1 text-[10px] font-medium text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">{selectedSite.billing}</span>
+                  <span className="rounded-md bg-slate-100 px-2 py-1 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">{selectedSite.payment}</span>
+                  <span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300">{selectedSite.nmi.slice(-10)}</span>
+                </>
+              }
+              metrics={[
+                ["Sites", "1"],
+                ["Usage", selected.usage],
+                ["Billed", "¥0"],
+                ["Unbilled", selectedSite.unbilled],
+                ["Overdue", selectedSite.overdue],
+                ["Balance", selectedSite.pendingInterest],
+              ]}
+            />
+
             <Panel className="p-5">
-              <SectionHeader
-                title={`Site Details: ${displaySiteName}`}
-                action={
-                  <div className="flex flex-wrap gap-2">
-                    <span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">{selectedSite.state}</span>
-                    <span className="rounded-md bg-blue-50 px-2 py-1 text-[10px] font-medium text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">{selectedSite.billing}</span>
-                    <span className="rounded-md bg-slate-100 px-2 py-1 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">{selectedSite.payment}</span>
-                    <span className="rounded-md bg-cyan-50 px-2 py-1 text-[10px] text-cyan-700 dark:bg-cyan-500/15 dark:text-cyan-300">{selectedSite.nmi.slice(-10)}</span>
-                  </div>
-                }
-              />
-              <div className="flex items-center gap-3 border-b border-slate-200 pb-4 dark:border-slate-800">
-                <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-500/20 dark:text-purple-300">
-                  {selected.name.split(" ").map((part) => part[0]).slice(0, 2).join("")}
-                </div>
-                <div>
-                  <div className="text-base font-semibold text-slate-900 dark:text-white">{selectedSite.account}</div>
-                  <div className="mt-0.5 text-xs text-slate-500">{selected.name}</div>
-                  <div className="text-xs text-slate-500">{selected.segment}</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-x-6 gap-y-4 border-b border-slate-200 py-4 sm:grid-cols-6 dark:border-slate-800">
-                {[
-                  ["Sites", "1"],
-                  ["Usage", selected.usage],
-                  ["Billed", "¥0"],
-                  ["Unbilled", selectedSite.unbilled],
-                  ["Overdue", selectedSite.overdue],
-                  ["Balance", selectedSite.pendingInterest],
-                ].map(([label, value]) => (
-                  <div key={label}>
-                    <div className="text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
-                    <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">{value}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 gap-5 pt-4 text-xs md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-5 text-xs md:grid-cols-3">
                 <div>
                   <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Account details</div>
                   <div className="space-y-2 text-slate-700 dark:text-slate-300">
@@ -2813,46 +2995,32 @@ function CustomerDrilldown({ selected, initialSiteId }: { selected: CustomerReco
           </div>
         ) : (
           <div className="min-w-0 space-y-4 xl:col-span-8">
+            <DetailsContextStrip
+              kind="account"
+              title={selectedNode.name}
+              accountId={`TA${String(selectedNode.sites).padStart(6, "0")}`}
+              subtitle={selectedNode.name}
+              segment={selected.segment}
+              initials={selectedNode.name.split(" ").map((part) => part[0]).slice(0, 2).join("").slice(0, 2) || "AC"}
+              badges={
+                <>
+                  <span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">Active</span>
+                  <span className="rounded-md bg-blue-50 px-2 py-1 text-[10px] font-medium text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">Billing</span>
+                  <span className="rounded-md bg-slate-100 px-2 py-1 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">Direct debit</span>
+                </>
+              }
+              metrics={[
+                ["Sites", selectedNode.sites.toLocaleString()],
+                ["Usage", selectedNode.usage],
+                ["Billed", selectedNode.billed],
+                ["Unbilled", selectedNode.unbilled],
+                ["Overdue", selectedNode.overdue],
+                ["Balance", selectedNode.overdue],
+              ]}
+            />
+
             <Panel className="p-5">
-              <SectionHeader
-                title={`Account Details: ${selectedNode.name}`}
-                action={
-                  <div className="flex flex-wrap gap-2">
-                    <span className="rounded-md bg-emerald-50 px-2 py-1 text-[10px] font-medium text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">Active</span>
-                    <span className="rounded-md bg-blue-50 px-2 py-1 text-[10px] font-medium text-blue-700 dark:bg-blue-500/15 dark:text-blue-300">Billing</span>
-                    <span className="rounded-md bg-slate-100 px-2 py-1 text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-300">Direct debit</span>
-                  </div>
-                }
-              />
-              <div className="flex items-center gap-3 border-b border-slate-200 pb-4 dark:border-slate-800">
-                <div className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-purple-100 text-sm font-semibold text-purple-700 dark:bg-purple-500/20 dark:text-purple-300">
-                  {selectedNode.name.split(" ").map((part) => part[0]).slice(0, 2).join("").slice(0, 2) || "AC"}
-                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500 dark:border-slate-900" />
-                </div>
-                <div className="min-w-0">
-                  <div className="truncate text-base font-semibold text-slate-900 dark:text-white">TA{String(selectedNode.sites).padStart(6, "0")}</div>
-                  <div className="mt-0.5 truncate text-xs text-slate-500">{selectedNode.name}</div>
-                  <div className="text-xs text-slate-500">{selected.segment}</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-x-6 gap-y-4 border-b border-slate-200 py-4 sm:grid-cols-6 dark:border-slate-800">
-                {[
-                  ["Sites", selectedNode.sites.toLocaleString()],
-                  ["Usage", selectedNode.usage],
-                  ["Billed", selectedNode.billed],
-                  ["Unbilled", selectedNode.unbilled],
-                  ["Overdue", selectedNode.overdue],
-                  ["Balance", selectedNode.overdue],
-                ].map(([label, value]) => (
-                  <div key={label}>
-                    <div className="text-[10px] uppercase tracking-wide text-slate-400">{label}</div>
-                    <div className="mt-1 text-sm font-semibold text-slate-900 dark:text-white">{value}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 gap-5 pt-4 text-xs md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-5 text-xs md:grid-cols-3">
                 <div>
                   <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Account details</div>
                   <div className="space-y-2 text-slate-700 dark:text-slate-300">
@@ -3040,12 +3208,12 @@ function ExceptionWorkspace() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
-        <KpiCard compact showSparkline={false} emphasizeValue icon="warning" title="Open Exceptions" value="3,857" sub="Currently unresolved" tone="amber" />
-        <KpiCard compact showSparkline={false} emphasizeValue icon="priority_high" title="High Severity" value="3,669" sub="Critical and high priority" tone="red" />
-        <KpiCard compact showSparkline={false} icon="task_alt" title="Resolved" value="51" sub="Closed in current month" tone="green" />
-        <KpiCard compact showSparkline={false} emphasizeValue icon="schedule" title="SLA Breached" value="1" sub="Open past SLA date" tone="red" />
-        <KpiCard compact showSparkline={false} icon="hourglass_top" title="Avg Age Open" value="278.1d" sub="Days since created" tone="purple" />
-        <KpiCard compact showSparkline={false} icon="autorenew" title="Auto-Resolved" value="98%" sub="Avg close rate in period" tone="green" />
+        <KpiCard compact emphasizeValue icon="warning" title="Open Exceptions" value="3,857" sub="Currently unresolved" tone="amber" sparklineData={makeKpiSparkTrend(3857, "ease")} sparklineValueFormatter={(value) => `${value.toLocaleString()} exceptions`} />
+        <KpiCard compact emphasizeValue icon="priority_high" title="High Severity" value="3,669" sub="Critical and high priority" tone="red" sparklineData={makeKpiSparkTrend(3669, "ease")} sparklineValueFormatter={(value) => `${value.toLocaleString()} high severity`} />
+        <KpiCard compact icon="task_alt" title="Resolved" value="51" sub="Closed in current month" tone="green" sparklineData={makeKpiSparkTrend(51, "rise")} sparklineValueFormatter={(value) => `${value.toLocaleString()} resolved`} />
+        <KpiCard compact emphasizeValue icon="schedule" title="SLA Breached" value="1" sub="Open past SLA date" tone="red" sparklineData={makeKpiSparkTrend(1, "decline")} sparklineValueFormatter={(value) => `${value.toLocaleString()} breached`} />
+        <KpiCard compact icon="hourglass_top" title="Avg Age Open" value="278.1d" sub="Days since created" tone="purple" sparklineData={makeKpiSparkTrend(278.1, "ease", 1)} sparklineValueFormatter={(value) => `${value.toLocaleString()} days`} />
+        <KpiCard compact icon="autorenew" title="Auto-Resolved" value="98%" sub="Avg close rate in period" tone="green" sparklineData={makeKpiSparkTrend(98, "rise")} sparklineValueFormatter={(value) => `${value.toLocaleString()}%`} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -3259,19 +3427,37 @@ function ExceptionWorkspace() {
 
 /* ────────── Dashboard header (within main pane) ────────── */
 
-function DashboardHeader({ activeView, selected, setActiveView, setSelectedCustomer, compact, onOpenInsightSheet }: { activeView: ViewKey; selected: CustomerRecord; setActiveView: (v: ViewKey) => void; setSelectedCustomer: (c: CustomerRecord) => void; compact: boolean; onOpenInsightSheet?: () => void }) {
+function DashboardHeader({
+  activeView,
+  selected,
+  setActiveView,
+  setSelectedCustomer,
+  compact,
+  onOpenInsightSheet,
+  onSelectCustomerView,
+}: {
+  activeView: ViewKey;
+  selected: CustomerRecord | null;
+  setActiveView: (v: ViewKey) => void;
+  setSelectedCustomer: (c: CustomerRecord | null) => void;
+  compact: boolean;
+  onOpenInsightSheet?: () => void;
+  onSelectCustomerView?: () => void;
+}) {
   const [customerSearch, setCustomerSearch] = useState("");
   const [showCustomerPicker, setShowCustomerPicker] = useState(false);
   const isCustomer = activeView === "Customer Hierarchy";
   const title = isCustomer
-    ? selected.name
+    ? (selected?.name ?? "Customer")
     : activeView === "Exception Workspace"
       ? "Exception Overview"
       : activeView;
   const filteredCustomers = customers.filter((c) => c.name.toLowerCase().includes(customerSearch.toLowerCase()));
 
   const subtitle = isCustomer
-    ? "Customer command centre for hierarchy, site, billing, usage and exceptions."
+    ? selected
+      ? "Customer command centre for hierarchy, site, billing, usage and exceptions."
+      : "Search and select a customer to open their command centre."
     : activeView === "Exception Workspace"
       ? "Unified queue for billing, market, metering and customer exceptions."
       : activeView === "Interactions"
@@ -3286,11 +3472,14 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
         className={cn(
           "flex items-center gap-3 rounded-2xl border border-slate-200 bg-white text-left transition hover:border-emerald-500/60 hover:bg-emerald-50/40 dark:border-slate-800 dark:bg-slate-900/70 dark:hover:border-emerald-400/40 dark:hover:bg-slate-900",
           compact ? "px-3 py-1.5" : "px-5 py-3",
+          !selected && "ring-1 ring-emerald-300 dark:ring-emerald-400/30",
         )}
       >
         <div>
           {!compact && <div className="text-[11px] uppercase tracking-wide text-slate-500">Customer</div>}
-          <div className={cn("font-semibold tracking-tight text-slate-900 dark:text-white", compact ? "text-base" : "text-3xl")}>{selected.name}</div>
+          <div className={cn("font-semibold tracking-tight text-slate-900 dark:text-white", compact ? "text-base" : "text-3xl")}>
+            {selected?.name ?? "Select a customer"}
+          </div>
         </div>
         <Icon name="expand_more" size={compact ? 16 : 18} className={cn("text-slate-500 transition", !compact && "mt-1", showCustomerPicker && "rotate-180")} />
       </button>
@@ -3318,7 +3507,7 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
                 }}
                 className={cn(
                   "flex w-full items-center gap-4 border-b border-slate-200 px-4 py-4 text-left transition last:border-b-0 hover:bg-emerald-50 dark:border-slate-800 dark:hover:bg-emerald-500/5",
-                  selected.id === customer.id && "bg-emerald-50/80 dark:bg-emerald-500/10",
+                  selected?.id === customer.id && "bg-emerald-50/80 dark:bg-emerald-500/10",
                 )}
               >
                 <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-emerald-100 text-sm font-semibold text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
@@ -3352,39 +3541,6 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
 
   const actions = (
     <div className="flex items-center gap-2">
-      {isCustomer && (
-        <button
-          type="button"
-          onClick={() => setActiveView("Portfolio Overview")}
-          className={cn(
-            "flex items-center gap-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600",
-            compact ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
-          )}
-        >
-          <Icon name="arrow_back" size={compact ? 14 : 16} /> {compact ? "Back" : "Back to Portfolio"}
-        </button>
-      )}
-      {activeView === "Exception Workspace" ? (
-        <button
-          type="button"
-          className={cn(
-            "rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600",
-            compact ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
-          )}
-        >
-          Bulk Action <Icon name="expand_more" size={compact ? 12 : 14} className="ml-1 inline" />
-        </button>
-      ) : (
-        <button
-          type="button"
-          className={cn(
-            "flex items-center gap-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600",
-            compact ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
-          )}
-        >
-          <Icon name="download" size={compact ? 14 : 16} /> Export
-        </button>
-      )}
       {hasInsight && onOpenInsightSheet && (
         <button
           type="button"
@@ -3405,38 +3561,48 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
     <div
       className={cn(
         "sticky top-0 z-20 border-b border-slate-200 bg-[#F3F4F6]/95 backdrop-blur-xl transition-[padding] duration-200 dark:border-slate-700 dark:bg-slate-900/90",
-        compact ? "px-7 py-2" : "px-7 py-5",
+        compact ? "px-7 py-2" : "px-7 py-3",
       )}
     >
       {compact ? (
         <div className="flex items-center justify-between gap-4">
           <div className="flex min-w-0 items-center gap-4">
-            {isCustomer ? (
+            {isCustomer && selected ? (
               customerPicker
             ) : (
               <h1 className="truncate text-sm font-semibold tracking-tight text-slate-900 dark:text-white">{title}</h1>
             )}
           </div>
           <div className="flex items-center gap-3">
-            <ViewSwitcher activeView={activeView} setActiveView={setActiveView} selected={selected} />
+            <ViewSwitcher
+              activeView={activeView}
+              setActiveView={setActiveView}
+              selected={selected}
+              onSelectCustomerView={onSelectCustomerView}
+            />
             {actions}
           </div>
         </div>
       ) : (
         <>
-          <div className="mb-5 flex flex-wrap items-center justify-end gap-4">
-            <ViewSwitcher activeView={activeView} setActiveView={setActiveView} selected={selected} />
+          <div className="mb-2 flex flex-wrap items-center justify-end gap-4">
+            <ViewSwitcher
+              activeView={activeView}
+              setActiveView={setActiveView}
+              selected={selected}
+              onSelectCustomerView={onSelectCustomerView}
+            />
           </div>
 
           <div className="flex items-start justify-between gap-6">
             <div>
-              {isCustomer ? (
+              {isCustomer && selected ? (
                 customerPicker
               ) : (
                 <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">{title}</h1>
               )}
               <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{subtitle}</p>
-              {isCustomer && (
+              {isCustomer && selected && (
                 <div className="mt-2 text-xs text-blue-700 dark:text-blue-300">
                   Portfolio Overview <span className="text-slate-400 dark:text-slate-600">›</span> {selected.name}
                 </div>
@@ -3446,9 +3612,9 @@ function DashboardHeader({ activeView, selected, setActiveView, setSelectedCusto
             <div className="flex items-center gap-3">{actions}</div>
           </div>
 
-          <div className="mt-4 flex items-center justify-end gap-2 text-xs text-slate-500">
+          <div className="mt-2 flex items-center justify-end gap-2 text-xs text-slate-500">
             <Icon name="refresh" size={13} /> Last updated: 08:32 JST
-            {isCustomer && <span className="ml-3 rounded-full bg-emerald-100 px-2 py-1 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">Auto refresh •</span>}
+            {isCustomer && selected && <span className="ml-3 rounded-full bg-emerald-100 px-2 py-1 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">Auto refresh •</span>}
           </div>
         </>
       )}
@@ -4072,7 +4238,7 @@ function InsightContent({
   onPanelTabChange,
 }: {
   activeView: ViewKey;
-  selected: CustomerRecord;
+  selected: CustomerRecord | null;
   onClose?: () => void;
   showRailHeader?: boolean;
   activePanelTab?: PanelTab;
@@ -4125,7 +4291,20 @@ function InsightContent({
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         {activePanelTab === "Adora" && (
-          isCustomer ? <CustomerInsightPanel selected={selected} /> : <PortfolioInsightsPanel />
+          isCustomer && selected
+            ? <CustomerInsightPanel selected={selected} />
+            : isCustomer
+              ? (
+                <div className="space-y-3 px-3.5 py-3.5">
+                  <Panel className="p-4">
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white">Select a customer</div>
+                    <p className="mt-2 text-xs leading-relaxed text-slate-500">
+                      Customer insights appear here once an account is selected.
+                    </p>
+                  </Panel>
+                </div>
+              )
+              : <PortfolioInsightsPanel />
         )}
         {activePanelTab === "Control Panel" && <QuickActionsPanel />}
         {activePanelTab === "X-Sell" && (
@@ -4143,7 +4322,7 @@ function RightInsightRail({
   onToggle,
 }: {
   activeView: ViewKey;
-  selected: CustomerRecord;
+  selected: CustomerRecord | null;
   collapsed: boolean;
   onToggle: () => void;
 }) {
@@ -4243,9 +4422,10 @@ function CommercialEnvironmentContent({
   const [activeView, setActiveView] = useState<ViewKey>(() =>
     searchParams.get("view") === "customer" ? "Customer Hierarchy" : "Portfolio Overview"
   );
-  const [selectedCustomer, setSelectedCustomer] = useState<CustomerRecord>(() => {
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerRecord | null>(() => {
     const customerId = searchParams.get("customer");
-    return customers.find((customer) => customer.id === customerId) ?? customers[0];
+    if (!customerId) return null;
+    return customers.find((customer) => customer.id === customerId) ?? null;
   });
   const [activeNavId, setActiveNavId] = useState("customers-portfolio");
   const [openParentId, setOpenParentId] = useState<string | null>("customers");
@@ -4330,9 +4510,15 @@ function CommercialEnvironmentContent({
     setActiveView("Customer Hierarchy");
   };
 
+  const openCustomerLanding = () => {
+    setSelectedCustomer(null);
+    setActiveView("Customer Hierarchy");
+  };
+
   const content = useMemo(() => {
     if (activeView === "Portfolio Overview") return <PortfolioOverview setActiveView={setActiveView} openCustomer={openCustomer} />;
     if (activeView === "Customer Hierarchy") {
+      if (!selectedCustomer) return <CustomerLanding onSelect={openCustomer} />;
       return <CustomerDrilldown selected={selectedCustomer} initialSiteId={deepLinkSiteId} />;
     }
     if (activeView === "Interactions") {
@@ -4557,6 +4743,7 @@ function CommercialEnvironmentContent({
                 setSelectedCustomer={setSelectedCustomer}
                 compact={headerCompact}
                 onOpenInsightSheet={() => setAiSheetOpen(true)}
+                onSelectCustomerView={openCustomerLanding}
               />
               <div className="p-7">{content}</div>
             </div>
