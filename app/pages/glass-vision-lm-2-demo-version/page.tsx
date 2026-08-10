@@ -24,7 +24,6 @@ import {
 } from "recharts";
 import { Icon } from "@/components/ui/icon";
 import { Avatar, AvatarFallback } from "@/components/Avatar/Avatar";
-import { Sheet, SheetContent } from "@/components/Sheet/Sheet";
 import { Dialog, DialogContent } from "@/components/Dialog/Dialog";
 import CompanionWidget, { CompanionCompactIcon } from "@/components/CompanionWidget/CompanionWidget";
 import { cn } from "@/lib/utils";
@@ -2038,10 +2037,10 @@ function ViewSwitcher({
               setActiveView(view);
             }}
             className={cn(
-              "-mb-px flex items-center border-b-2 transition-colors",
+              "-mb-px flex shrink-0 items-center whitespace-nowrap border-b-2 transition-colors",
               compact
                 ? "gap-1.5 px-4 py-2.5 text-sm"
-                : "gap-2.5 px-2 pb-3 pt-1 text-3xl font-semibold tracking-tight first:pl-0 md:px-6",
+                : "gap-[clamp(0.375rem,0.9cqi,0.625rem)] px-[clamp(0.375rem,1.8cqi,1.5rem)] pb-3 pt-1 text-[clamp(1.125rem,2.6cqi,1.875rem)] font-semibold tracking-tight first:pl-0",
               active
                 ? "border-[#00D2A2] font-semibold text-slate-900 dark:border-[#00D2A2] dark:text-slate-100"
                 : "border-transparent text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300",
@@ -3250,7 +3249,6 @@ function DashboardHeader({
   setActiveView,
   setSelectedCustomer,
   compact,
-  onOpenInsightSheet,
   onSelectCustomerView,
 }: {
   activeView: ViewKey;
@@ -3258,7 +3256,6 @@ function DashboardHeader({
   setActiveView: (v: ViewKey) => void;
   setSelectedCustomer: (c: CustomerRecord) => void;
   compact: boolean;
-  onOpenInsightSheet?: () => void;
   onSelectCustomerView?: () => void;
 }) {
   const [customerSearch, setCustomerSearch] = useState("");
@@ -3345,30 +3342,10 @@ function DashboardHeader({
     </div>
   );
 
-  const hasInsight = activeView !== "Exception Workspace";
-
-  const actions = (
-    <div className="flex items-center gap-2">
-      {hasInsight && onOpenInsightSheet && (
-        <button
-          type="button"
-          onClick={onOpenInsightSheet}
-          aria-label="Open AI insight panel"
-          className={cn(
-            "flex items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-400/40 dark:bg-emerald-500/10 dark:text-emerald-300 dark:hover:bg-emerald-500/20 xl:hidden",
-            compact ? "px-3 py-1.5 text-xs" : "px-4 py-2 text-sm",
-          )}
-        >
-          <Icon name="auto_awesome" size={compact ? 14 : 16} /> Summary
-        </button>
-      )}
-    </div>
-  );
-
   return (
     <div
       className={cn(
-        "sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur-xl transition-[padding] duration-200 dark:border-slate-800 dark:bg-slate-950/85",
+        "@container sticky top-0 z-20 border-b border-slate-200 bg-white/80 backdrop-blur-xl transition-[padding] duration-200 dark:border-slate-800 dark:bg-slate-950/85",
         compact ? "px-7 py-2" : "px-7 py-3",
       )}
     >
@@ -3380,9 +3357,6 @@ function DashboardHeader({
             onSelectCustomerView={onSelectCustomerView}
             compact
           />
-          <div className="flex items-center gap-3">
-            {actions}
-          </div>
         </div>
       ) : (
         <>
@@ -3397,8 +3371,6 @@ function DashboardHeader({
                 </div>
               )}
             </div>
-
-            <div className="flex items-center gap-3">{actions}</div>
           </div>
 
           <div className="mt-2 flex items-center justify-end gap-2 text-xs text-slate-500">
@@ -4115,7 +4087,7 @@ function RightInsightRail({
   if (collapsed) {
     return (
       <aside
-        className="dark hidden w-14 shrink-0 flex-col items-center bg-[#161B2E] py-4 xl:flex"
+        className="dark flex w-14 shrink-0 flex-col items-center bg-[#161B2E] py-4"
         aria-label="Insight panel"
       >
         <div className="flex flex-col items-center gap-2">
@@ -4173,7 +4145,7 @@ function RightInsightRail({
 
   return (
     <aside
-      className="dark hidden w-80 shrink-0 overflow-hidden bg-[#161B2E] p-3 xl:flex xl:flex-col"
+      className="dark flex w-72 shrink-0 flex-col overflow-hidden bg-[#161B2E] p-3 xl:w-80"
       aria-label="Insight panel"
     >
       <InsightContent
@@ -4215,7 +4187,6 @@ function GlassVisionLM2DemoContent() {
   const [navCollapsed, setNavCollapsed] = useState(true);
   const [headerCompact, setHeaderCompact] = useState(false);
   const [aiRailCollapsed, setAiRailCollapsed] = useState(false);
-  const [aiSheetOpen, setAiSheetOpen] = useState(false);
   const [companionOpen, setCompanionOpen] = useState(false);
   const headerSentinelRef = React.useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
@@ -4488,10 +4459,7 @@ function GlassVisionLM2DemoContent() {
 
           {/* ────── Main pane: dashboard with radial glow + right rail ────── */}
           <main
-            className={cn(
-              "flex min-w-0 flex-1 overflow-hidden rounded-tl-[1.5rem] text-slate-700 dark:text-slate-100",
-              aiRailCollapsed && "xl:rounded-tr-[1.5rem]",
-            )}
+            className="flex min-w-0 flex-1 overflow-hidden rounded-tl-[1.5rem] rounded-tr-[1.5rem] text-slate-700 dark:text-slate-100"
             style={{
               background: isLight
                 ? "radial-gradient(circle at top left, #EBEDF2 0, #F9F9FB 38%, #F9F9FB 100%)"
@@ -4506,7 +4474,6 @@ function GlassVisionLM2DemoContent() {
                 setActiveView={setActiveView}
                 setSelectedCustomer={setSelectedCustomer}
                 compact={headerCompact}
-                onOpenInsightSheet={() => setAiSheetOpen(true)}
                 onSelectCustomerView={openCustomerLanding}
               />
               <div className="p-7">{content}</div>
@@ -4523,21 +4490,8 @@ function GlassVisionLM2DemoContent() {
           <CompanionWidget
             open={companionOpen}
             onOpenChange={setCompanionOpen}
-            launcherClassName={aiRailCollapsed ? "xl:hidden" : undefined}
+            launcherClassName={aiRailCollapsed ? "hidden" : undefined}
           />
-          <Sheet open={aiSheetOpen} onOpenChange={setAiSheetOpen}>
-            <SheetContent
-              side="right"
-              className="!bg-white !border-slate-200 text-slate-900 w-full overflow-y-auto p-5 sm:!max-w-md dark:!bg-slate-950 dark:!border-slate-800 dark:text-slate-100"
-            >
-              <InsightContent
-                activeView={activeView}
-                selected={selectedCustomer ?? customers[0]}
-                onClose={() => setAiSheetOpen(false)}
-                showRailHeader
-              />
-            </SheetContent>
-          </Sheet>
         </div>
       </div>
     </div>
