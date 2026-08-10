@@ -57,6 +57,13 @@ import {
 
 const ACCENT = EOS_ACCENT;
 
+/** Soft card surface tokens — used by Panel / KpiCard / nested cards */
+const CARD_SURFACE_VARS = {
+  "--card-border": "1px solid #E3E9EF",
+  "--shadow-card":
+    "0 1px 2px rgba(30, 41, 59, 0.04), 0 2px 4px -1px rgba(30, 41, 59, 0.06)",
+} as React.CSSProperties;
+
 const COLORS_DARK = {
   green: ACCENT,
   green2: "#22c55e",
@@ -449,7 +456,7 @@ function AdoraDefenderPanel() {
           <div
             key={`${issue.eventId}-${index}`}
             className={cn(
-              "rounded-xl border border-l-4 border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-800 dark:bg-slate-900/60",
+              "rounded-xl border-l-4 bg-white p-3.5 [border:var(--card-border)] [border-left-width:4px] dark:bg-slate-900/60",
               isFail ? "border-l-red-500 dark:border-l-red-400" : "border-l-amber-500 dark:border-l-amber-400",
             )}
           >
@@ -681,7 +688,7 @@ function AdoraDefenderPanel() {
             <span>Issue date in current month</span>
           </div>
 
-          <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/40">
+          <div className="mt-4 rounded-xl bg-slate-50 p-4 [border:var(--card-border)] dark:bg-slate-950/40">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className={cn("inline-flex h-7 w-7 items-center justify-center rounded-lg border", adoraToneStyles.green.chip)}>
@@ -708,7 +715,7 @@ function AdoraDefenderPanel() {
                 type="button"
                 onClick={() => openDrillDown(tile.name)}
                 className={cn(
-                  "group rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 dark:border-slate-800 dark:bg-slate-900/70",
+                  "group rounded-xl bg-white p-4 text-left [border:var(--card-border)] transition hover:-translate-y-0.5 dark:bg-slate-900/70",
                   tile.tone.hoverBorder,
                 )}
               >
@@ -1343,7 +1350,7 @@ function LoadDisaggregationPanel({ siteId, siteName, customerId }: { siteId: str
           { label: "Demand charge exposure", value: dataset.demandCharge, unit: null, note: "set by one 15-min interval" },
           { label: "Peak recorded", value: dataset.peakTime, unit: null, note: dataset.peakNote },
         ].map((stat) => (
-          <div key={stat.label} className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
+          <div key={stat.label} className="rounded-xl bg-slate-50 p-4 [border:var(--card-border)] dark:bg-slate-950/50">
             <div className="text-xs text-slate-500">{stat.label}</div>
             <div className="mt-1 text-xl font-semibold text-slate-900 dark:text-white">
               {stat.value}
@@ -1382,7 +1389,7 @@ function LoadDisaggregationPanel({ siteId, siteName, customerId }: { siteId: str
               <div
                 key={d.name}
                 className={cn(
-                  "flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/50",
+                  "flex items-center gap-3 rounded-xl bg-slate-50 p-3 [border:var(--card-border)] dark:bg-slate-950/50",
                   d.status === "fault" && "border-red-200 dark:border-red-500/30",
                   d.status === "watch" && "border-amber-200 dark:border-amber-500/30",
                 )}
@@ -1411,7 +1418,7 @@ function LoadDisaggregationPanel({ siteId, siteName, customerId }: { siteId: str
         </div>
         <ul className="space-y-2.5">
           {dataset.recs.map((rec, i) => (
-            <li key={i} className="flex items-start gap-3 rounded-lg border border-emerald-100 bg-white p-3 shadow-sm dark:border-emerald-500/20 dark:bg-slate-900/70">
+            <li key={i} className="flex items-start gap-3 rounded-lg border border-emerald-100 bg-white p-3 dark:border-emerald-500/20 dark:bg-slate-900/70">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-xs font-semibold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200">
                 {i + 1}
               </span>
@@ -1585,8 +1592,27 @@ const LEFT_NAV_ITEMS: NavItem[] = [
 
 /* ────────── Reusable bits ────────── */
 
-function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/70 dark:shadow-2xl dark:shadow-black/20", className)}>{children}</div>;
+function Panel({
+  children,
+  className = "",
+  elevated = true,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  /** Subtle card elevation; set false to keep a card flat (border only) */
+  elevated?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-2xl bg-white [border:var(--card-border)] dark:bg-slate-900/70",
+        elevated && "[box-shadow:var(--shadow-card)]",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
 }
 
 function Pill({ children, tone = "Low" }: { children: React.ReactNode; tone?: string }) {
@@ -1609,6 +1635,8 @@ interface KpiCardProps {
   sparklineValueFormatter?: (value: number) => string;
   emphasizeValue?: boolean;
   onClick?: () => void;
+  /** Subtle card elevation; set false to keep a card flat (border only) */
+  elevated?: boolean;
 }
 
 type KpiSparkShape = "rise" | "ease" | "volatile" | "decline";
@@ -1666,6 +1694,7 @@ function KpiCard({
   sparklineValueFormatter,
   emphasizeValue = false,
   onClick,
+  elevated = true,
 }: KpiCardProps) {
   const colors = useColors();
   const chart = useChartTheme();
@@ -1690,7 +1719,8 @@ function KpiCard({
     <button
       onClick={onClick}
       className={cn(
-        "group w-full rounded-xl border border-slate-200 bg-white text-left shadow-sm transition dark:border-slate-800 dark:bg-slate-900/80 dark:shadow-black/20",
+        "group w-full rounded-xl bg-white text-left [border:var(--card-border)] transition dark:bg-slate-900/80",
+        elevated && "[box-shadow:var(--shadow-card)]",
         // The sparkline tooltip must be able to render outside the card, so clipping
         // is moved onto the chart surface itself when a sparkline is present.
         hasSparkline ? "overflow-visible" : "overflow-hidden",
@@ -1899,7 +1929,7 @@ function DetailsContextStrip({
   metrics: Array<[string, string]>;
 }) {
   return (
-    <Panel className="xl:sticky xl:top-20 xl:z-20 border-emerald-200/70 bg-white/95 p-3.5 shadow-md backdrop-blur-xl dark:border-emerald-400/20 dark:bg-slate-900/95">
+    <Panel className="xl:sticky xl:top-20 xl:z-20 border-emerald-200/70 bg-white/95 p-3.5 backdrop-blur-xl dark:border-emerald-400/20 dark:bg-slate-900/95">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
@@ -1990,51 +2020,69 @@ type ViewKey = "Portfolio Overview" | "Customer Hierarchy" | "Exception Workspac
 function ViewSwitcher({
   activeView,
   setActiveView,
-  selected,
   onSelectCustomerView,
+  compact = false,
 }: {
   activeView: ViewKey;
   setActiveView: (v: ViewKey) => void;
-  selected: CustomerRecord | null;
   onSelectCustomerView?: () => void;
+  compact?: boolean;
 }) {
-  const items: Array<{ label: string; view: ViewKey; icon: string }> = [
-    { label: "Portfolio", view: "Portfolio Overview", icon: "dashboard" },
-    { label: "Exceptions", view: "Exception Workspace", icon: "warning" },
-    { label: "Customer", view: "Customer Hierarchy", icon: "group" },
-    { label: "Interactions", view: "Interactions", icon: "forum" },
+  const items: Array<{ label: string; view: ViewKey; count?: number; countTone?: "warning" | "neutral" }> = [
+    { label: "Portfolio", view: "Portfolio Overview" },
+    { label: "Exceptions", view: "Exception Workspace", count: 226, countTone: "warning" },
+    { label: "Customers", view: "Customer Hierarchy", count: 50, countTone: "neutral" },
+    { label: "Interactions", view: "Interactions", count: 14, countTone: "neutral" },
   ];
   return (
-    <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-900/80">
-      {items.map(({ label, view, icon }) => {
+    <nav
+      aria-label="Workspace views"
+      className={cn(
+        "flex min-w-0 items-center",
+        compact && "border-b border-slate-200 dark:border-slate-700",
+      )}
+    >
+      {items.map(({ label, view, count, countTone }) => {
         const active = activeView === view;
         return (
           <button
             key={view}
             type="button"
+            aria-current={active ? "page" : undefined}
             onClick={() => {
               if (view === "Customer Hierarchy" && onSelectCustomerView) {
                 onSelectCustomerView();
-              } else {
-                setActiveView(view);
+                return;
               }
+              setActiveView(view);
             }}
             className={cn(
-              "flex items-center gap-2 rounded-xl px-4 py-2 text-sm transition",
+              "-mb-px flex items-center border-b-2 transition-colors",
+              compact
+                ? "gap-1.5 px-4 py-2.5 text-sm"
+                : "gap-2.5 px-2 pb-3 pt-1 text-3xl font-semibold tracking-tight first:pl-0 md:px-6",
               active
-                ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:ring-emerald-400/30"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white",
+                ? "border-[#00D2A2] font-semibold text-slate-900 dark:border-[#00D2A2] dark:text-slate-100"
+                : "border-transparent text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300",
             )}
           >
-            <Icon name={icon} size={16} />
-            <span>{label}</span>
-            {view === "Customer Hierarchy" && selected && (
-              <span className="hidden max-w-36 truncate text-xs text-slate-500 lg:inline">{selected.name}</span>
+            {label}
+            {!compact && count !== undefined && (
+              <span
+                className={cn(
+                  "rounded-full px-2 py-0.5 text-xs font-semibold tracking-normal",
+                  countTone === "warning"
+                    ? "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
+                    : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+                )}
+              >
+                {count}
+              </span>
             )}
           </button>
         );
       })}
-    </div>
+    </nav>
   );
 }
 
@@ -3298,12 +3346,12 @@ function ExceptionWorkspace() {
             <div className="grid min-w-8 flex-1 place-items-center bg-blue-100 text-xs font-semibold text-blue-800 dark:bg-blue-500/20 dark:text-blue-200">2%</div>
           </div>
           <div className="mt-5 grid grid-cols-2 gap-4 text-sm">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
+            <div className="rounded-xl bg-slate-50 p-4 [border:var(--card-border)] dark:bg-slate-950/50">
               <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />Resolved Automatically</div>
               <div className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">50</div>
               <div className="mt-1 text-xs text-slate-500">98.0% · fully automated</div>
             </div>
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50">
+            <div className="rounded-xl bg-slate-50 p-4 [border:var(--card-border)] dark:bg-slate-950/50">
               <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300"><span className="h-2.5 w-2.5 rounded-full bg-blue-500" />User</div>
               <div className="mt-2 text-xl font-semibold text-slate-900 dark:text-white">1</div>
               <div className="mt-1 text-xs text-slate-500">2.0% · all user resolves</div>
@@ -3448,11 +3496,6 @@ function DashboardHeader({
   const [customerSearch, setCustomerSearch] = useState("");
   const [showCustomerPicker, setShowCustomerPicker] = useState(false);
   const isCustomer = activeView === "Customer Hierarchy";
-  const title = isCustomer
-    ? (selected?.name ?? "Customer")
-    : activeView === "Exception Workspace"
-      ? "Exception Overview"
-      : activeView;
   const filteredCustomers = customers.filter((c) => c.name.toLowerCase().includes(customerSearch.toLowerCase()));
 
   const subtitle = isCustomer
@@ -3567,42 +3610,23 @@ function DashboardHeader({
     >
       {compact ? (
         <div className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-4">
-            {isCustomer && selected ? (
-              customerPicker
-            ) : (
-              <h1 className="truncate text-sm font-semibold tracking-tight text-slate-900 dark:text-white">{title}</h1>
-            )}
-          </div>
+          <ViewSwitcher
+            activeView={activeView}
+            setActiveView={setActiveView}
+            onSelectCustomerView={onSelectCustomerView}
+            compact
+          />
           <div className="flex items-center gap-3">
-            <ViewSwitcher
-              activeView={activeView}
-              setActiveView={setActiveView}
-              selected={selected}
-              onSelectCustomerView={onSelectCustomerView}
-            />
             {actions}
           </div>
         </div>
       ) : (
         <>
-          <div className="mb-2 flex flex-wrap items-center justify-end gap-4">
-            <ViewSwitcher
-              activeView={activeView}
-              setActiveView={setActiveView}
-              selected={selected}
-              onSelectCustomerView={onSelectCustomerView}
-            />
-          </div>
-
           <div className="flex items-start justify-between gap-6">
-            <div>
-              {isCustomer && selected ? (
-                customerPicker
-              ) : (
-                <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">{title}</h1>
-              )}
-              <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{subtitle}</p>
+            <div className="min-w-0">
+              <ViewSwitcher activeView={activeView} setActiveView={setActiveView} onSelectCustomerView={onSelectCustomerView} />
+              {isCustomer && <div className="mt-4">{customerPicker}</div>}
+              <p className="mt-4 text-sm text-slate-600 dark:text-slate-400">{subtitle}</p>
               {isCustomer && selected && (
                 <div className="mt-2 text-xs text-blue-700 dark:text-blue-300">
                   Portfolio Overview <span className="text-slate-400 dark:text-slate-600">›</span> {selected.name}
@@ -4557,7 +4581,7 @@ function CommercialEnvironmentContent({
   const isLight = theme === "light";
 
   return (
-    <div className={cn("flex h-full flex-col overflow-hidden", IOS_CHROME_CLASS)}>
+    <div className={cn("flex h-full flex-col overflow-hidden", IOS_CHROME_CLASS)} style={CARD_SURFACE_VARS}>
       <div className="flex min-h-0 flex-1 flex-col">
         {/* ────── Glass header chrome ────── */}
         <header className="flex h-14 shrink-0 items-center gap-4 px-6">
