@@ -132,6 +132,14 @@ const pages = [
     icon: "support_agent",
     tags: ["EOS", "Glass", "Call centre", "Residential", "C&I"],
   },
+  {
+    title: "C&I Portal",
+    description:
+      "End-user Commercial & Industrial portal demos skinned with client brands — starting with SEC Victoria",
+    href: "/pages/ci-portal",
+    icon: "factory",
+    tags: ["C&I", "Client brands", "Dashboard", "Charts", "Billing"],
+  },
 ];
 
 export default function PagesIndex() {

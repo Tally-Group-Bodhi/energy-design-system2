@@ -7,6 +7,8 @@ export interface PopoverProps {
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
+  /** Classes for the positioning wrapper, e.g. `w-full` for full-width triggers. */
+  className?: string;
   children: React.ReactNode;
 }
 
@@ -29,6 +31,7 @@ const Popover = ({
   open: controlledOpen,
   defaultOpen = false,
   onOpenChange,
+  className,
   children,
 }: PopoverProps) => {
   const [internalOpen, setInternalOpen] = React.useState(defaultOpen);
@@ -46,7 +49,7 @@ const Popover = ({
 
   return (
     <PopoverContext.Provider value={{ open, setOpen }}>
-      <div className="relative inline-block">{children}</div>
+      <div className={cn("relative inline-block", className)}>{children}</div>
     </PopoverContext.Provider>
   );
 };

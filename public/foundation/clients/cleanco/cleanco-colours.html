@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CleanCo Queensland — Colour Reference</title>
+    <style>
+      :root {
+        --ink: #2b2a2a;
+        --muted: #6b6869;
+        --line: #ededed;
+        --paper: #ffffff;
+        --wash: #f6fcfd;
+
+        --cyan-25: #f6fcfd;
+        --cyan-50: #e9f8fb;
+        --cyan-100: #d0f1f7;
+        --cyan-300: #64d0e4;
+        --cyan-600: #408592;
+        --cyan-700: #326872;
+        --cyan-800: #264f57;
+        --cyan-950: #162e32;
+
+        --char-50: #f3f2f3;
+        --char-300: #b0aeaf;
+        --char-600: #4f4c4d;
+
+        --gray-25: #fcfcfc;
+        --gray-100: #f5f4f4;
+        --gray-200: #ededed;
+        --gray-300: #c9c7c8;
+        --gray-700: #4f4c4d;
+        --gray-900: #2b2a2a;
+
+        --danger: #b3261e;
+        --success: #0c7a4b;
+        --warning: #8a5300;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0; padding: 0;
+        background: var(--wash);
+        color: var(--ink);
+        font-family: Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 11pt; line-height: 1.4;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .sheet {
+        max-width: 210mm; margin: 0 auto;
+        padding: 14mm 14mm 16mm;
+        background: var(--paper); min-height: 100vh;
+      }
+
+      header {
+        display: flex; justify-content: space-between; align-items: flex-end;
+        gap: 16px; padding-bottom: 10px;
+        border-bottom: 2px solid var(--char-600); margin-bottom: 18px;
+      }
+      header h1 {
+        margin: 0; font-size: 18pt; font-weight: 700;
+        color: var(--char-600); letter-spacing: -0.02em;
+      }
+      header p { margin: 4px 0 0; color: var(--muted); font-size: 9pt; }
+      header .meta {
+        text-align: right; color: var(--muted);
+        font-size: 8.5pt; white-space: nowrap;
+      }
+
+      h2 {
+        margin: 0 0 8px; font-size: 11pt; font-weight: 700;
+        color: var(--char-600); text-transform: uppercase; letter-spacing: 0.04em;
+      }
+
+      .section { margin-bottom: 16px; break-inside: avoid; }
+
+      .swatch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .swatch-grid.three { grid-template-columns: repeat(3, 1fr); }
+      .swatch-grid.five { grid-template-columns: repeat(5, 1fr); }
+
+      .swatch {
+        border: 1px solid var(--line); border-radius: 6px;
+        overflow: hidden; background: #fff;
+      }
+      .swatch .chip { height: 42px; border-bottom: 1px solid var(--line); }
+      .swatch .chip.light-border { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+      .swatch .meta { padding: 6px 8px 8px; }
+      .swatch .name { font-size: 8pt; font-weight: 600; color: var(--ink); }
+      .swatch .hex {
+        font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+        font-size: 8.5pt; color: var(--char-600); margin-top: 1px;
+      }
+      .swatch .role { font-size: 7.5pt; color: var(--muted); margin-top: 3px; line-height: 1.3; }
+
+      .note {
+        margin: 0 0 8px; padding: 8px 10px;
+        background: var(--cyan-50); border-left: 3px solid var(--cyan-700);
+        color: var(--ink); font-size: 8.5pt;
+      }
+      .note strong { color: var(--char-600); }
+      .note.warn { background: #fdf1f0; border-left-color: var(--danger); }
+
+      .anchors { display: flex; gap: 10px; margin-bottom: 10px; }
+      .anchor {
+        flex: 1; display: flex; align-items: center; gap: 9px;
+        border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px;
+      }
+      .anchor .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; }
+      .anchor .title { font-size: 9pt; font-weight: 600; }
+      .anchor .sub {
+        font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+        font-size: 8pt; color: var(--muted); margin-top: 1px;
+      }
+
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+      table.contrast { width: 100%; border-collapse: collapse; font-size: 8pt; }
+      table.contrast th {
+        text-align: left; color: var(--muted); font-weight: 600;
+        padding: 4px 6px; border-bottom: 1px solid var(--line);
+      }
+      table.contrast td { padding: 4px 6px; border-bottom: 1px solid var(--line); }
+      table.contrast td.mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+      .pass { color: #0c7a4b; font-weight: 600; }
+      .fail { color: #b3261e; font-weight: 600; }
+
+      .checklist { margin: 0; padding: 0; list-style: none; font-size: 8.5pt; }
+      .checklist li { display: flex; gap: 7px; align-items: flex-start; margin-bottom: 5px; }
+      .checklist .box {
+        width: 10px; height: 10px; border: 1px solid var(--gray-300);
+        border-radius: 2px; flex: none; margin-top: 2px;
+      }
+      .checklist .label { font-weight: 600; }
+      .checklist .hint { color: var(--muted); }
+
+      footer {
+        margin-top: 18px; padding-top: 8px; border-top: 1px solid var(--line);
+        display: flex; justify-content: space-between; font-size: 8pt; color: var(--muted);
+      }
+
+      .print-hint {
+        position: fixed; top: 12px; right: 12px;
+        background: var(--char-600); color: #fff; border: 0;
+        border-radius: 999px; padding: 8px 16px; font-size: 9pt; cursor: pointer;
+      }
+      @media print { .print-hint { display: none; } body { background: #fff; } }
+    </style>
+  </head>
+  <body>
+    <button class="print-hint" type="button" onclick="window.print()">
+      Print / Save as PDF
+    </button>
+
+    <main class="sheet">
+      <header>
+        <div>
+          <h1>CleanCo Queensland — Colour Reference</h1>
+          <p>C&amp;I Portal client brand tokens · Tally Energy Design System</p>
+        </div>
+        <div class="meta">
+          Namespaced <code>cleanco-*</code><br />
+          Printable one-pager
+        </div>
+      </header>
+
+      <section class="section">
+        <h2>Brand anchors</h2>
+        <div class="anchors">
+          <div class="anchor">
+            <span class="dot" style="background: var(--cyan-300)"></span>
+            <div>
+              <div class="title">CleanCo cyan</div>
+              <div class="sub">#64D0E4 · cyan-300</div>
+            </div>
+          </div>
+          <div class="anchor">
+            <span class="dot" style="background: var(--char-600)"></span>
+            <div>
+              <div class="title">CleanCo charcoal</div>
+              <div class="sub">#4F4C4D · char-600</div>
+            </div>
+          </div>
+        </div>
+        <p class="note warn">
+          <strong>The brand cyan is 1.80:1 on white.</strong> That is the
+          lowest of any client in this system — it fails AA for text and misses
+          the 3:1 non-text threshold by a wide margin. It cannot carry text,
+          icons, thin lines, chart marks, or white text on top of it. Treat
+          <code>#64D0E4</code> as a large-area fill only.
+        </p>
+        <p class="note">
+          <strong>Cyan on charcoal is the one readable brand pairing</strong>
+          (4.72:1) — and it is exactly how the annual report uses it, for
+          headings on the dark panel. On a dark surface, cyan can carry text.
+          On white, use <code>cyan-700 #326872</code> (6.25:1) instead.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Cyan scale</h2>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="chip" style="background: var(--cyan-950)"></div>
+            <div class="meta">
+              <div class="name">cyan-950</div><div class="hex">#162E32</div>
+              <div class="role">Primary — headings, CTA, selected states</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--cyan-800)"></div>
+            <div class="meta">
+              <div class="name">cyan-800</div><div class="hex">#264F57</div>
+              <div class="role">App bar / branded chrome</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--cyan-700)"></div>
+            <div class="meta">
+              <div class="name">cyan-700</div><div class="hex">#326872</div>
+              <div class="role">Links, secondary text (lowest AA-safe cyan)</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--cyan-600)"></div>
+            <div class="meta">
+              <div class="name">cyan-600</div><div class="hex">#408592</div>
+              <div class="role">Chart series &amp; icon fills — not text (4.21:1)</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--cyan-300)"></div>
+            <div class="meta">
+              <div class="name">cyan-300</div><div class="hex">#64D0E4</div>
+              <div class="role">Brand anchor — large fills only</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--cyan-100)"></div>
+            <div class="meta">
+              <div class="name">cyan-100</div><div class="hex">#D0F1F7</div>
+              <div class="role">Tint</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--cyan-50)"></div>
+            <div class="meta">
+              <div class="name">cyan-50</div><div class="hex">#E9F8FB</div>
+              <div class="role">KPI cards, nav active, hover</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--cyan-25)"></div>
+            <div class="meta">
+              <div class="name">cyan-25</div><div class="hex">#F6FCFD</div>
+              <div class="role">Page wash / surface start</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Charcoal scale</h2>
+        <div class="swatch-grid three">
+          <div class="swatch">
+            <div class="chip" style="background: var(--char-600)"></div>
+            <div class="meta">
+              <div class="name">char-600</div><div class="hex">#4F4C4D</div>
+              <div class="role">Accent — dark panels, reversed surfaces</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--char-300)"></div>
+            <div class="meta">
+              <div class="name">char-300</div><div class="hex">#B0AEAF</div>
+              <div class="role">Dividers on dark, disabled</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--char-50)"></div>
+            <div class="meta">
+              <div class="name">char-50</div><div class="hex">#F3F2F3</div>
+              <div class="role">Callout / accent tint</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Neutrals</h2>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="chip" style="background: var(--gray-900)"></div>
+            <div class="meta"><div class="name">gray-900</div><div class="hex">#2B2A2A</div><div class="role">Body text</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--gray-700)"></div>
+            <div class="meta"><div class="name">gray-700</div><div class="hex">#4F4C4D</div><div class="role">Muted / metadata text</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--gray-300)"></div>
+            <div class="meta"><div class="name">gray-300</div><div class="hex">#C9C7C8</div><div class="role">Strong border</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--gray-200)"></div>
+            <div class="meta"><div class="name">gray-200</div><div class="hex">#EDEDED</div><div class="role">Card border, table stripe</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--gray-100)"></div>
+            <div class="meta"><div class="name">gray-100</div><div class="hex">#F5F4F4</div><div class="role">Track / rail</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--gray-25)"></div>
+            <div class="meta"><div class="name">gray-25</div><div class="hex">#FCFCFC</div><div class="role">Page background</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: #ffffff"></div>
+            <div class="meta"><div class="name">white</div><div class="hex">#FFFFFF</div><div class="role">Card surface</div></div>
+          </div>
+        </div>
+        <p class="note" style="margin-top: 8px">
+          <strong>Neutrals are warm here, not the shared cool set.</strong>
+          <code>#4F4C4D</code> and <code>#EDEDED</code> are lifted straight from
+          the report; the rest are derived from them. Don't mix in the cool
+          Radix greys used for SEC and Ampol — the temperature clash is visible
+          side by side.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Semantic</h2>
+        <div class="swatch-grid three">
+          <div class="swatch">
+            <div class="chip" style="background: var(--danger)"></div>
+            <div class="meta"><div class="name">danger</div><div class="hex">#B3261E</div><div class="role">Errors, negatives</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--success)"></div>
+            <div class="meta"><div class="name">success</div><div class="hex">#0C7A4B</div><div class="role">Confirmations</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--warning)"></div>
+            <div class="meta"><div class="name">warning</div><div class="hex">#8A5300</div><div class="role">Cautions</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Chart series — fixed order</h2>
+        <p class="note warn">
+          <strong>This palette has one hue.</strong> CleanCo has no second
+          chromatic anchor — the report is cyan plus charcoal and nothing else —
+          so the series below is a sequential ladder, not a categorical set.
+          It reads well for stacked or ordered data and poorly for unrelated
+          categories. Dash patterns are mandatory. Anything past three
+          categories needs an extended data-viz palette from the client.
+        </p>
+        <div class="swatch-grid five">
+          <div class="swatch">
+            <div class="chip" style="background: #162e32"></div>
+            <div class="meta"><div class="name">1 · solid</div><div class="hex">#162E32</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #326872"></div>
+            <div class="meta"><div class="name">2 · dash 6 3</div><div class="hex">#326872</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #408592"></div>
+            <div class="meta"><div class="name">3 · dash 2 3</div><div class="hex">#408592</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #64d0e4"></div>
+            <div class="meta"><div class="name">4 · dash 8 4</div><div class="hex">#64D0E4</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #4f4c4d"></div>
+            <div class="meta"><div class="name">5 · dotted</div><div class="hex">#4F4C4D</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Contrast audit</h2>
+        <table class="contrast">
+          <thead>
+            <tr><th>Pair</th><th>Ratio</th><th>Text AA</th><th>UI 3:1</th><th>Use</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">#64D0E4 on white</td><td>1.80</td><td class="fail">Fail</td><td class="fail">Fail</td><td>Large fills only — never text or marks</td></tr>
+            <tr><td class="mono">white on #64D0E4</td><td>1.80</td><td class="fail">Fail</td><td class="fail">Fail</td><td>Never put white text on brand cyan</td></tr>
+            <tr><td class="mono">#64D0E4 on #4F4C4D</td><td>4.72</td><td class="pass">Pass</td><td class="pass">Pass</td><td>The one readable brand pairing</td></tr>
+            <tr><td class="mono">#64D0E4 on #162E32</td><td>7.94</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Cyan on dark chrome</td></tr>
+            <tr><td class="mono">#4F4C4D on white</td><td>8.49</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Body text, dark panels</td></tr>
+            <tr><td class="mono">#326872 on white</td><td>6.25</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Links, lowest AA-safe cyan</td></tr>
+            <tr><td class="mono">#408592 on white</td><td>4.21</td><td class="fail">Fail</td><td class="pass">Pass</td><td>Icon fills and chart marks, not text</td></tr>
+            <tr><td class="mono">#2B2A2A on white</td><td>14.31</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Primary body text</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>Outstanding — verify with client</h2>
+        <div class="two-col">
+          <ul class="checklist">
+            <li><span class="box"></span><span><span class="label">Report vintage</span> <span class="hint">— FY2018–19, their first. Confirm brand hasn't moved since</span></span></li>
+            <li><span class="box"></span><span><span class="label">Typeface</span> <span class="hint">— not confirmed. Inter until licensed</span></span></li>
+            <li><span class="box"></span><span><span class="label">Dark ramp</span> <span class="hint">— cyan-600 to 950 derived, not published</span></span></li>
+          </ul>
+          <ul class="checklist">
+            <li><span class="box"></span><span><span class="label">Extended data-viz palette</span> <span class="hint">— required; one hue won't carry 4+ series</span></span></li>
+            <li><span class="box"></span><span><span class="label">Logos</span> <span class="hint">— standard + reversed, SVG</span></span></li>
+            <li><span class="box"></span><span><span class="label">Second accent</span> <span class="hint">— ask whether one exists outside the report</span></span></li>
+          </ul>
+        </div>
+      </section>
+
+      <footer>
+        <span>Source: CleanCo Queensland Annual Report 2018–19 · PDF fill operators + rendered pages</span>
+        <span>Tally Energy Design System · C&amp;I Portal</span>
+      </footer>
+    </main>
+  </body>
+</html>

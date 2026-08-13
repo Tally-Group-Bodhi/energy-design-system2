@@ -39,6 +39,151 @@
   --popover-foreground: #f3f4f6;
 }
 
+/* ── SEC Victoria (client brand) ──────────────────────────────────────────
+ * Sampled from secvictoria.com.au and the 2025 annual report. Namespaced with
+ * `sec-` so the client palette can never override Tally DS tokens: the client's
+ * own tokens.css redefines gray-*, font-sans and radius-*, which would restyle
+ * every other page in this system.
+ *
+ * purple-950 and orange-600 are the fixed brand anchors (byte-identical across
+ * web and print). The cool lavender set is the digital palette; the warm cream
+ * set from the annual report is deliberately not included.
+ *
+ * orange-600 is 3.04:1 on white — accent only (icon fills, chart marks,
+ * borders, focus rings). Never as text, and never behind white text.
+ *
+ * Colour only: spacing, type scale, radii and icon sizes come from the Tally
+ * density system so client pages stay dimensionally consistent with the rest
+ * of the design system.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-sec-purple-25: #FBF7FF;
+  --color-sec-purple-50: #F4EBFF;
+  --color-sec-purple-100: #E9D7FE;
+  --color-sec-purple-300: #C18FEC;
+  --color-sec-purple-600: #7E4EA5;
+  --color-sec-purple-700: #43165E;
+  --color-sec-purple-800: #4E236E;
+  --color-sec-purple-950: #390A56;
+
+  --color-sec-orange-50: #FEF6EE;
+  --color-sec-orange-300: #FBB480;
+  --color-sec-orange-600: #F66800;
+
+  --color-sec-gray-25: #FCFCFC;
+  --color-sec-gray-100: #F1F1F2;
+  --color-sec-gray-200: #E8E8E8;
+  --color-sec-gray-300: #D9D9E0;
+  --color-sec-gray-600: #60646C;
+  --color-sec-gray-900: #1C2024;
+
+  --color-sec-danger: #CC0000;
+  --color-sec-success: #0C7A4B;
+  --color-sec-warning: #8A5300;
+}
+
+/* ── Ampol (client brand) ────────────────────────────────────────────────────
+ * Anchors: Ampol blue #18249C (theme-color) and Ampol red #ED0C06. Namespaced
+ * with `ampol-` so client tokens never override Tally DS or SEC tokens.
+ *
+ * Red is accent AND the universal error signal — reserve red-600 for brand
+ * chrome (logo, one hero accent, chart series 1). Semantic danger is the
+ * darker #B90905. Never put red-600 on Ampol blue (2.63:1); use red-300.
+ *
+ * Colour only: spacing, type scale, radii and icon sizes come from the Tally
+ * density system.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-ampol-blue-25: #F8F8FC;
+  --color-ampol-blue-50: #EFF0F8;
+  --color-ampol-blue-100: #DADCEF;
+  --color-ampol-blue-300: #979CD2;
+  --color-ampol-blue-600: #1860D8;
+  --color-ampol-blue-700: #18249C;
+  --color-ampol-blue-800: #11196D;
+  --color-ampol-blue-950: #0C1351;
+
+  --color-ampol-red-50: #FEF0F0;
+  --color-ampol-red-300: #F7928F;
+  --color-ampol-red-600: #ED0C06;
+
+  --color-ampol-gray-25: #FCFCFC;
+  --color-ampol-gray-100: #F1F1F2;
+  --color-ampol-gray-200: #E8E8E8;
+  --color-ampol-gray-300: #D9D9E0;
+  --color-ampol-gray-600: #60646C;
+  --color-ampol-gray-900: #1C2024;
+
+  --color-ampol-danger: #B90905;
+  --color-ampol-success: #0C7A4B;
+  --color-ampol-warning: #8A5300;
+}
+
+/* ── CleanCo Queensland (client brand) ───────────────────────────────────────
+ * Anchors: brand cyan #64D0E4 (large fills only — 1.80:1 on white) and charcoal
+ * #4F4C4D. Namespaced with `cleanco-`. Neutrals are warm; do not reuse the cool
+ * grey set from SEC/Ampol.
+ *
+ * On white: cyan-700 (#326872) for links/accents, cyan-600 for icon fills and
+ * chart marks (not text). Brand cyan only as a large fill or on dark chrome.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-cleanco-cyan-25: #F6FCFD;
+  --color-cleanco-cyan-50: #E9F8FB;
+  --color-cleanco-cyan-100: #D0F1F7;
+  --color-cleanco-cyan-300: #64D0E4;
+  --color-cleanco-cyan-600: #408592;
+  --color-cleanco-cyan-700: #326872;
+  --color-cleanco-cyan-800: #264F57;
+  --color-cleanco-cyan-950: #162E32;
+
+  --color-cleanco-char-50: #F3F2F3;
+  --color-cleanco-char-300: #B0AEAF;
+  --color-cleanco-char-600: #4F4C4D;
+
+  --color-cleanco-gray-25: #FCFCFC;
+  --color-cleanco-gray-100: #F5F4F4;
+  --color-cleanco-gray-200: #EDEDED;
+  --color-cleanco-gray-300: #C9C7C8;
+  --color-cleanco-gray-700: #4F4C4D;
+  --color-cleanco-gray-900: #2B2A2A;
+
+  --color-cleanco-danger: #B3261E;
+  --color-cleanco-success: #0C7A4B;
+  --color-cleanco-warning: #8A5300;
+}
+
+/* ── EnergyAustralia (client brand) ──────────────────────────────────────────
+ * Anchors: deep green #094C15 and brand green #007D2F. Namespaced `ea-`.
+ * Accent #008D36 is a brighter green (marks only). Success is teal #005E7A so
+ * it stays distinct from brand chrome. Hexes are logo-sampled — verify.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-ea-green-25: #F5FAF7;
+  --color-ea-green-50: #E8F3EC;
+  --color-ea-green-100: #CCE5D5;
+  --color-ea-green-300: #73B88D;
+  --color-ea-green-600: #007D2F;
+  --color-ea-green-700: #006927;
+  --color-ea-green-800: #00541F;
+  --color-ea-green-950: #094C15;
+
+  --color-ea-acc-50: #EDF7F1;
+  --color-ea-acc-300: #85C89F;
+  --color-ea-acc-600: #008D36;
+
+  --color-ea-gray-25: #FCFCFC;
+  --color-ea-gray-100: #F1F1F2;
+  --color-ea-gray-200: #E8E8E8;
+  --color-ea-gray-300: #D9D9E0;
+  --color-ea-gray-600: #60646C;
+  --color-ea-gray-900: #1C2024;
+
+  --color-ea-danger: #B3261E;
+  --color-ea-success: #005E7A;
+  --color-ea-warning: #8A5300;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -155,6 +300,127 @@ body {
   background:
     linear-gradient(to bottom, rgb(67 20 7 / 0.15), rgb(67 20 7 / 0.25)),
     linear-gradient(to bottom, rgb(69 26 3 / 0.1), rgb(69 26 3 / 0.2));
+}
+
+/* SEC Victoria pane: the cool lavender wash (purple-25 → gray-25). The warm
+   cream family from the annual report is never mixed in here — the warm and
+   cool greys clash side by side. */
+.surface-sec-victoria {
+  background: linear-gradient(
+    to bottom,
+    var(--color-sec-purple-25),
+    var(--color-sec-gray-25)
+  );
+}
+
+/* Ampol pane: cool blue wash (blue-25 → gray-25). */
+.surface-ampol {
+  background: linear-gradient(
+    to bottom,
+    var(--color-ampol-blue-25),
+    var(--color-ampol-gray-25)
+  );
+}
+
+/* CleanCo pane: cool cyan wash (cyan-25 → gray-25). */
+.surface-cleanco {
+  background: linear-gradient(
+    to bottom,
+    var(--color-cleanco-cyan-25),
+    var(--color-cleanco-gray-25)
+  );
+}
+
+/* EnergyAustralia pane: green wash (green-25 → gray-25). */
+.surface-energy-australia {
+  background: linear-gradient(
+    to bottom,
+    var(--color-ea-green-25),
+    var(--color-ea-gray-25)
+  );
+}
+
+/* SEC Victoria date pickers use the design system Calendar unchanged and
+   re-point its semantic tokens at the client palette. The DS tokens are
+   declared with `@theme inline`, so `bg-primary` compiles to
+   `var(--primary)` and picks up these scoped values. */
+.sec-calendar {
+  --foreground: var(--color-sec-gray-900);
+  --muted-foreground: var(--color-sec-gray-600);
+  --border: var(--color-sec-gray-200);
+  --input: var(--color-sec-gray-300);
+  --primary: var(--color-sec-purple-950);
+  --primary-foreground: #ffffff;
+  --accent: var(--color-sec-purple-50);
+  --accent-foreground: var(--color-sec-purple-950);
+  --ring: var(--color-sec-orange-600);
+}
+
+.ampol-calendar {
+  --foreground: var(--color-ampol-gray-900);
+  --muted-foreground: var(--color-ampol-gray-600);
+  --border: var(--color-ampol-gray-200);
+  --input: var(--color-ampol-gray-300);
+  --primary: var(--color-ampol-blue-700);
+  --primary-foreground: #ffffff;
+  --accent: var(--color-ampol-blue-50);
+  --accent-foreground: var(--color-ampol-blue-700);
+  --ring: var(--color-ampol-red-600);
+}
+
+.cleanco-calendar {
+  --foreground: var(--color-cleanco-gray-900);
+  --muted-foreground: var(--color-cleanco-gray-700);
+  --border: var(--color-cleanco-gray-200);
+  --input: var(--color-cleanco-gray-300);
+  --primary: var(--color-cleanco-cyan-950);
+  --primary-foreground: #ffffff;
+  --accent: var(--color-cleanco-cyan-50);
+  --accent-foreground: var(--color-cleanco-cyan-950);
+  --ring: var(--color-cleanco-cyan-700);
+}
+
+.ea-calendar {
+  --foreground: var(--color-ea-gray-900);
+  --muted-foreground: var(--color-ea-gray-600);
+  --border: var(--color-ea-gray-200);
+  --input: var(--color-ea-gray-300);
+  --primary: var(--color-ea-green-950);
+  --primary-foreground: #ffffff;
+  --accent: var(--color-ea-green-50);
+  --accent-foreground: var(--color-ea-green-950);
+  --ring: var(--color-ea-green-600);
+}
+
+/* WCAG 2.2 AA is a hard requirement on this government product: every
+   interactive element carries a visible focus state. Scoped to the SEC brand
+   wrapper so it doesn't alter focus styling elsewhere in the system. */
+.sec-brand
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-sec-purple-950);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.ampol-brand
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-ampol-blue-700);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.cleanco-brand
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-cleanco-cyan-950);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.ea-brand
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-ea-green-950);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Hide scrollbar while keeping scroll functionality */

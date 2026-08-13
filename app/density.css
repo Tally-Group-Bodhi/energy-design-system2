@@ -126,15 +126,18 @@
   --spacing-density-xl: var(--tally-spacing-xl);
   --spacing-density-xxl: var(--tally-spacing-xxl);
 
-  /* Font size: text-density-xs … text-density-xxl */
-  --font-size-density-xs: var(--tally-font-size-xs);
-  --font-size-density-sm: var(--tally-font-size-sm);
-  --font-size-density-base: var(--tally-font-size-base);
-  --font-size-density-lg: var(--tally-font-size-lg);
-  --font-size-density-xl: var(--tally-font-size-xl);
-  --font-size-density-xxl: var(--tally-font-size-xxl);
-  --font-size-density-3xl: var(--tally-font-size-3xl);
-  --font-size-density-4xl: var(--tally-font-size-4xl);
+  /* Font size: text-density-xs … text-density-4xl.
+   * Tailwind v4 reads font sizes from the `--text-*` namespace, not
+   * `--font-size-*`; under the latter these utilities generate nothing and
+   * every `text-density-*` class silently inherits its parent size. */
+  --text-density-xs: var(--tally-font-size-xs);
+  --text-density-sm: var(--tally-font-size-sm);
+  --text-density-base: var(--tally-font-size-base);
+  --text-density-lg: var(--tally-font-size-lg);
+  --text-density-xl: var(--tally-font-size-xl);
+  --text-density-xxl: var(--tally-font-size-xxl);
+  --text-density-3xl: var(--tally-font-size-3xl);
+  --text-density-4xl: var(--tally-font-size-4xl);
 
   /* Border radius: rounded-density-sm … rounded-density-lg */
   --radius-density-sm: var(--tally-radius-sm);

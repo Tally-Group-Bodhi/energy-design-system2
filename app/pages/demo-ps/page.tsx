@@ -365,7 +365,7 @@ export default function DemoPsCustomerAccountPage() {
               </BreadcrumbList>
             </Breadcrumb>
 
-            <h1 className="mb-density-lg text-density-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            <h1 className="mb-density-lg text-density-xxl font-bold tracking-tight text-gray-900 dark:text-gray-100">
               {ACCOUNT_NAME}
             </h1>
 

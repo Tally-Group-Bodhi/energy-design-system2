@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EnergyAustralia — Colour Reference</title>
+    <style>
+      :root {
+        --ink: #1c2024;
+        --muted: #60646c;
+        --line: #e8e8e8;
+        --paper: #ffffff;
+        --wash: #f5faf7;
+
+        --green-25: #f5faf7;
+        --green-50: #e8f3ec;
+        --green-100: #cce5d5;
+        --green-300: #73b88d;
+        --green-600: #007d2f;
+        --green-700: #006927;
+        --green-800: #00541f;
+        --green-950: #094c15;
+
+        --acc-50: #edf7f1;
+        --acc-300: #85c89f;
+        --acc-600: #008d36;
+
+        --gray-25: #fcfcfc;
+        --gray-100: #f1f1f2;
+        --gray-200: #e8e8e8;
+        --gray-300: #d9d9e0;
+        --gray-600: #60646c;
+        --gray-900: #1c2024;
+
+        --danger: #b3261e;
+        --success: #005e7a;
+        --warning: #8a5300;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0; padding: 0;
+        background: var(--wash); color: var(--ink);
+        font-family: Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 11pt; line-height: 1.4;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+
+      .sheet {
+        max-width: 210mm; margin: 0 auto;
+        padding: 14mm 14mm 16mm; background: var(--paper); min-height: 100vh;
+      }
+
+      header {
+        display: flex; justify-content: space-between; align-items: flex-end;
+        gap: 16px; padding-bottom: 10px;
+        border-bottom: 2px solid var(--green-950); margin-bottom: 18px;
+      }
+      header h1 {
+        margin: 0; font-size: 18pt; font-weight: 700;
+        color: var(--green-950); letter-spacing: -0.02em;
+      }
+      header p { margin: 4px 0 0; color: var(--muted); font-size: 9pt; }
+      header .meta { text-align: right; color: var(--muted); font-size: 8.5pt; white-space: nowrap; }
+
+      h2 {
+        margin: 0 0 8px; font-size: 11pt; font-weight: 700;
+        color: var(--green-950); text-transform: uppercase; letter-spacing: 0.04em;
+      }
+
+      .section { margin-bottom: 16px; break-inside: avoid; }
+
+      .swatch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .swatch-grid.three { grid-template-columns: repeat(3, 1fr); }
+      .swatch-grid.five { grid-template-columns: repeat(5, 1fr); }
+
+      .swatch { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; }
+      .swatch .chip { height: 42px; border-bottom: 1px solid var(--line); }
+      .swatch .chip.light-border { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+      .swatch .meta { padding: 6px 8px 8px; }
+      .swatch .name { font-size: 8pt; font-weight: 600; color: var(--ink); }
+      .swatch .hex {
+        font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+        font-size: 8.5pt; color: var(--green-950); margin-top: 1px;
+      }
+      .swatch .role { font-size: 7.5pt; color: var(--muted); margin-top: 3px; line-height: 1.3; }
+
+      .note {
+        margin: 0 0 8px; padding: 8px 10px;
+        background: var(--green-50); border-left: 3px solid var(--green-600);
+        color: var(--ink); font-size: 8.5pt;
+      }
+      .note strong { color: var(--green-950); }
+      .note.warn { background: #fdf1f0; border-left-color: var(--danger); }
+
+      .anchors { display: flex; gap: 10px; margin-bottom: 10px; }
+      .anchor {
+        flex: 1; display: flex; align-items: center; gap: 9px;
+        border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px;
+      }
+      .anchor .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; }
+      .anchor .title { font-size: 9pt; font-weight: 600; }
+      .anchor .sub {
+        font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+        font-size: 8pt; color: var(--muted); margin-top: 1px;
+      }
+
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+      table.contrast { width: 100%; border-collapse: collapse; font-size: 8pt; }
+      table.contrast th {
+        text-align: left; color: var(--muted); font-weight: 600;
+        padding: 4px 6px; border-bottom: 1px solid var(--line);
+      }
+      table.contrast td { padding: 4px 6px; border-bottom: 1px solid var(--line); }
+      table.contrast td.mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+      .pass { color: #0c7a4b; font-weight: 600; }
+      .fail { color: #b3261e; font-weight: 600; }
+
+      .checklist { margin: 0; padding: 0; list-style: none; font-size: 8.5pt; }
+      .checklist li { display: flex; gap: 7px; align-items: flex-start; margin-bottom: 5px; }
+      .checklist .box {
+        width: 10px; height: 10px; border: 1px solid var(--gray-300);
+        border-radius: 2px; flex: none; margin-top: 2px;
+      }
+      .checklist .label { font-weight: 600; }
+      .checklist .hint { color: var(--muted); }
+
+      footer {
+        margin-top: 18px; padding-top: 8px; border-top: 1px solid var(--line);
+        display: flex; justify-content: space-between; font-size: 8pt; color: var(--muted);
+      }
+
+      .print-hint {
+        position: fixed; top: 12px; right: 12px;
+        background: var(--green-950); color: #fff; border: 0;
+        border-radius: 999px; padding: 8px 16px; font-size: 9pt; cursor: pointer;
+      }
+      @media print { .print-hint { display: none; } body { background: #fff; } }
+    </style>
+  </head>
+  <body>
+    <button class="print-hint" type="button" onclick="window.print()">
+      Print / Save as PDF
+    </button>
+
+    <main class="sheet">
+      <header>
+        <div>
+          <h1>EnergyAustralia — Colour Reference</h1>
+          <p>C&amp;I Portal client brand tokens · Tally Energy Design System</p>
+        </div>
+        <div class="meta">
+          Namespaced <code>ea-*</code><br />
+          Printable one-pager
+        </div>
+      </header>
+
+      <section class="section">
+        <h2>Brand anchors</h2>
+        <div class="anchors">
+          <div class="anchor">
+            <span class="dot" style="background: var(--green-950)"></span>
+            <div>
+              <div class="title">EA deep green</div>
+              <div class="sub">#094C15 · green-950</div>
+            </div>
+          </div>
+          <div class="anchor">
+            <span class="dot" style="background: var(--green-600)"></span>
+            <div>
+              <div class="title">EA green</div>
+              <div class="sub">#007D2F · green-600</div>
+            </div>
+          </div>
+        </div>
+        <p class="note warn">
+          <strong>Lowest-confidence sheet in this set.</strong> Unlike SEC
+          (PDF fill operators), Ampol (client meta tag) or CleanCo (PDF + raster),
+          these hexes come from a single logo-aggregator that sampled the SVG.
+          EA's own site publishes no <code>theme-color</code> and their
+          Brandfetch profile has no colour data. Corroborating signal only:
+          their asset filenames are <code>chevron-down-green.svg</code>.
+          <strong>Verify before building.</strong>
+        </p>
+        <p class="note">
+          <strong>Good news on contrast — a first for this set.</strong>
+          <code>#007D2F</code> is 5.28:1 on white, so unlike SEC's orange,
+          Ampol's red or CleanCo's cyan, EA's brand colour can actually carry
+          body text. Both anchors pass AA on white and reversed.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Green scale</h2>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="chip" style="background: var(--green-950)"></div>
+            <div class="meta">
+              <div class="name">green-950</div><div class="hex">#094C15</div>
+              <div class="role">Primary — headings, CTA, app bar</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--green-800)"></div>
+            <div class="meta">
+              <div class="name">green-800</div><div class="hex">#00541F</div>
+              <div class="role">Branded chrome, hover on primary</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--green-700)"></div>
+            <div class="meta">
+              <div class="name">green-700</div><div class="hex">#006927</div>
+              <div class="role">Links, secondary text</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--green-600)"></div>
+            <div class="meta">
+              <div class="name">green-600</div><div class="hex">#007D2F</div>
+              <div class="role">Brand anchor — marks, chart series, body-safe</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--green-300)"></div>
+            <div class="meta">
+              <div class="name">green-300</div><div class="hex">#73B88D</div>
+              <div class="role">Light chart fills only (2.34:1)</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--green-100)"></div>
+            <div class="meta">
+              <div class="name">green-100</div><div class="hex">#CCE5D5</div>
+              <div class="role">Tint, borders on wash</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--green-50)"></div>
+            <div class="meta">
+              <div class="name">green-50</div><div class="hex">#E8F3EC</div>
+              <div class="role">KPI cards, nav active, hover</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--green-25)"></div>
+            <div class="meta">
+              <div class="name">green-25</div><div class="hex">#F5FAF7</div>
+              <div class="role">Page wash / surface start</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Accent scale</h2>
+        <p class="note warn">
+          <strong>This is not a true accent.</strong> <code>#008D36</code> is the
+          third sampled green and sits almost on top of <code>green-600</code> —
+          it adds brightness, not a second hue. EA appears to be a
+          single-chroma brand. Never pair it with <code>green-950</code>
+          (2.37:1, fails), and never use it for text (4.32:1, fails AA).
+          A genuine second hue is the single most valuable thing to obtain
+          from this client.
+        </p>
+        <div class="swatch-grid three">
+          <div class="swatch">
+            <div class="chip" style="background: var(--acc-600)"></div>
+            <div class="meta">
+              <div class="name">acc-600</div><div class="hex">#008D36</div>
+              <div class="role">Bright marks, icon fills — never text</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--acc-300)"></div>
+            <div class="meta">
+              <div class="name">acc-300</div><div class="hex">#85C89F</div>
+              <div class="role">Accent on dark green chrome</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--acc-50)"></div>
+            <div class="meta">
+              <div class="name">acc-50</div><div class="hex">#EDF7F1</div>
+              <div class="role">Callout / accent tint</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Neutrals &amp; semantic</h2>
+        <div class="two-col">
+          <div class="swatch-grid three">
+            <div class="swatch">
+              <div class="chip" style="background: var(--gray-900)"></div>
+              <div class="meta"><div class="name">gray-900</div><div class="hex">#1C2024</div><div class="role">Body text</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip" style="background: var(--gray-600)"></div>
+              <div class="meta"><div class="name">gray-600</div><div class="hex">#60646C</div><div class="role">Muted text</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip" style="background: var(--gray-300)"></div>
+              <div class="meta"><div class="name">gray-300</div><div class="hex">#D9D9E0</div><div class="role">Strong border</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip light-border" style="background: var(--gray-200)"></div>
+              <div class="meta"><div class="name">gray-200</div><div class="hex">#E8E8E8</div><div class="role">Card border</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip light-border" style="background: var(--gray-100)"></div>
+              <div class="meta"><div class="name">gray-100</div><div class="hex">#F1F1F2</div><div class="role">Track / rail</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip light-border" style="background: var(--gray-25)"></div>
+              <div class="meta"><div class="name">gray-25</div><div class="hex">#FCFCFC</div><div class="role">Page background</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip light-border" style="background: #ffffff"></div>
+              <div class="meta"><div class="name">white</div><div class="hex">#FFFFFF</div><div class="role">Card surface</div></div>
+            </div>
+          </div>
+          <div class="swatch-grid three">
+            <div class="swatch">
+              <div class="chip" style="background: var(--danger)"></div>
+              <div class="meta"><div class="name">danger</div><div class="hex">#B3261E</div><div class="role">Errors, negatives</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip" style="background: var(--success)"></div>
+              <div class="meta"><div class="name">success</div><div class="hex">#005E7A</div><div class="role">Teal, NOT green — see note</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip" style="background: var(--warning)"></div>
+              <div class="meta"><div class="name">warning</div><div class="hex">#8A5300</div><div class="role">Cautions</div></div>
+            </div>
+          </div>
+        </div>
+        <p class="note" style="margin-top: 8px">
+          <strong>Success is deliberately teal, not green.</strong> Green is the
+          brand here, so a green success state reads as chrome rather than a
+          signal — the mirror image of Ampol's red problem. <code>#005E7A</code>
+          (7.29:1) is far enough in hue to be unambiguous. Positive and negative
+          values must still carry a sign or arrow, never colour alone.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Chart series — fixed order</h2>
+        <p class="note warn">
+          <strong>One hue, so this is a sequential ladder, not a categorical
+          set.</strong> Series 1–4 are green steps separated by luminance;
+          series 5 is neutral. Fine for stacked or ordered data, poor for
+          unrelated categories. Dash patterns are mandatory. Past three
+          categories, request an extended data-viz palette.
+        </p>
+        <div class="swatch-grid five">
+          <div class="swatch">
+            <div class="chip" style="background: #094c15"></div>
+            <div class="meta"><div class="name">1 · solid</div><div class="hex">#094C15</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #007d2f"></div>
+            <div class="meta"><div class="name">2 · dash 6 3</div><div class="hex">#007D2F</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #008d36"></div>
+            <div class="meta"><div class="name">3 · dash 2 3</div><div class="hex">#008D36</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #73b88d"></div>
+            <div class="meta"><div class="name">4 · dash 8 4</div><div class="hex">#73B88D</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #60646c"></div>
+            <div class="meta"><div class="name">5 · dotted</div><div class="hex">#60646C</div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Contrast audit</h2>
+        <table class="contrast">
+          <thead>
+            <tr><th>Pair</th><th>Ratio</th><th>Text AA</th><th>UI 3:1</th><th>Use</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">#094C15 on white</td><td>10.21</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Headings, primary button</td></tr>
+            <tr><td class="mono">white on #094C15</td><td>10.21</td><td class="pass">Pass</td><td class="pass">Pass</td><td>App bar, reversed chrome</td></tr>
+            <tr><td class="mono">#007D2F on white</td><td>5.28</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Body-safe brand green</td></tr>
+            <tr><td class="mono">white on #007D2F</td><td>5.28</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Filled buttons</td></tr>
+            <tr><td class="mono">#008D36 on white</td><td>4.32</td><td class="fail">Fail</td><td class="pass">Pass</td><td>Marks and fills only</td></tr>
+            <tr><td class="mono">#008D36 on #094C15</td><td>2.37</td><td class="fail">Fail</td><td class="fail">Fail</td><td>Never pair these two</td></tr>
+            <tr><td class="mono">#73B88D on white</td><td>2.34</td><td class="fail">Fail</td><td class="fail">Fail</td><td>Large fills only, never marks</td></tr>
+            <tr><td class="mono">#005E7A on white</td><td>7.29</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Success — distinct from brand</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>Outstanding — verify with client</h2>
+        <div class="two-col">
+          <ul class="checklist">
+            <li><span class="box"></span><span><span class="label">All three hexes</span> <span class="hint">— single aggregator source; run the extractor on their site</span></span></li>
+            <li><span class="box"></span><span><span class="label">Missing yellow / gold</span> <span class="hint">— source names them but gives no hex</span></span></li>
+            <li><span class="box"></span><span><span class="label">Typeface</span> <span class="hint">— likely custom wordmark. Inter until licensed</span></span></li>
+          </ul>
+          <ul class="checklist">
+            <li><span class="box"></span><span><span class="label">C&amp;I portal</span> <span class="hint">— ci.energyaustralia.com.au may differ from the consumer site</span></span></li>
+            <li><span class="box"></span><span><span class="label">Second hue</span> <span class="hint">— highest-value gap; unblocks charts</span></span></li>
+            <li><span class="box"></span><span><span class="label">Logos</span> <span class="hint">— standard + reversed, SVG</span></span></li>
+          </ul>
+        </div>
+      </section>
+
+      <footer>
+        <span>Source: logotyp.us logo sampling · corroborated by EA asset filenames. Not client-verified.</span>
+        <span>Tally Energy Design System · C&amp;I Portal</span>
+      </footer>
+    </main>
+  </body>
+</html>

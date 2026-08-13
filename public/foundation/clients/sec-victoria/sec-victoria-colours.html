@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SEC Victoria — Colour Reference</title>
+    <style>
+      :root {
+        --ink: #1c2024;
+        --muted: #60646c;
+        --line: #e8e8e8;
+        --paper: #ffffff;
+        --wash: #fbf7ff;
+
+        --purple-25: #fbf7ff;
+        --purple-50: #f4ebff;
+        --purple-100: #e9d7fe;
+        --purple-300: #c18fec;
+        --purple-600: #7e4ea5;
+        --purple-700: #43165e;
+        --purple-800: #4e236e;
+        --purple-950: #390a56;
+
+        --orange-50: #fef6ee;
+        --orange-300: #fbb480;
+        --orange-600: #f66800;
+
+        --gray-25: #fcfcfc;
+        --gray-100: #f1f1f2;
+        --gray-200: #e8e8e8;
+        --gray-300: #d9d9e0;
+        --gray-600: #60646c;
+        --gray-900: #1c2024;
+
+        --danger: #cc0000;
+        --success: #0c7a4b;
+        --warning: #8a5300;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--wash);
+        color: var(--ink);
+        font-family: Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 11pt;
+        line-height: 1.4;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .sheet {
+        max-width: 210mm;
+        margin: 0 auto;
+        padding: 14mm 14mm 16mm;
+        background: var(--paper);
+        min-height: 100vh;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--purple-950);
+        margin-bottom: 18px;
+      }
+
+      header h1 {
+        margin: 0;
+        font-size: 18pt;
+        font-weight: 700;
+        color: var(--purple-950);
+        letter-spacing: -0.02em;
+      }
+
+      header p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 9pt;
+      }
+
+      header .meta {
+        text-align: right;
+        color: var(--muted);
+        font-size: 8.5pt;
+        white-space: nowrap;
+      }
+
+      h2 {
+        margin: 0 0 8px;
+        font-size: 11pt;
+        font-weight: 700;
+        color: var(--purple-950);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .section {
+        margin-bottom: 16px;
+        break-inside: avoid;
+      }
+
+      .swatch-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+
+      .swatch-grid.three {
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .swatch-grid.five {
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .swatch {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .swatch .chip {
+        height: 42px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .swatch .chip.light-border {
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+      }
+
+      .swatch .meta {
+        padding: 6px 8px 8px;
+      }
+
+      .swatch .name {
+        font-size: 8pt;
+        font-weight: 600;
+        color: var(--ink);
+      }
+
+      .swatch .hex {
+        font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+        font-size: 8.5pt;
+        color: var(--purple-950);
+        margin-top: 1px;
+      }
+
+      .swatch .role {
+        font-size: 7.5pt;
+        color: var(--muted);
+        margin-top: 3px;
+        line-height: 1.3;
+      }
+
+      .note {
+        margin: 0 0 8px;
+        padding: 8px 10px;
+        background: var(--orange-50);
+        border-left: 3px solid var(--orange-600);
+        color: var(--ink);
+        font-size: 8.5pt;
+      }
+
+      .note strong {
+        color: var(--purple-950);
+      }
+
+      .two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+
+      .checklist {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .checklist li {
+        display: grid;
+        grid-template-columns: 14px 1fr;
+        gap: 8px;
+        align-items: start;
+        padding: 5px 0;
+        border-bottom: 1px solid var(--line);
+        font-size: 8.5pt;
+      }
+
+      .checklist li:last-child {
+        border-bottom: 0;
+      }
+
+      .box {
+        width: 12px;
+        height: 12px;
+        margin-top: 2px;
+        border: 1.5px solid var(--purple-950);
+        border-radius: 2px;
+      }
+
+      .checklist .label {
+        font-weight: 600;
+        color: var(--ink);
+      }
+
+      .checklist .hint {
+        color: var(--muted);
+        font-weight: 400;
+      }
+
+      .usage {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        font-size: 8.5pt;
+      }
+
+      .usage dt {
+        font-weight: 600;
+        color: var(--purple-950);
+      }
+
+      .usage dd {
+        margin: 0 0 6px;
+        color: var(--muted);
+      }
+
+      .anchors {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+
+      .anchor {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px 10px;
+      }
+
+      .anchor .dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        flex-shrink: 0;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+
+      .anchor .title {
+        font-weight: 700;
+        font-size: 9pt;
+      }
+
+      .anchor .sub {
+        font-size: 8pt;
+        color: var(--muted);
+        font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+      }
+
+      footer {
+        margin-top: 18px;
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        color: var(--muted);
+        font-size: 7.5pt;
+      }
+
+      .print-hint {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        background: var(--purple-950);
+        color: #fff;
+        border: 0;
+        border-radius: 999px;
+        padding: 10px 16px;
+        font: inherit;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(57, 10, 86, 0.25);
+      }
+
+      @media print {
+        body {
+          background: #fff;
+        }
+
+        .sheet {
+          max-width: none;
+          padding: 0;
+          min-height: auto;
+        }
+
+        .print-hint {
+          display: none;
+        }
+
+        .section {
+          page-break-inside: avoid;
+        }
+      }
+
+      @page {
+        size: A4;
+        margin: 12mm;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-hint" type="button" onclick="window.print()">
+      Print / Save as PDF
+    </button>
+
+    <main class="sheet">
+      <header>
+        <div>
+          <h1>SEC Victoria — Colour Reference</h1>
+          <p>
+            C&amp;I Portal client brand tokens · Tally Energy Design System
+          </p>
+        </div>
+        <div class="meta">
+          Namespaced <code>sec-*</code><br />
+          Printable one-pager
+        </div>
+      </header>
+
+      <section class="section">
+        <h2>Brand anchors</h2>
+        <div class="anchors">
+          <div class="anchor">
+            <span class="dot" style="background: var(--purple-950)"></span>
+            <div>
+              <div class="title">Primary purple</div>
+              <div class="sub">#390A56 · purple-950</div>
+            </div>
+          </div>
+          <div class="anchor">
+            <span class="dot" style="background: var(--orange-600)"></span>
+            <div>
+              <div class="title">Accent orange</div>
+              <div class="sub">#F66800 · orange-600</div>
+            </div>
+          </div>
+        </div>
+        <p class="note">
+          <strong>Orange is accent only.</strong> Use for icon fills, chart
+          marks, tab underlines, focus rings, and due-day dots.
+          Never as text on white, and never behind white text (≈3.04:1 on
+          white — fails WCAG AA for text).
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Purple scale</h2>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="chip" style="background: var(--purple-950)"></div>
+            <div class="meta">
+              <div class="name">purple-950</div>
+              <div class="hex">#390A56</div>
+              <div class="role">Headings, primary CTA, selected states</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--purple-800)"></div>
+            <div class="meta">
+              <div class="name">purple-800</div>
+              <div class="hex">#4E236E</div>
+              <div class="role">App bar / branded chrome</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--purple-700)"></div>
+            <div class="meta">
+              <div class="name">purple-700</div>
+              <div class="hex">#43165E</div>
+              <div class="role">Intermediate shade</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--purple-600)"></div>
+            <div class="meta">
+              <div class="name">purple-600</div>
+              <div class="hex">#7E4EA5</div>
+              <div class="role">Muted labels, links, chart series</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--purple-300)"></div>
+            <div class="meta">
+              <div class="name">purple-300</div>
+              <div class="hex">#C18FEC</div>
+              <div class="role">Light chart series</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div
+              class="chip light-border"
+              style="background: var(--purple-100)"
+            ></div>
+            <div class="meta">
+              <div class="name">purple-100</div>
+              <div class="hex">#E9D7FE</div>
+              <div class="role">Tint</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div
+              class="chip light-border"
+              style="background: var(--purple-50)"
+            ></div>
+            <div class="meta">
+              <div class="name">purple-50</div>
+              <div class="hex">#F4EBFF</div>
+              <div class="role">KPI cards, nav active, hover</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div
+              class="chip light-border"
+              style="background: var(--purple-25)"
+            ></div>
+            <div class="meta">
+              <div class="name">purple-25</div>
+              <div class="hex">#FBF7FF</div>
+              <div class="role">Page wash / surface start</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Orange scale</h2>
+        <div class="swatch-grid three">
+          <div class="swatch">
+            <div class="chip" style="background: var(--orange-600)"></div>
+            <div class="meta">
+              <div class="name">orange-600</div>
+              <div class="hex">#F66800</div>
+              <div class="role">Accent marks &amp; rings (not text)</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--orange-300)"></div>
+            <div class="meta">
+              <div class="name">orange-300</div>
+              <div class="hex">#FBB480</div>
+              <div class="role">Accent on purple surfaces</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div
+              class="chip light-border"
+              style="background: var(--orange-50)"
+            ></div>
+            <div class="meta">
+              <div class="name">orange-50</div>
+              <div class="hex">#FEF6EE</div>
+              <div class="role">Callout / accent tint</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Neutrals</h2>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="chip" style="background: var(--gray-900)"></div>
+            <div class="meta">
+              <div class="name">gray-900</div>
+              <div class="hex">#1C2024</div>
+              <div class="role">Body text</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--gray-600)"></div>
+            <div class="meta">
+              <div class="name">gray-600</div>
+              <div class="hex">#60646C</div>
+              <div class="role">Muted / metadata text</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--gray-300)"></div>
+            <div class="meta">
+              <div class="name">gray-300</div>
+              <div class="hex">#D9D9E0</div>
+              <div class="role">Input borders</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div
+              class="chip light-border"
+              style="background: var(--gray-200)"
+            ></div>
+            <div class="meta">
+              <div class="name">gray-200</div>
+              <div class="hex">#E8E8E8</div>
+              <div class="role">Card borders, chart grid</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div
+              class="chip light-border"
+              style="background: var(--gray-100)"
+            ></div>
+            <div class="meta">
+              <div class="name">gray-100</div>
+              <div class="hex">#F1F1F2</div>
+              <div class="role">Subtle fills</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div
+              class="chip light-border"
+              style="background: var(--gray-25)"
+            ></div>
+            <div class="meta">
+              <div class="name">gray-25</div>
+              <div class="hex">#FCFCFC</div>
+              <div class="role">Page / card surface</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div
+              class="chip light-border"
+              style="background: #ffffff"
+            ></div>
+            <div class="meta">
+              <div class="name">white</div>
+              <div class="hex">#FFFFFF</div>
+              <div class="role">Cards, panels, calendar</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="two-col">
+          <div>
+            <h2>Semantic</h2>
+            <div class="swatch-grid three">
+              <div class="swatch">
+                <div class="chip" style="background: var(--danger)"></div>
+                <div class="meta">
+                  <div class="name">danger</div>
+                  <div class="hex">#CC0000</div>
+                </div>
+              </div>
+              <div class="swatch">
+                <div class="chip" style="background: var(--success)"></div>
+                <div class="meta">
+                  <div class="name">success</div>
+                  <div class="hex">#0C7A4B</div>
+                </div>
+              </div>
+              <div class="swatch">
+                <div class="chip" style="background: var(--warning)"></div>
+                <div class="meta">
+                  <div class="name">warning</div>
+                  <div class="hex">#8A5300</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h2>Chart series (fixed order)</h2>
+            <div class="swatch-grid five">
+              <div class="swatch">
+                <div class="chip" style="background: #f66800"></div>
+                <div class="meta">
+                  <div class="name">1</div>
+                  <div class="hex">#F66800</div>
+                </div>
+              </div>
+              <div class="swatch">
+                <div class="chip" style="background: #7e4ea5"></div>
+                <div class="meta">
+                  <div class="name">2</div>
+                  <div class="hex">#7E4EA5</div>
+                </div>
+              </div>
+              <div class="swatch">
+                <div class="chip" style="background: #390a56"></div>
+                <div class="meta">
+                  <div class="name">3</div>
+                  <div class="hex">#390A56</div>
+                </div>
+              </div>
+              <div class="swatch">
+                <div class="chip" style="background: #c18fec"></div>
+                <div class="meta">
+                  <div class="name">4</div>
+                  <div class="hex">#C18FEC</div>
+                </div>
+              </div>
+              <div class="swatch">
+                <div class="chip" style="background: #60646c"></div>
+                <div class="meta">
+                  <div class="name">5</div>
+                  <div class="hex">#60646C</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Transpose checklist — new client brand</h2>
+        <p class="note" style="margin-bottom: 10px">
+          Fill these roles for a new client. Spacing, type scale, radii and
+          icons stay on the Tally density system — only colour, logos and font
+          change.
+        </p>
+        <div class="two-col">
+          <ul class="checklist">
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">primary</span>
+                <span class="hint"
+                  >— deepest brand (headings, CTA, selection)</span
+                ></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">primaryStrong</span>
+                <span class="hint">— app bar (lighter than primary)</span></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">primaryMuted</span>
+                <span class="hint">— secondary text / links</span></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">primaryTint</span>
+                <span class="hint">— card / active nav wash (~50)</span></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">primaryWash</span>
+                <span class="hint">— page gradient start (~25)</span></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">accent</span>
+                <span class="hint"
+                  >— marks &amp; rings (not text on white)</span
+                ></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">accentOnPrimary</span>
+                <span class="hint">— accent readable on brand surface</span></span
+              >
+            </li>
+          </ul>
+          <ul class="checklist">
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">accentTint</span>
+                <span class="hint">— soft callout background</span></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">text / textMuted / border / surface</span>
+                <span class="hint">— neutrals</span></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">danger / success / warning</span>
+                <span class="hint">— semantic</span></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">5 chart series + dash patterns</span>
+                <span class="hint">— fixed order</span></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">Nav active colours</span>
+                <span class="hint">— bg, text, dark variants</span></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">Logos</span>
+                <span class="hint">— standard + reversed (+ sizes)</span></span
+              >
+            </li>
+            <li>
+              <span class="box"></span>
+              <span
+                ><span class="label">Font</span>
+                <span class="hint">— or keep Inter until licensed</span></span
+              >
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <footer>
+        <span
+          >Source: <code>lib/tokens/client-brands.ts</code> ·
+          <code>app/globals.css</code></span
+        >
+        <span>Tally Energy Design System · C&amp;I Portal</span>
+      </footer>
+    </main>
+  </body>
+</html>
