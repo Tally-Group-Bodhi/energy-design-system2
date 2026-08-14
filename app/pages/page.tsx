@@ -98,6 +98,13 @@ const pages = [
     tags: ["Large Market", "Glass", "Operations", "Exceptions", "Dashboard", "Demo"],
   },
   {
+    title: "Glass Embedded Networks",
+    description: "SUPA Energy Commercial EN view of Glass: network portfolio, fuel-account hierarchy, and EN exception areas",
+    href: "/pages/glass-embedded-networks",
+    icon: "hub",
+    tags: ["Embedded Networks", "Glass", "Commercial", "Exceptions", "Dashboard"],
+  },
+  {
     title: "Tally Orion",
     description: "ORION-style CRM/account management with contact details and address tables",
     href: "/pages/tally-orion",
