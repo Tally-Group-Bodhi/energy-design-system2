@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Snowy Hydro — Colour Reference</title>
+    <style>
+      :root {
+        --ink: #1c2024;
+        --muted: #60646c;
+        --line: #ecedee;
+        --paper: #ffffff;
+        --wash: #f7fdfd;
+
+        --teal-25: #f7fdfd;
+        --teal-50: #edfafa;
+        --teal-100: #ccf0f1;
+        --teal-300: #9bd1d6;
+        --teal-600: #00b2b9;
+        --teal-700: #087786;
+        --teal-800: #103c54;
+        --teal-950: #000132;
+
+        --acc-50: #fef7e8;
+        --acc-300: #fdd998;
+        --acc-600: #faab1a;
+
+        --gray-25: #fcfcfc;
+        --gray-100: #ecedee;
+        --gray-200: #dcdedf;
+        --gray-300: #c3c6c8;
+        --gray-600: #60646c;
+        --gray-900: #1c2024;
+
+        --danger: #b3261e;
+        --success: #0c7a4b;
+        --warning: #8a5300;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0; padding: 0;
+        background: var(--wash); color: var(--ink);
+        font-family: Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 11pt; line-height: 1.4;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact;
+      }
+
+      .sheet {
+        max-width: 210mm; margin: 0 auto;
+        padding: 14mm 14mm 16mm; background: var(--paper); min-height: 100vh;
+      }
+
+      header {
+        display: flex; justify-content: space-between; align-items: flex-end;
+        gap: 16px; padding-bottom: 10px;
+        border-bottom: 2px solid var(--teal-950); margin-bottom: 18px;
+      }
+      header h1 {
+        margin: 0; font-size: 18pt; font-weight: 700;
+        color: var(--teal-950); letter-spacing: -0.02em;
+      }
+      header p { margin: 4px 0 0; color: var(--muted); font-size: 9pt; }
+      header .meta { text-align: right; color: var(--muted); font-size: 8.5pt; white-space: nowrap; }
+
+      h2 {
+        margin: 0 0 8px; font-size: 11pt; font-weight: 700;
+        color: var(--teal-950); text-transform: uppercase; letter-spacing: 0.04em;
+      }
+
+      .section { margin-bottom: 16px; break-inside: avoid; }
+
+      .swatch-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .swatch-grid.three { grid-template-columns: repeat(3, 1fr); }
+      .swatch-grid.five { grid-template-columns: repeat(5, 1fr); }
+
+      .swatch { border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #fff; }
+      .swatch .chip { height: 42px; border-bottom: 1px solid var(--line); }
+      .swatch .chip.light-border { box-shadow: inset 0 0 0 1px rgba(0,0,0,0.06); }
+      .swatch .meta { padding: 6px 8px 8px; }
+      .swatch .name { font-size: 8pt; font-weight: 600; color: var(--ink); }
+      .swatch .hex {
+        font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+        font-size: 8.5pt; color: var(--teal-950); margin-top: 1px;
+      }
+      .swatch .role { font-size: 7.5pt; color: var(--muted); margin-top: 3px; line-height: 1.3; }
+      .swatch .src {
+        display: inline-block; font-size: 6.5pt; font-weight: 700;
+        color: #0c7a4b; letter-spacing: 0.04em; margin-top: 2px;
+      }
+
+      .note {
+        margin: 0 0 8px; padding: 8px 10px;
+        background: var(--teal-50); border-left: 3px solid var(--teal-800);
+        color: var(--ink); font-size: 8.5pt;
+      }
+      .note strong { color: var(--teal-950); }
+      .note.warn { background: #fdf1f0; border-left-color: var(--danger); }
+      .note.good { background: #eef8f2; border-left-color: #0c7a4b; }
+
+      .anchors { display: flex; gap: 10px; margin-bottom: 10px; }
+      .anchor {
+        flex: 1; display: flex; align-items: center; gap: 9px;
+        border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px;
+      }
+      .anchor .dot { width: 26px; height: 26px; border-radius: 50%; flex: none; }
+      .anchor .title { font-size: 9pt; font-weight: 600; }
+      .anchor .sub {
+        font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+        font-size: 8pt; color: var(--muted); margin-top: 1px;
+      }
+
+      .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+      table.contrast { width: 100%; border-collapse: collapse; font-size: 8pt; }
+      table.contrast th {
+        text-align: left; color: var(--muted); font-weight: 600;
+        padding: 4px 6px; border-bottom: 1px solid var(--line);
+      }
+      table.contrast td { padding: 4px 6px; border-bottom: 1px solid var(--line); }
+      table.contrast td.mono { font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace; }
+      .pass { color: #0c7a4b; font-weight: 600; }
+      .fail { color: #b3261e; font-weight: 600; }
+
+      .checklist { margin: 0; padding: 0; list-style: none; font-size: 8.5pt; }
+      .checklist li { display: flex; gap: 7px; align-items: flex-start; margin-bottom: 5px; }
+      .checklist .box {
+        width: 10px; height: 10px; border: 1px solid var(--gray-300);
+        border-radius: 2px; flex: none; margin-top: 2px;
+      }
+      .checklist .label { font-weight: 600; }
+      .checklist .hint { color: var(--muted); }
+
+      footer {
+        margin-top: 18px; padding-top: 8px; border-top: 1px solid var(--line);
+        display: flex; justify-content: space-between; font-size: 8pt; color: var(--muted);
+      }
+
+      .print-hint {
+        position: fixed; top: 12px; right: 12px;
+        background: var(--teal-950); color: #fff; border: 0;
+        border-radius: 999px; padding: 8px 16px; font-size: 9pt; cursor: pointer;
+      }
+      @media print { .print-hint { display: none; } body { background: #fff; } }
+    </style>
+  </head>
+  <body>
+    <button class="print-hint" type="button" onclick="window.print()">
+      Print / Save as PDF
+    </button>
+
+    <main class="sheet">
+      <header>
+        <div>
+          <h1>Snowy Hydro — Colour Reference</h1>
+          <p>C&amp;I Portal client brand tokens · Tally Energy Design System</p>
+        </div>
+        <div class="meta">
+          Namespaced <code>snowy-*</code><br />
+          Printable one-pager
+        </div>
+      </header>
+
+      <section class="section">
+        <h2>Brand anchors</h2>
+        <div class="anchors">
+          <div class="anchor">
+            <span class="dot" style="background: var(--teal-950)"></span>
+            <div>
+              <div class="title">Snowy navy</div>
+              <div class="sub">#000132 · teal-950</div>
+            </div>
+          </div>
+          <div class="anchor">
+            <span class="dot" style="background: var(--teal-600)"></span>
+            <div>
+              <div class="title">Snowy teal</div>
+              <div class="sub">#00B2B9 · teal-600</div>
+            </div>
+          </div>
+        </div>
+        <p class="note warn">
+          <strong>Print and web disagree on the teal.</strong> The FY2024–25
+          report declares <code>#00B2B9</code>; snowyhydro.com.au publishes
+          <code>#00AEB6</code> in its <code>msapplication-TileColor</code>.
+          Both are real, neither is wrong — this sheet uses the print value
+          because it is corroborated across 377 fill operators. Confirm which
+          the client considers canonical before shipping.
+        </p>
+        <p class="note">
+          <strong>The ramp shifts hue as it lightens, and that's faithful.</strong>
+          Snowy's system runs near-black navy on covers, deep slate on section
+          pages, teal for accents, then pale teal tints. It reads as one
+          dark-to-light ladder in the report, so it is tokenised as one.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Primary scale</h2>
+        <div class="swatch-grid">
+          <div class="swatch">
+            <div class="chip" style="background: var(--teal-950)"></div>
+            <div class="meta">
+              <div class="name">teal-950</div><div class="hex">#000132</div>
+              <div class="role">Primary — headings, CTA, cover chrome</div>
+              <div class="src">CONFIRMED</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--teal-800)"></div>
+            <div class="meta">
+              <div class="name">teal-800</div><div class="hex">#103C54</div>
+              <div class="role">App bar, section surfaces</div>
+              <div class="src">CONFIRMED</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--teal-700)"></div>
+            <div class="meta">
+              <div class="name">teal-700</div><div class="hex">#087786</div>
+              <div class="role">Links, AA-safe teal on white (5.26:1)</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--teal-600)"></div>
+            <div class="meta">
+              <div class="name">teal-600</div><div class="hex">#00B2B9</div>
+              <div class="role">Brand accent — fills, marks. Never text on white</div>
+              <div class="src">CONFIRMED</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--teal-300)"></div>
+            <div class="meta">
+              <div class="name">teal-300</div><div class="hex">#9BD1D6</div>
+              <div class="role">Text on dark chrome (6.95:1 on teal-800)</div>
+              <div class="src">CONFIRMED</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--teal-100)"></div>
+            <div class="meta">
+              <div class="name">teal-100</div><div class="hex">#CCF0F1</div>
+              <div class="role">Tint, borders on wash</div>
+              <div class="src">CONFIRMED</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--teal-50)"></div>
+            <div class="meta">
+              <div class="name">teal-50</div><div class="hex">#EDFAFA</div>
+              <div class="role">KPI cards, nav active, hover</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--teal-25)"></div>
+            <div class="meta">
+              <div class="name">teal-25</div><div class="hex">#F7FDFD</div>
+              <div class="role">Page wash / surface start</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Amber accent</h2>
+        <div class="swatch-grid three">
+          <div class="swatch">
+            <div class="chip" style="background: var(--acc-600)"></div>
+            <div class="meta">
+              <div class="name">acc-600</div><div class="hex">#FAAB1A</div>
+              <div class="role">Highlight on dark chrome (10.38:1 on navy)</div>
+              <div class="src">CONFIRMED</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--acc-300)"></div>
+            <div class="meta">
+              <div class="name">acc-300</div><div class="hex">#FDD998</div>
+              <div class="role">Soft highlight on navy</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="chip light-border" style="background: var(--acc-50)"></div>
+            <div class="meta">
+              <div class="name">acc-50</div><div class="hex">#FEF7E8</div>
+              <div class="role">Callout / accent tint</div>
+            </div>
+          </div>
+        </div>
+        <p class="note" style="margin-top: 8px">
+          Amber is 1.93:1 on white — it only works against the navy and slate
+          surfaces, where it is excellent. Treat it as a dark-mode accent, not a
+          light-mode one. It is also chart series 3, so keep the meaning
+          consistent.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Neutrals &amp; semantic</h2>
+        <div class="two-col">
+          <div class="swatch-grid three">
+            <div class="swatch">
+              <div class="chip" style="background: var(--gray-900)"></div>
+              <div class="meta"><div class="name">gray-900</div><div class="hex">#1C2024</div><div class="role">Body text</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip" style="background: var(--gray-600)"></div>
+              <div class="meta"><div class="name">gray-600</div><div class="hex">#60646C</div><div class="role">Muted text</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip" style="background: var(--gray-300)"></div>
+              <div class="meta"><div class="name">gray-300</div><div class="hex">#C3C6C8</div><div class="role">Strong border</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip light-border" style="background: var(--gray-200)"></div>
+              <div class="meta"><div class="name">gray-200</div><div class="hex">#DCDEDF</div><div class="role">Card border</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip light-border" style="background: var(--gray-100)"></div>
+              <div class="meta"><div class="name">gray-100</div><div class="hex">#ECEDEE</div><div class="role">Track / rail</div><div class="src">CONFIRMED</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip light-border" style="background: var(--gray-25)"></div>
+              <div class="meta"><div class="name">gray-25</div><div class="hex">#FCFCFC</div><div class="role">Page background</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip light-border" style="background: #ffffff"></div>
+              <div class="meta"><div class="name">white</div><div class="hex">#FFFFFF</div><div class="role">Card surface</div></div>
+            </div>
+          </div>
+          <div class="swatch-grid three">
+            <div class="swatch">
+              <div class="chip" style="background: var(--danger)"></div>
+              <div class="meta"><div class="name">danger</div><div class="hex">#B3261E</div><div class="role">Errors, negatives</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip" style="background: var(--success)"></div>
+              <div class="meta"><div class="name">success</div><div class="hex">#0C7A4B</div><div class="role">Confirmations</div></div>
+            </div>
+            <div class="swatch">
+              <div class="chip" style="background: var(--warning)"></div>
+              <div class="meta"><div class="name">warning</div><div class="hex">#8A5300</div><div class="role">Cautions</div></div>
+            </div>
+          </div>
+        </div>
+        <p class="note" style="margin-top: 8px">
+          <strong>Watch the amber/warning overlap.</strong> Brand amber
+          <code>#FAAB1A</code> and semantic warning <code>#8A5300</code> are the
+          same hue at different luminance. Amber is brand and appears on dark
+          surfaces; warning is semantic and appears on light. Never put them in
+          the same view.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Chart series — fixed order</h2>
+        <p class="note good">
+          <strong>A genuine categorical palette — the first in the client set.</strong>
+          Snowy's report carries five distinct chart hues, all extracted as fill
+          operators and all confirmed to render. Unlike CleanCo, EnergyAustralia
+          or CS Energy, this separates on hue rather than luminance alone, so it
+          will carry five unrelated categories. Dash patterns still recommended.
+        </p>
+        <div class="swatch-grid five">
+          <div class="swatch">
+            <div class="chip" style="background: #00b2b9"></div>
+            <div class="meta"><div class="name">1 · solid</div><div class="hex">#00B2B9</div><div class="src">CONFIRMED</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #215e9e"></div>
+            <div class="meta"><div class="name">2 · dash 6 3</div><div class="hex">#215E9E</div><div class="src">CONFIRMED</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #faab1a"></div>
+            <div class="meta"><div class="name">3 · dash 2 3</div><div class="hex">#FAAB1A</div><div class="src">CONFIRMED</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #603290"></div>
+            <div class="meta"><div class="name">4 · dash 8 4</div><div class="hex">#603290</div><div class="src">CONFIRMED</div></div>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: #ee2e24"></div>
+            <div class="meta"><div class="name">5 · dotted</div><div class="hex">#EE2E24</div><div class="src">CONFIRMED</div></div>
+          </div>
+        </div>
+        <p class="note warn" style="margin-top: 8px">
+          <strong>Series 5 is red and series 3 is amber.</strong> In a portal
+          full of variances and negative values that will read as danger and
+          warning. Either reorder so red and amber sit last, or drop them and
+          run three categories. Never use series 5 for a metric that can go
+          negative.
+        </p>
+      </section>
+
+      <section class="section">
+        <h2>Contrast audit</h2>
+        <table class="contrast">
+          <thead>
+            <tr><th>Pair</th><th>Ratio</th><th>Text AA</th><th>UI 3:1</th><th>Use</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="mono">#000132 on white</td><td>19.99</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Headings, primary button</td></tr>
+            <tr><td class="mono">#103C54 on white</td><td>11.69</td><td class="pass">Pass</td><td class="pass">Pass</td><td>App bar, section chrome</td></tr>
+            <tr><td class="mono">#00B2B9 on white</td><td>2.60</td><td class="fail">Fail</td><td class="fail">Fail</td><td>Fills and marks only</td></tr>
+            <tr><td class="mono">#00B2B9 on #000132</td><td>7.68</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Teal reads well on navy</td></tr>
+            <tr><td class="mono">#00B2B9 on #103C54</td><td>4.49</td><td class="fail">Fail</td><td class="pass">Pass</td><td>Large text only on slate</td></tr>
+            <tr><td class="mono">#087786 on white</td><td>5.26</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Derived — the AA-safe teal</td></tr>
+            <tr><td class="mono">#FAAB1A on white</td><td>1.93</td><td class="fail">Fail</td><td class="fail">Fail</td><td>Dark surfaces only</td></tr>
+            <tr><td class="mono">#FAAB1A on #000132</td><td>10.38</td><td class="pass">Pass</td><td class="pass">Pass</td><td>Highlight on navy</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>Outstanding — verify with client</h2>
+        <div class="two-col">
+          <ul class="checklist">
+            <li><span class="box"></span><span><span class="label">Which teal is canonical</span> <span class="hint">— #00B2B9 (print) vs #00AEB6 (web)</span></span></li>
+            <li><span class="box"></span><span><span class="label">Typeface</span> <span class="hint">— not extracted. Inter until confirmed</span></span></li>
+            <li><span class="box"></span><span><span class="label">Chart palette intent</span> <span class="hint">— confirm the five hues are data-viz, not status</span></span></li>
+          </ul>
+          <ul class="checklist">
+            <li><span class="box"></span><span><span class="label">Red Energy / Lumo</span> <span class="hint">— retail subsidiaries with separate identities</span></span></li>
+            <li><span class="box"></span><span><span class="label">Neutrals</span> <span class="hint">— only #ECEDEE confirmed; rest are the shared Tally set</span></span></li>
+            <li><span class="box"></span><span><span class="label">Logos</span> <span class="hint">— standard + reversed, SVG</span></span></li>
+          </ul>
+        </div>
+      </section>
+
+      <footer>
+        <span>Source: Snowy Hydro Annual Report FY2024–25 — fill operators + raster verification. Print guide colours excluded.</span>
+        <span>Tally Energy Design System · C&amp;I Portal</span>
+      </footer>
+    </main>
+  </body>
+</html>

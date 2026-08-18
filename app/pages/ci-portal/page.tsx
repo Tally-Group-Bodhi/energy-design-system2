@@ -48,6 +48,20 @@ const demoPages: {
       "EnergyAustralia C&I portal demo: deep green brand skin with teal success signalling.",
     tags: ["Dashboard", "Charts", "Settlements", "Network"],
   },
+  {
+    brandKey: "cs-energy",
+    href: "/pages/ci-portal/cs-energy",
+    description:
+      "CS Energy C&I portal demo: deep blue and cyan brand skin with CS Energy greys.",
+    tags: ["Dashboard", "Charts", "Settlements", "Network"],
+  },
+  {
+    brandKey: "snowy-hydro",
+    href: "/pages/ci-portal/snowy-hydro",
+    description:
+      "Snowy Hydro C&I portal demo: navy and teal brand skin with amber dark-chrome accents.",
+    tags: ["Dashboard", "Charts", "Settlements", "Network"],
+  },
 ];
 
 export default function CiPortalIndex() {

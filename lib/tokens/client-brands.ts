@@ -305,11 +305,125 @@ const energyAustralia: ClientBrand = {
   },
 };
 
+/**
+ * CS Energy — deep blue and cyan, sourced from the FY2025 annual report fill
+ * operators. Namespaced `cs-`. Uses CS Energy's own grey scale (#231F20–#EEF1F2),
+ * not the shared Tally neutrals. Cyan (#00AEEF) fails on white and on deep blue
+ * (2.53 / 2.70): accent marks and large fills only — use acc-300 on blue chrome.
+ * blue-600 (#0079C1) is body-safe for links. Semantic set is unmodified (no
+ * brand collision with red/green/amber).
+ */
+const csEnergy: ClientBrand = {
+  key: "cs-energy",
+  name: "CS Energy",
+  shortName: "CS",
+  fontFamily: "var(--font-inter)",
+  colours: {
+    primary: "#005BAA",
+    primaryStrong: "#005BAA",
+    primaryMuted: "#0079C1",
+    primaryTint: "#EDF6FB",
+    primaryWash: "#F7FBFD",
+    accent: "#00AEEF",
+    accentOnPrimary: "#8CDBF8",
+    accentTint: "#E6F7FD",
+    text: "#231F20",
+    textMuted: "#6D6E71",
+    border: "#EEF1F2",
+    surface: "#FFFFFF",
+    danger: "#B3261E",
+  },
+  logos: {
+    standard: {
+      src: "/foundation/clients/cs-energy/CSEnergyLogo.png",
+      width: 131,
+      height: 88,
+    },
+    reversed: {
+      src: "/foundation/clients/cs-energy/CSEnergyLogoReversed.png",
+      width: 131,
+      height: 88,
+    },
+  },
+  surfaceClass: "surface-cs-energy",
+  navActiveColors: {
+    bg: "bg-cs-blue-50",
+    text: "text-cs-blue-800",
+    darkBg: "dark:bg-cs-blue-800/30",
+    darkText: "dark:text-cs-blue-100",
+  },
+  chart: {
+    // Sequential blue ladder + cyan fill + neutral. Dash patterns mandatory.
+    // #00AEEF is series 4 (fills / thick marks), never thin text-like lines.
+    series: ["#003869", "#005BAA", "#0079C1", "#00AEEF", "#6D6E71"],
+    seriesDash: ["0", "6 3", "2 3", "8 4", "2 2"],
+    grid: "#EEF1F2",
+    axis: "#6D6E71",
+  },
+};
+
+/**
+ * Snowy Hydro — navy and teal, from the FY2024–25 annual report. Namespaced
+ * `snowy-`. Brand teal (#00B2B9) is 2.60:1 on white: fills and marks only; use
+ * teal-700 (#087786) for links. Amber (#FAAB1A) is a dark-chrome accent only.
+ * Report chart hues include amber and red — portal series drops them so they
+ * cannot collide with warning/danger in a billing UI.
+ */
+const snowyHydro: ClientBrand = {
+  key: "snowy-hydro",
+  name: "Snowy Hydro",
+  shortName: "Snowy",
+  fontFamily: "var(--font-inter)",
+  colours: {
+    primary: "#000132",
+    primaryStrong: "#103C54",
+    primaryMuted: "#087786",
+    primaryTint: "#EDFAFA",
+    primaryWash: "#F7FDFD",
+    accent: "#00B2B9",
+    accentOnPrimary: "#9BD1D6",
+    accentTint: "#FEF7E8",
+    text: "#1C2024",
+    textMuted: "#60646C",
+    border: "#DCDEDF",
+    surface: "#FCFCFC",
+    danger: "#B3261E",
+  },
+  logos: {
+    standard: {
+      src: "/foundation/clients/snowy-hydro/SnowyHydroLogo.png",
+      width: 488,
+      height: 96,
+    },
+    reversed: {
+      src: "/foundation/clients/snowy-hydro/SnowyHydroLogoReversed.png",
+      width: 488,
+      height: 96,
+    },
+  },
+  surfaceClass: "surface-snowy-hydro",
+  navActiveColors: {
+    bg: "bg-snowy-teal-50",
+    text: "text-snowy-teal-950",
+    darkBg: "dark:bg-snowy-teal-800/30",
+    darkText: "dark:text-snowy-teal-300",
+  },
+  chart: {
+    // Teal / blue / purple / slate / neutral — report amber & red omitted.
+    series: ["#00B2B9", "#215E9E", "#603290", "#103C54", "#60646C"],
+    seriesDash: ["0", "6 3", "2 3", "8 4", "2 2"],
+    grid: "#ECEDEE",
+    axis: "#60646C",
+  },
+};
+
 export const clientBrands = {
   "sec-victoria": secVictoria,
   ampol,
   cleanco,
   "energy-australia": energyAustralia,
+  "cs-energy": csEnergy,
+  "snowy-hydro": snowyHydro,
 } as const;
 
 export type ClientBrandKey = keyof typeof clientBrands;

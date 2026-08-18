@@ -184,6 +184,70 @@
   --color-ea-warning: #8A5300;
 }
 
+/* ── CS Energy (client brand) ────────────────────────────────────────────────
+ * Anchors: deep blue #005BAA and cyan #00AEEF. Namespaced `cs-`. Neutrals are
+ * CS Energy's own grey scale from the FY2025 annual report — do not substitute
+ * the shared Tally greys. Cyan fails on white and on blue-800; use acc-300 on
+ * chrome and blue-600 for body-safe links. Semantic colours are unmodified.
+ * ─────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-cs-blue-25: #F7FBFD;
+  --color-cs-blue-50: #EDF6FB;
+  --color-cs-blue-100: #D4E9F8;
+  --color-cs-blue-300: #6DCFF6;
+  --color-cs-blue-600: #0079C1;
+  --color-cs-blue-700: #006AB6;
+  --color-cs-blue-800: #005BAA;
+  --color-cs-blue-950: #003869;
+
+  --color-cs-acc-50: #E6F7FD;
+  --color-cs-acc-300: #8CDBF8;
+  --color-cs-acc-600: #00AEEF;
+
+  --color-cs-gray-25: #FFFFFF;
+  --color-cs-gray-100: #EEF1F2;
+  --color-cs-gray-200: #EEF1F2;
+  --color-cs-gray-300: #C0C0C0;
+  --color-cs-gray-600: #6D6E71;
+  --color-cs-gray-700: #58595B;
+  --color-cs-gray-900: #231F20;
+
+  --color-cs-danger: #B3261E;
+  --color-cs-success: #0C7A4B;
+  --color-cs-warning: #8A5300;
+}
+
+/* ── Snowy Hydro (client brand) ──────────────────────────────────────────────
+ * Anchors: navy #000132 and teal #00B2B9. Namespaced `snowy-`. Brand teal fails
+ * on white (2.60:1) — fills/marks only; use teal-700 for links. Amber #FAAB1A
+ * is dark-chrome only. Print teal (#00B2B9) preferred over web (#00AEB6).
+ * ─────────────────────────────────────────────────────────────────────────── */
+@theme {
+  --color-snowy-teal-25: #F7FDFD;
+  --color-snowy-teal-50: #EDFAFA;
+  --color-snowy-teal-100: #CCF0F1;
+  --color-snowy-teal-300: #9BD1D6;
+  --color-snowy-teal-600: #00B2B9;
+  --color-snowy-teal-700: #087786;
+  --color-snowy-teal-800: #103C54;
+  --color-snowy-teal-950: #000132;
+
+  --color-snowy-acc-50: #FEF7E8;
+  --color-snowy-acc-300: #FDD998;
+  --color-snowy-acc-600: #FAAB1A;
+
+  --color-snowy-gray-25: #FCFCFC;
+  --color-snowy-gray-100: #ECEDEE;
+  --color-snowy-gray-200: #DCDEDF;
+  --color-snowy-gray-300: #C3C6C8;
+  --color-snowy-gray-600: #60646C;
+  --color-snowy-gray-900: #1C2024;
+
+  --color-snowy-danger: #B3261E;
+  --color-snowy-success: #0C7A4B;
+  --color-snowy-warning: #8A5300;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -340,6 +404,24 @@ body {
   );
 }
 
+/* CS Energy pane: cool blue wash (blue-25 → white). */
+.surface-cs-energy {
+  background: linear-gradient(
+    to bottom,
+    var(--color-cs-blue-25),
+    var(--color-cs-gray-25)
+  );
+}
+
+/* Snowy Hydro pane: teal wash (teal-25 → gray-25). */
+.surface-snowy-hydro {
+  background: linear-gradient(
+    to bottom,
+    var(--color-snowy-teal-25),
+    var(--color-snowy-gray-25)
+  );
+}
+
 /* SEC Victoria date pickers use the design system Calendar unchanged and
    re-point its semantic tokens at the client palette. The DS tokens are
    declared with `@theme inline`, so `bg-primary` compiles to
@@ -392,6 +474,30 @@ body {
   --ring: var(--color-ea-green-600);
 }
 
+.cs-calendar {
+  --foreground: var(--color-cs-gray-900);
+  --muted-foreground: var(--color-cs-gray-600);
+  --border: var(--color-cs-gray-200);
+  --input: var(--color-cs-gray-300);
+  --primary: var(--color-cs-blue-800);
+  --primary-foreground: #ffffff;
+  --accent: var(--color-cs-blue-50);
+  --accent-foreground: var(--color-cs-blue-800);
+  --ring: var(--color-cs-blue-600);
+}
+
+.snowy-calendar {
+  --foreground: var(--color-snowy-gray-900);
+  --muted-foreground: var(--color-snowy-gray-600);
+  --border: var(--color-snowy-gray-200);
+  --input: var(--color-snowy-gray-300);
+  --primary: var(--color-snowy-teal-950);
+  --primary-foreground: #ffffff;
+  --accent: var(--color-snowy-teal-50);
+  --accent-foreground: var(--color-snowy-teal-950);
+  --ring: var(--color-snowy-teal-700);
+}
+
 /* WCAG 2.2 AA is a hard requirement on this government product: every
    interactive element carries a visible focus state. Scoped to the SEC brand
    wrapper so it doesn't alter focus styling elsewhere in the system. */
@@ -419,6 +525,20 @@ body {
 .ea-brand
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--color-ea-green-950);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.cs-brand
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-cs-blue-800);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.snowy-brand
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-snowy-teal-950);
   outline-offset: 2px;
   border-radius: 4px;
 }
