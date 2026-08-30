@@ -6,10 +6,12 @@ export interface IconProps extends React.HTMLAttributes<HTMLSpanElement> {
   name: string;
   /** Size in CSS (e.g. 24, "1.5rem") */
   size?: number | string;
+  /** Render the solid-filled variant (Material Symbols FILL axis) */
+  filled?: boolean;
 }
 
 const Icon = React.forwardRef<HTMLSpanElement, IconProps>(
-  ({ className, name, size = 24, style, ...props }, ref) => {
+  ({ className, name, size = 24, filled = false, style, ...props }, ref) => {
     const sizeStyle =
       typeof size === "number"
         ? { fontSize: `${size}px`, width: size, height: size }
@@ -19,7 +21,11 @@ const Icon = React.forwardRef<HTMLSpanElement, IconProps>(
       <span
         ref={ref}
         className={cn("material-symbols-outlined inline-block shrink-0", className)}
-        style={{ ...sizeStyle, ...style }}
+        style={{
+          ...sizeStyle,
+          ...(filled ? { fontVariationSettings: "'FILL' 1" } : null),
+          ...style,
+        }}
         aria-hidden
         {...props}
       >

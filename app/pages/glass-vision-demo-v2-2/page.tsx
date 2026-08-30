@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Suspense, useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -29,6 +30,7 @@ import { Card, CardContent } from "@/components/Card/Card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/Tabs/Tabs";
 import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
+import Select from "@/components/Select/Select";
 import {
   Dialog,
   DialogContent,
@@ -47,6 +49,16 @@ import CompanionWidget, {
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
 import { secondaryColors } from "@/lib/tokens/colors";
+import {
+  IOS_CHROME_ACTIVE_CLASS,
+  IOS_CHROME_ACTIVE_ICON_CLASS,
+  IOS_CHROME_BORDER_CLASS,
+  IOS_CHROME_CLASS,
+  IOS_CHROME_INSET_CLASS,
+  IOS_CHROME_ITEM_CLASS,
+  IOS_CHROME_MUTED_CLASS,
+  IOS_CHROME_TEXT_CLASS,
+} from "@/app/pages/eos-glass/eos-glass-theme";
 
 /* ────────── Chart data & helpers ────────── */
 
@@ -413,10 +425,14 @@ const PANEL_TAB_ICONS: Record<PanelTab, string> = {
 };
 
 /* ────────── Bill Compare data ────────── */
+/**
+ * Invoice pool for Bill Compare. Ordered newest first; each `BILL_COMPARE_ROWS`
+ * value array is indexed against this list, so the two must stay the same length.
+ */
 const BILL_COMPARE_BILLS = [
   {
     id: "bill-1",
-    label: "Bill 1",
+    label: "Jun 2026",
     period: DEMO_BILL_PERIOD,
     status: "Paid" as const,
     adoraColor: "#F97316",
@@ -425,7 +441,7 @@ const BILL_COMPARE_BILLS = [
   },
   {
     id: "bill-2",
-    label: "Bill 2",
+    label: "May 2026",
     period: "31 Apr – 29 May 2026",
     status: "Paid" as const,
     adoraColor: "#EF4444",
@@ -433,30 +449,55 @@ const BILL_COMPARE_BILLS = [
   },
   {
     id: "bill-3",
-    label: "Bill 3",
+    label: "Apr 2026",
     period: "31 Mar – 29 Apr 2026",
     status: "Paid" as const,
     adoraColor: "#EF4444",
     adoraSummary: "Baseline period before plan change to HomeDeal Extra.",
   },
+  {
+    id: "bill-4",
+    label: "Mar 2026",
+    period: "28 Feb – 30 Mar 2026",
+    status: "Paid" as const,
+    adoraColor: "#EF4444",
+    adoraSummary: "Late summer period on the Home Saver plan.",
+  },
+  {
+    id: "bill-5",
+    label: "Feb 2026",
+    period: "31 Jan – 27 Feb 2026",
+    status: "Paid" as const,
+    adoraColor: "#EF4444",
+    adoraSummary: "Peak summer usage on the Home Saver plan.",
+  },
+  {
+    id: "bill-6",
+    label: "Jan 2026",
+    period: "31 Dec 2025 – 30 Jan 2026",
+    status: "Paid" as const,
+    adoraColor: "#EF4444",
+    adoraSummary: "Holiday period usage on the Home Saver plan.",
+  },
 ];
 
-const BILL_COMPARE_ROWS: { label: string; values: string[]; detail?: string }[] = [
-  { label: "Invoice issue date", values: [DEMO_INVOICE_ISSUED, "01 Jun 2026", "01 May 2026"] },
-  { label: "Energy plan", values: ["HomeDeal Extra", "HomeDeal Extra", "Home Saver"], detail: `Plan changed to HomeDeal Extra on ${DEMO_PLAN_CHANGE_DATE}` },
-  { label: "Invoice amount", values: ["$140.74", "$115.42", "$108.90"] },
-  { label: "Allocated amount", values: ["Fully Allocated", "Fully Allocated", "Fully Allocated"] },
-  { label: "Total Usage", values: ["412 kWh", "338 kWh", "321 kWh"] },
-  { label: "Average Daily Usage", values: ["13.7 kWh", "11.3 kWh", "10.7 kWh"] },
-  { label: "Compared to previous invoice", values: ["+22%", "−6.4%", "+3.1%"] },
-  { label: "General usage charge", values: ["$98.40", "$81.20", "$76.50"] },
-  { label: "Daily supply charge", values: ["$42.34", "$42.34", "$42.34"] },
-  { label: "Total new charges", values: ["$140.74", "$115.42", "$108.90"] },
-  { label: "GST", values: ["$12.79", "$10.49", "$9.90"] },
-  { label: "Previous Balance", values: ["−$69.14 CR", "$0.00", "−$12.50 CR"] },
-  { label: "Government relief credit", values: ["—", "−$75.00", "−$75.00"], detail: "No government relief credit on current bill" },
-  { label: "Hardship credit", values: ["−$100.00", "—", "—"] },
-  { label: "Carried forward credit", values: ["−$69.14 CR", "−$45.20 CR", "−$12.50 CR"] },
+/** `detailBillIndex` is the index in `BILL_COMPARE_BILLS` the note describes. */
+const BILL_COMPARE_ROWS: { label: string; values: string[]; detail?: string; detailBillIndex?: number }[] = [
+  { label: "Invoice issue date", values: [DEMO_INVOICE_ISSUED, "01 Jun 2026", "01 May 2026", "01 Apr 2026", "01 Mar 2026", "01 Feb 2026"] },
+  { label: "Energy plan", values: ["HomeDeal Extra", "HomeDeal Extra", "Home Saver", "Home Saver", "Home Saver", "Home Saver"], detail: `Plan changed to HomeDeal Extra on ${DEMO_PLAN_CHANGE_DATE}`, detailBillIndex: 0 },
+  { label: "Invoice amount", values: ["$140.74", "$115.42", "$108.90", "$121.35", "$132.60", "$128.15"] },
+  { label: "Allocated amount", values: ["Fully Allocated", "Fully Allocated", "Fully Allocated", "Fully Allocated", "Fully Allocated", "Fully Allocated"] },
+  { label: "Total Usage", values: ["412 kWh", "338 kWh", "321 kWh", "356 kWh", "389 kWh", "375 kWh"] },
+  { label: "Average Daily Usage", values: ["13.7 kWh", "11.3 kWh", "10.7 kWh", "11.9 kWh", "13.0 kWh", "12.5 kWh"] },
+  { label: "Compared to previous invoice", values: ["+22%", "+5.3%", "−9.8%", "−8.5%", "+3.7%", "+2.2%"] },
+  { label: "General usage charge", values: ["$98.40", "$81.20", "$76.50", "$85.60", "$93.80", "$90.40"] },
+  { label: "Daily supply charge", values: ["$42.34", "$42.34", "$42.34", "$42.34", "$42.34", "$42.34"] },
+  { label: "Total new charges", values: ["$140.74", "$115.42", "$108.90", "$121.35", "$132.60", "$128.15"] },
+  { label: "GST", values: ["$12.79", "$10.49", "$9.90", "$11.03", "$12.05", "$11.65"] },
+  { label: "Previous Balance", values: ["−$69.14 CR", "$0.00", "−$12.50 CR", "$0.00", "$0.00", "$0.00"] },
+  { label: "Government relief credit", values: ["—", "−$75.00", "−$75.00", "—", "—", "—"], detail: "No government relief credit on current bill", detailBillIndex: 0 },
+  { label: "Hardship credit", values: ["−$100.00", "—", "—", "—", "—", "—"] },
+  { label: "Carried forward credit", values: ["−$69.14 CR", "−$45.20 CR", "−$12.50 CR", "$0.00", "$0.00", "$0.00"] },
 ];
 
 const BROADBAND_PLANS = [
@@ -637,21 +678,37 @@ function AccountUsageBarChart({
   );
 }
 
-const FUEL_ICONS: Record<string, string> = {
-  Electricity: "bolt",
-  Gas: "local_fire_department",
+const FUEL_META: Record<string, { icon: string; className: string }> = {
+  Electricity: { icon: "bolt", className: "text-sky-500 dark:text-sky-400" },
+  Gas: { icon: "local_fire_department", className: "text-orange-500 dark:text-orange-400" },
+  Solar: { icon: "solar_power", className: "text-amber-500 dark:text-amber-400" },
 };
 
-function FuelLabel({ fuel, iconSize = 14 }: { fuel: string; iconSize?: number }) {
+/**
+ * Account rows show the fuels supplied rather than repeating the property-type
+ * icon already carried by the section header they sit under.
+ */
+function AccountFuelIcons({
+  fuel,
+  size = 20,
+  className,
+}: {
+  fuel: string;
+  size?: number;
+  className?: string;
+}) {
   const parts = fuel.split(" + ");
   return (
-    <span className="inline-flex items-center gap-0.5" title={fuel} aria-label={fuel}>
-      {parts.map((part, index) => (
-        <React.Fragment key={part}>
-          {index > 0 && <span aria-hidden>+</span>}
-          <Icon name={FUEL_ICONS[part] ?? "bolt"} size={iconSize} />
-        </React.Fragment>
-      ))}
+    <span
+      role="img"
+      title={fuel}
+      aria-label={fuel}
+      className={cn("flex w-9 shrink-0 flex-col items-center justify-center gap-0.5", className)}
+    >
+      {parts.map((part) => {
+        const meta = FUEL_META[part] ?? FUEL_META.Electricity;
+        return <Icon key={part} name={meta.icon} size={size} filled className={meta.className} />;
+      })}
     </span>
   );
 }
@@ -691,10 +748,12 @@ function AccountUsageChartLegend({
   );
 }
 
-/** Darkest navy — header & nav */
-const DARKEST_NAVY = "#161B2E";
-/** Dark navy for search input */
-const DARK_NAVY = "#212946";
+/* ========== Headline tabs (underline, flush left) ========== */
+const HEADLINE_TABS_LIST =
+  "h-auto w-full justify-start rounded-none border-b border-gray-200 bg-transparent p-0 shadow-none dark:border-white/10 dark:bg-transparent";
+/** Nested tab set — smaller than the account-level tabs so hierarchy stays readable. */
+const HEADLINE_TAB_TRIGGER_SM =
+  "-mb-px rounded-none border-b-2 border-transparent bg-transparent px-0 pb-2 pt-0 text-[13px] font-medium text-gray-500 shadow-none hover:bg-transparent hover:text-gray-800 data-[state=active]:border-[#2C365D] data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:text-[#2C365D] data-[state=active]:shadow-none dark:text-slate-400 dark:hover:text-slate-200 dark:data-[state=active]:border-[#00D2A2] dark:data-[state=active]:bg-transparent dark:data-[state=active]:text-[#00D2A2]";
 
 /* ========== Light mode (default) ========== */
 const PANE_LIGHT = "bg-gray-100";
@@ -811,7 +870,7 @@ const ACCOUNTS: AccountRecord[] = [
     nmi: "63058847231",
     accNumber: "104087412",
     type: "Residential",
-    fuel: "Electricity",
+    fuel: "Electricity + Solar",
     status: "OPEN",
     balance: "−$24.50 Credit",
     isCredit: true,
@@ -1094,6 +1153,550 @@ const ACCOUNT_SECTIONS: {
   },
 ];
 
+function getAccountTypeMeta(type: AccountRecord["type"]) {
+  if (type === "Residential") {
+    return { icon: "home" as const, iconBg: "bg-sky-100 text-sky-700 dark:bg-sky-500/25 dark:text-sky-300" };
+  }
+  if (type === "Commercial") {
+    return { icon: "business" as const, iconBg: "bg-violet-100 text-violet-700 dark:bg-violet-500/25 dark:text-violet-300" };
+  }
+  return { icon: "store" as const, iconBg: "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300" };
+}
+
+function AccountOverviewDetails({ acc }: { acc: AccountRecord }) {
+  const accountCharts = getAccountChartData(acc.address);
+  const [invoicePreviewOpen, setInvoicePreviewOpen] = useState(false);
+
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
+          <CardContent className="p-3.5 pt-3.5 pb-3.5">
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">Plan</p>
+            <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.plan ?? "—"}</p>
+            {acc.planRef && <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-500">{acc.planRef}</p>}
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
+          <CardContent className="p-3.5 pt-3.5 pb-3.5">
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">Best offer</p>
+            <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.bestOffer ?? "—"}</p>
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
+          <CardContent className="p-3.5 pt-3.5 pb-3.5">
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">Billing</p>
+            <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.billing ?? "—"}</p>
+            {acc.billingTo && <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-500">{acc.billingTo}</p>}
+          </CardContent>
+        </Card>
+        <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
+          <CardContent className="p-3.5 pt-3.5 pb-3.5">
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">{acc.scheduledRead ? "Next scheduled read" : "Commenced"}</p>
+            <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.scheduledRead ?? acc.commenced ?? "—"}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
+            <Tabs defaultValue="charges">
+              <TabsList className={cn(HEADLINE_TABS_LIST, "mx-density-xl flex w-auto gap-5 pt-4")}>
+                <TabsTrigger value="charges" className={HEADLINE_TAB_TRIGGER_SM}>
+                  Charges
+                </TabsTrigger>
+                <TabsTrigger value="load" className={HEADLINE_TAB_TRIGGER_SM}>
+                  Load
+                </TabsTrigger>
+                <TabsTrigger value="usage" className={HEADLINE_TAB_TRIGGER_SM}>
+                  Usage
+                </TabsTrigger>
+              </TabsList>
+              <CardContent className="p-5 pt-4 pb-5">
+                <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill Information</h3>
+                {acc.billPeriod && (
+                  <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">{acc.billPeriod}</p>
+                )}
+              <TabsContent value="charges" className="mt-4">
+                <div className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
+                  {acc.isClosed ? (
+                    <>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Final invoice</span>
+                        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalInvoice ?? "—"}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Allocated</span>
+                        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Posted</span>
+                        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Closed on</span>
+                        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.closedOn ?? "—"}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Final read</span>
+                        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalRead ?? "—"}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Washup</span>
+                        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Invoice amount</span>
+                        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.invoiceAmount ?? "—"}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Allocated</span>
+                        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Posted</span>
+                        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Due</span>
+                        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.due ?? "—"}</span>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Charges</span>
+                        <span
+                          className={cn(
+                            "font-medium",
+                            (acc.charges?.includes("−") || acc.charges?.includes("-")) && acc.charges?.includes("CR")
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-gray-900 dark:text-slate-100"
+                          )}
+                        >
+                          {acc.charges ?? "—"}
+                        </span>
+                      </div>
+                      {acc.demandCharge && (
+                        <div className="flex justify-between gap-4">
+                          <span className="text-gray-500 dark:text-slate-500">Demand charge</span>
+                          <span className="font-medium text-gray-900 dark:text-slate-100">{acc.demandCharge}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between gap-4">
+                        <span className="text-gray-500 dark:text-slate-500">Washup</span>
+                        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </TabsContent>
+              <TabsContent value="load" className="mt-4">
+                {acc.type === "Commercial" ? (
+                  <CommercialLoadDisaggChart data={accountCharts.loadDisagg} />
+                ) : (
+                  <>
+                    <p className="mb-3 text-xs text-gray-500 dark:text-slate-400">
+                      Estimated breakdown by equipment category ({accountCharts.loadDisaggUnit ?? "kWh"})
+                    </p>
+                    <div className="space-y-2.5">
+                      {accountCharts.loadDisagg.map((item) => {
+                        const maxKWh = accountCharts.loadDisagg[0].kWh;
+                        const pct = Math.round((item.kWh / maxKWh) * 100);
+                        return (
+                          <div key={item.category} className="group">
+                            <div className="mb-1 flex items-center justify-between text-xs">
+                              <span className="flex items-center gap-1.5 font-medium text-gray-700 dark:text-slate-300">
+                                <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: item.fill }} />
+                                {item.category}
+                              </span>
+                              <span className="tabular-nums text-gray-500 dark:text-slate-400">
+                                {item.kWh} {accountCharts.loadDisaggUnit ?? "kWh"}
+                              </span>
+                            </div>
+                            <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
+                              <div
+                                className="h-full rounded-full transition-all duration-700 ease-out group-hover:opacity-80"
+                                style={{ width: `${pct}%`, backgroundColor: item.fill }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-2 dark:border-white/[0.06]">
+                      <span className="text-xs font-medium text-gray-700 dark:text-slate-300">Total estimated</span>
+                      <span className="text-xs font-semibold tabular-nums text-gray-900 dark:text-slate-100">
+                        {accountCharts.loadDisagg.reduce((s, d) => s + d.kWh, 0)} {accountCharts.loadDisaggUnit ?? "kWh"}
+                      </span>
+                    </div>
+                  </>
+                )}
+              </TabsContent>
+              <TabsContent value="usage" className="mt-4">
+                <AccountUsageChartLegend
+                  data={accountCharts.usage}
+                  billVsPrevious={acc.billVsPrevious}
+                  billVsPreviousUp={acc.billVsPreviousUp}
+                />
+                <AccountUsageBarChart
+                  data={accountCharts.usage}
+                  gradientId={`gradUsage-${acc.nmi.replace(/\s/g, "")}`}
+                />
+              </TabsContent>
+              </CardContent>
+            </Tabs>
+        </Card>
+
+        <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
+          <Tabs defaultValue="invoice-pdf">
+            <TabsList className={cn(HEADLINE_TABS_LIST, "mx-density-xl flex w-auto gap-5 pt-4")}>
+              <TabsTrigger value="invoice-pdf" className={HEADLINE_TAB_TRIGGER_SM}>
+                Invoice PDF
+              </TabsTrigger>
+              <TabsTrigger value="bill-vs-previous" className={HEADLINE_TAB_TRIGGER_SM}>
+                Bill vs Previous
+              </TabsTrigger>
+            </TabsList>
+            <CardContent className="p-5 pt-4 pb-5">
+              <TabsContent value="invoice-pdf" className="mt-0">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">
+                      Latest invoice
+                    </h3>
+                    <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                      {acc.billPeriod ?? "Latest billing period"}
+                    </p>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-2 py-1 text-xs font-medium text-red-600 dark:bg-red-500/10 dark:text-red-300">
+                    <Icon name="picture_as_pdf" size={15} filled />
+                    3 pages
+                  </span>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-gray-200/80 bg-white p-3 dark:border-white/10 dark:bg-white/[0.04]">
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                      Amount due
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-slate-100">
+                      {acc.invoiceAmount ?? acc.finalInvoice ?? "—"}
+                    </p>
+                  </div>
+                  <div className="rounded-xl border border-gray-200/80 bg-white p-3 dark:border-white/10 dark:bg-white/[0.04]">
+                    <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                      Due date
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-slate-100">
+                      {acc.due ?? acc.closedOn ?? "—"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-3 space-y-2 rounded-xl border border-gray-200/80 bg-white p-3 text-xs dark:border-white/10 dark:bg-white/[0.04]">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-gray-500 dark:text-slate-400">Account</span>
+                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.accNumber ?? acc.nmi}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-gray-500 dark:text-slate-400">Service</span>
+                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.fuel}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-gray-500 dark:text-slate-400">Charges</span>
+                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.charges ?? "—"}</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setInvoicePreviewOpen(true)}
+                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#2C365D] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#222a49] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2C365D] focus-visible:ring-offset-2 dark:bg-[#00D2A2] dark:text-[#102c25] dark:hover:bg-[#00bc91]"
+                >
+                  <Icon name="open_in_full" size={17} />
+                  View full invoice PDF
+                </button>
+              </TabsContent>
+
+              <TabsContent value="bill-vs-previous" className="mt-0">
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill vs Previous</h3>
+              <button
+                type="button"
+                className="rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-[#00D2A2]/10 hover:text-[#008f6f] dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-[#00D2A2]/20 dark:hover:text-[#00D2A2]"
+              >
+                Latest bill
+              </button>
+            </div>
+            {acc.billVsPrevious && acc.billVsPrevious !== "—" ? (
+              <div
+                className={cn(
+                  "mt-4 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium",
+                  acc.billVsPreviousUp
+                    ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"
+                    : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+                )}
+              >
+                <Icon name={acc.billVsPreviousUp ? "trending_up" : "trending_down"} size={18} />
+                {acc.billVsPrevious}
+              </div>
+            ) : null}
+            <div className="mt-4 flex items-center gap-4">
+              <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: CHART_TEAL }} />
+                Current
+              </span>
+              <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                <span className="inline-block h-2 w-2 rounded-full bg-gray-300 dark:bg-slate-500" />
+                Previous
+              </span>
+            </div>
+            <div className="mt-2 h-52 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={accountCharts.billVsPrevious} margin={{ top: 12, right: 12, bottom: 4, left: -8 }}>
+                  <defs>
+                    <linearGradient id={`bill-area-${acc.nmi.replace(/\s/g, "")}`} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={CHART_TEAL} stopOpacity={0.25} />
+                      <stop offset="100%" stopColor={CHART_TEAL} stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" strokeOpacity={0.5} vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} dy={6} />
+                  <YAxis domain={[0, 160]} ticks={[0, 80, 160]} tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={32} />
+                  <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#00D2A2", strokeWidth: 1, strokeDasharray: "4 4", strokeOpacity: 0.4 }} />
+                  <Area
+                    type="natural"
+                    dataKey="current"
+                    name="Current"
+                    stroke={CHART_TEAL}
+                    strokeWidth={2.5}
+                    fill={`url(#bill-area-${acc.nmi.replace(/\s/g, "")})`}
+                    dot={false}
+                    activeDot={{ r: 5, fill: CHART_TEAL, stroke: "#fff", strokeWidth: 2 }}
+                    animationDuration={800}
+                    animationEasing="ease-out"
+                  />
+                  <Line
+                    type="natural"
+                    dataKey="previous"
+                    name="Previous"
+                    stroke="#D1D5DB"
+                    strokeWidth={1.5}
+                    strokeDasharray="6 3"
+                    dot={false}
+                    activeDot={{ r: 4, fill: "#D1D5DB", stroke: "#fff", strokeWidth: 2 }}
+                    animationDuration={800}
+                    animationEasing="ease-out"
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+              </TabsContent>
+            </CardContent>
+          </Tabs>
+        </Card>
+      </div>
+
+      {invoicePreviewOpen &&
+        createPortal(
+          <Dialog open={invoicePreviewOpen} onOpenChange={setInvoicePreviewOpen}>
+            <DialogContent className="!flex h-[92vh] w-[95vw] !max-w-[1200px] !flex-col gap-0 overflow-hidden !rounded-xl !border-gray-200 !bg-white p-0 dark:!border-slate-700 dark:!bg-slate-900">
+              <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4 pr-14 dark:border-slate-700">
+                <div className="min-w-0">
+                  <DialogTitle className="truncate dark:text-slate-100">Invoice PDF</DialogTitle>
+                  <DialogDescription className="mt-1 truncate dark:text-slate-400">
+                    {acc.address} · {acc.billPeriod ?? "Latest billing period"}
+                  </DialogDescription>
+                </div>
+                <a
+                  href="/sample-invoice.pdf"
+                  download
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <Icon name="download" size={16} />
+                  Download
+                </a>
+              </div>
+              <iframe
+                src="/sample-invoice.pdf"
+                title={`Invoice PDF for ${acc.address}`}
+                className="min-h-0 w-full flex-1 bg-gray-100 dark:bg-slate-950"
+              />
+              <DialogClose />
+            </DialogContent>
+          </Dialog>,
+          document.body
+        )}
+    </div>
+  );
+}
+
+type ActivityEvent = {
+  date: string;
+  title: string;
+  detail: string;
+  icon: string;
+  tone: "neutral" | "success" | "warning" | "info";
+  sortKey: number;
+};
+
+const MONTH_INDEX: Record<string, number> = {
+  Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6,
+  Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12,
+};
+
+function activitySortKey(dateStr: string): number {
+  const cleaned = dateStr.replace(/^Billed To /i, "").trim();
+  const match = cleaned.match(/^(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})$/);
+  if (!match) return 0;
+  const month = MONTH_INDEX[match[2]] ?? 0;
+  return Number(match[3]) * 10000 + month * 100 + Number(match[1]);
+}
+
+function periodEndDate(billPeriod?: string): string | null {
+  if (!billPeriod) return null;
+  const parts = billPeriod.split("–").map((part) => part.trim());
+  return parts[1] ?? null;
+}
+
+function getAccountActivity(acc: AccountRecord): ActivityEvent[] {
+  const events: ActivityEvent[] = [];
+
+  if (acc.scheduledRead) {
+    events.push({
+      date: acc.scheduledRead,
+      title: "Meter read scheduled",
+      detail: `Next scheduled read for NMI ${acc.nmi}`,
+      icon: "speed",
+      tone: "neutral",
+      sortKey: activitySortKey(acc.scheduledRead),
+    });
+  }
+  if (acc.due && acc.due !== "—") {
+    events.push({
+      date: acc.due,
+      title: acc.isCredit ? "Credit balance current" : "Payment due",
+      detail: acc.isCredit
+        ? `Account is in credit at ${acc.balance}`
+        : `Payment of ${acc.invoiceAmount ?? acc.balance} is due`,
+      icon: acc.isCredit ? "task_alt" : "event",
+      tone: acc.isCredit ? "success" : "warning",
+      sortKey: activitySortKey(acc.due),
+    });
+  }
+  if (acc.posted) {
+    const usageNote =
+      acc.billVsPrevious && acc.billVsPrevious !== "—"
+        ? ` Usage ${acc.billVsPreviousUp ? "up" : "down"} ${acc.billVsPrevious} vs the previous invoice.`
+        : "";
+    events.push({
+      date: acc.posted,
+      title: "Invoice issued",
+      detail: `${acc.invoiceAmount ? `Invoice posted for ${acc.invoiceAmount}.` : "Latest invoice posted."}${usageNote}`,
+      icon: "receipt_long",
+      tone: acc.billVsPreviousUp ? "warning" : "info",
+      sortKey: activitySortKey(acc.posted),
+    });
+  }
+  const periodEnd = periodEndDate(acc.billPeriod);
+  if (periodEnd && acc.billPeriod) {
+    events.push({
+      date: periodEnd,
+      title: "Billing period closed",
+      detail: acc.billPeriod,
+      icon: "calendar_month",
+      tone: "neutral",
+      sortKey: activitySortKey(periodEnd),
+    });
+  }
+  if (acc.plan) {
+    const isOfficerPlanChange = acc.plan === "HomeDeal Extra" && acc.commenced === "14 Mar 2019";
+    const planDate = isOfficerPlanChange ? "06 Jun 2026" : acc.commenced;
+    if (planDate) {
+      events.push({
+        date: planDate,
+        title: isOfficerPlanChange ? "Plan changed" : "Plan assignment",
+        detail: acc.planRef ? `${acc.plan} · ${acc.planRef}` : acc.plan,
+        icon: "description",
+        tone: "info",
+        sortKey: activitySortKey(planDate),
+      });
+    }
+  }
+  if (acc.tags && acc.tags.length > 0 && acc.commenced) {
+    events.push({
+      date: acc.commenced,
+      title: acc.tags.map((tag) => tag.label).join(" · "),
+      detail: acc.tags.some((tag) => tag.variant === "hardship")
+        ? "Hardship and assistance flags are active on this account"
+        : "Concession / government assistance is applied",
+      icon: acc.tags.some((tag) => tag.variant === "hardship") ? "favorite" : "volunteer_activism",
+      tone: acc.tags.some((tag) => tag.variant === "hardship") ? "warning" : "success",
+      sortKey: activitySortKey(acc.commenced) + 1,
+    });
+  }
+  if (acc.commenced) {
+    events.push({
+      date: acc.commenced,
+      title: "Account commenced",
+      detail: `${acc.type} ${acc.fuel.toLowerCase()} account opened`,
+      icon: "home",
+      tone: "neutral",
+      sortKey: activitySortKey(acc.commenced),
+    });
+  }
+
+  return events.sort((a, b) => b.sortKey - a.sortKey);
+}
+
+const ACTIVITY_TONE: Record<ActivityEvent["tone"], string> = {
+  neutral: "bg-gray-100 text-gray-600 dark:bg-slate-600/40 dark:text-slate-300",
+  success: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300",
+  warning: "bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300",
+  info: "bg-sky-100 text-sky-700 dark:bg-sky-500/20 dark:text-sky-300",
+};
+
+function AccountActivityPanel({ acc }: { acc: AccountRecord }) {
+  const events = getAccountActivity(acc);
+
+  return (
+    <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
+      <CardContent className="p-5 pt-5">
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-slate-100">Account Activity</h3>
+          <p className="text-xs text-gray-500 dark:text-slate-500">
+            Recent billing, meter, and account events for this service address
+          </p>
+        </div>
+        {events.length === 0 ? (
+          <p className="text-sm text-gray-500 dark:text-slate-400">No activity recorded for this account.</p>
+        ) : (
+          <ol className="space-y-0">
+            {events.map((event, index) => (
+              <li key={`${event.title}-${event.date}-${index}`} className="flex gap-3">
+                <div className="flex flex-col items-center">
+                  <span className={cn("flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", ACTIVITY_TONE[event.tone])}>
+                    <Icon name={event.icon} size={16} />
+                  </span>
+                  {index < events.length - 1 && <span className="my-1 w-px flex-1 bg-gray-200 dark:bg-white/10" />}
+                </div>
+                <div className={cn("min-w-0 flex-1", index < events.length - 1 && "pb-5")}>
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{event.title}</p>
+                    <p className="text-xs text-gray-500 dark:text-slate-500">{event.date}</p>
+                  </div>
+                  <p className="mt-0.5 text-sm text-gray-600 dark:text-slate-400">{event.detail}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 const ACCOUNT_USAGE_SPARKLINES: Record<string, number[]> = {
   "LOT 83 3 SNOW WAY, OFFICER, VIC 3809": [305, 298, 312, 305, 318, 328, 338, 412],
   "18 OCEAN VIEW DR, TORQUAY, VIC 3228": [95, 88, 92, 85, 78, 74, 72, 68],
@@ -1189,6 +1792,133 @@ const CALL_WRAP_SUMMARY_POINTS = [
 
 const DEMO_ANALYSE_DELAY = 3500;
 
+const BILL_COMPARE_COLUMNS = 3;
+
+/**
+ * Bill Compare grid. Each column picks its own invoice from `BILL_COMPARE_BILLS`,
+ * so an agent can line up any three periods (not just the most recent three).
+ */
+function BillCompareTable({ caption }: { caption?: string }) {
+  const [columnBillIds, setColumnBillIds] = useState<string[]>(() =>
+    BILL_COMPARE_BILLS.slice(0, BILL_COMPARE_COLUMNS).map((bill) => bill.id)
+  );
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+
+  const columns = columnBillIds.map((billId) => {
+    const index = BILL_COMPARE_BILLS.findIndex((bill) => bill.id === billId);
+    return { index, bill: BILL_COMPARE_BILLS[index] };
+  });
+
+  const selectColumnBill = (columnIndex: number, billId: string) => {
+    setColumnBillIds((previous) => {
+      const next = [...previous];
+      const clashIndex = next.indexOf(billId);
+      // Swap rather than duplicate when the invoice is already in another column.
+      if (clashIndex !== -1) next[clashIndex] = next[columnIndex];
+      next[columnIndex] = billId;
+      return next;
+    });
+  };
+
+  const toggleRow = (label: string) => {
+    setExpandedRows((previous) => {
+      const next = new Set(previous);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      return next;
+    });
+  };
+
+  const allExpanded = expandedRows.size === BILL_COMPARE_ROWS.length;
+
+  return (
+    <div className="overflow-x-auto">
+      <div className="min-w-[360px]">
+      {caption && (
+        <p className="border-b border-gray-100 px-4 py-2.5 text-xs text-gray-500 dark:border-white/[0.06] dark:text-slate-400">
+          {caption}
+        </p>
+      )}
+      <div className="grid grid-cols-3 gap-px">
+        {columns.map(({ bill }, columnIndex) => (
+          <div key={`bill-column-${columnIndex}`} className="p-2.5">
+            <Select
+              aria-label={`Invoice shown in column ${columnIndex + 1}`}
+              value={bill.id}
+              onChange={(event) => selectColumnBill(columnIndex, event.target.value)}
+              className="h-8 border-gray-200 bg-white/80 pl-1.5 pr-8 text-[11px] font-semibold text-gray-900 dark:border-white/10 dark:bg-white/[0.06] dark:text-slate-100"
+            >
+              {BILL_COMPARE_BILLS.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+            <div className="mt-1.5 flex items-center gap-1.5">
+              <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                {bill.status}
+              </span>
+              <button
+                type="button"
+                className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-red-50 text-red-600 transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
+                aria-label={`Download PDF for ${bill.period}`}
+              >
+                <Icon name="picture_as_pdf" size={14} />
+              </button>
+            </div>
+            <p className="mt-1 text-[10px] leading-tight text-gray-500 dark:text-slate-400">{bill.period}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center justify-end px-4 py-1.5">
+        <button
+          type="button"
+          onClick={() =>
+            setExpandedRows(
+              allExpanded ? new Set() : new Set(BILL_COMPARE_ROWS.map((row) => row.label))
+            )
+          }
+          className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 dark:text-slate-500 dark:hover:bg-white/[0.04] dark:hover:text-slate-300"
+        >
+          <Icon name={allExpanded ? "unfold_less" : "unfold_more"} size={14} />
+          {allExpanded ? "Collapse all" : "Expand all"}
+        </button>
+      </div>
+      <div className="divide-y divide-gray-100 dark:divide-white/[0.06]">
+        {BILL_COMPARE_ROWS.map((row) => {
+          const isRowExpanded = expandedRows.has(row.label);
+          return (
+            <div key={row.label}>
+              <button
+                type="button"
+                onClick={() => toggleRow(row.label)}
+                aria-expanded={isRowExpanded}
+                className="flex w-full items-center gap-2 px-4 py-2.5 text-left transition-colors hover:bg-gray-50/60 dark:hover:bg-white/[0.02]"
+              >
+                <span className="flex-1 text-xs font-medium text-gray-500 dark:text-slate-400">{row.label}</span>
+                <Icon name={isRowExpanded ? "expand_less" : "expand_more"} size={18} className="shrink-0 text-gray-400 dark:text-slate-500" />
+              </button>
+              {isRowExpanded && (
+                <div className="grid grid-cols-3 gap-px border-t border-gray-50 bg-gray-50/50 px-4 py-3 dark:border-white/[0.03] dark:bg-white/[0.02]">
+                  {columns.map(({ index }, columnIndex) => (
+                    <div key={`${row.label}-${columnIndex}`}>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{row.values[index]}</p>
+                      {row.detail && row.detailBillIndex === index && (
+                        <p className="mt-1 text-[10px] leading-relaxed text-gray-500 dark:text-slate-500">{row.detail}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      </div>
+    </div>
+  );
+}
+
 export default function GlassVisionPage() {
   return (
     <Suspense>
@@ -1199,11 +1929,14 @@ export default function GlassVisionPage() {
 
 function GlassVisionContent() {
   const searchParams = useSearchParams();
+  const initialAccountAddress =
+    ACCOUNTS.find((account) => account.nmi === searchParams.get("account"))?.address ?? null;
   const [activeTab, setActiveTab] = useState("overview");
+  const [accountTab, setAccountTab] = useState("overview");
   const [activeNavId, setActiveNavId] = useState("customers");
-  const [selectedAccountAddress, setSelectedAccountAddress] = useState<string | null>(null);
+  const [selectedAccountAddress, setSelectedAccountAddress] = useState<string | null>(initialAccountAddress);
   const [isExpanded, setIsExpanded] = useState(searchParams.get("expanded") === "true");
-  const [controlPanelOpen, setControlPanelOpen] = useState(true);
+  const [controlPanelOpen, setControlPanelOpen] = useState(!initialAccountAddress);
   const [activePanelTab, setActivePanelTab] = useState<PanelTab>("Adora");
   const [companionOpen, setCompanionOpen] = useState(false);
   const [adoraPhase, setAdoraPhase] = useState<"idle" | "thinking" | "typing" | "done">("idle");
@@ -1217,28 +1950,44 @@ function GlassVisionContent() {
   const [serviceAddressView, setServiceAddressView] = useState<"list" | "card">("list");
   const [collapsedAccountSections, setCollapsedAccountSections] = useState<Set<AccountRecord["type"]>>(new Set());
   const [adoraSummaryVisible, setAdoraSummaryVisible] = useState(false);
-  const [expandedBillRows, setExpandedBillRows] = useState<Set<string>>(new Set());
   const [displayOptionsOpen, setDisplayOptionsOpen] = useState(false);
+  const controlPanelBeforeAccountRef = useRef<boolean | null>(initialAccountAddress ? true : null);
 
-  const toggleBillRow = useCallback((label: string) => {
-    setExpandedBillRows((prev) => {
-      const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
-      return next;
-    });
+  const syncAccountQuery = useCallback((nmi: string | null) => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (nmi) url.searchParams.set("account", nmi);
+    else url.searchParams.delete("account");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
   }, []);
 
   const handleAccountClick = useCallback((address: string) => {
-    const isDeselecting = selectedAccountAddress === address;
-    setSelectedAccountAddress(isDeselecting ? null : address);
-    if (!isDeselecting) {
-      requestAnimationFrame(() => {
-        const el = document.getElementById(`account-${address.replace(/\W/g, "-")}`);
-        el?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+    setSelectedAccountAddress(address);
+    setAccountTab("overview");
+    setControlPanelOpen((open) => {
+      if (controlPanelBeforeAccountRef.current === null) {
+        controlPanelBeforeAccountRef.current = open;
+      }
+      return false;
+    });
+    const account = ACCOUNTS.find((item) => item.address === address);
+    if (account) syncAccountQuery(account.nmi);
+  }, [syncAccountQuery]);
+
+  const handleAccountBack = useCallback(() => {
+    setSelectedAccountAddress(null);
+    setAccountTab("overview");
+    setActiveTab("overview");
+    if (controlPanelBeforeAccountRef.current !== null) {
+      setControlPanelOpen(controlPanelBeforeAccountRef.current);
+      controlPanelBeforeAccountRef.current = null;
     }
-  }, [selectedAccountAddress]);
+    syncAccountQuery(null);
+  }, [syncAccountQuery]);
+
+  const selectedAccount = selectedAccountAddress
+    ? ACCOUNTS.find((account) => account.address === selectedAccountAddress) ?? null
+    : null;
 
   const toggleAccountSection = useCallback((type: AccountRecord["type"]) => {
     setCollapsedAccountSections((previous) => {
@@ -1260,7 +2009,13 @@ function GlassVisionContent() {
     clearDemoTimeout();
     setCallDemoStep("waiting");
     setSelectedAccountAddress(null);
-  }, [clearDemoTimeout]);
+    setAccountTab("overview");
+    if (controlPanelBeforeAccountRef.current !== null) {
+      setControlPanelOpen(controlPanelBeforeAccountRef.current);
+      controlPanelBeforeAccountRef.current = null;
+    }
+    syncAccountQuery(null);
+  }, [clearDemoTimeout, syncAccountQuery]);
 
   const advanceCallDemo = useCallback(() => {
     setCallDemoStep((step) => {
@@ -1311,16 +2066,18 @@ function GlassVisionContent() {
 
   useEffect(() => {
     if (callDemoStep !== "showInsights") return;
-    setSelectedAccountAddress(PRIMARY_ACCOUNT_ADDRESS);
-    requestAnimationFrame(() => {
-      const el = document.getElementById(`account-${PRIMARY_ACCOUNT_ADDRESS.replace(/\W/g, "-")}`);
-      el?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }, [callDemoStep]);
+    handleAccountClick(PRIMARY_ACCOUNT_ADDRESS);
+  }, [callDemoStep, handleAccountClick]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      if (e.key === "Escape" && selectedAccountAddress) {
+        e.preventDefault();
+        handleAccountBack();
+        return;
+      }
 
       if (e.key === "r" || e.key === "R") {
         resetCallDemo();
@@ -1336,7 +2093,7 @@ function GlassVisionContent() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [advanceCallDemo, resetCallDemo, isCallDemoAnalysing]);
+  }, [advanceCallDemo, resetCallDemo, isCallDemoAnalysing, selectedAccountAddress, handleAccountBack]);
 
   useEffect(() => {
     if (adoraPhase !== "typing") return;
@@ -1365,10 +2122,10 @@ function GlassVisionContent() {
 
   return (
     <div
-      className="flex h-full flex-col overflow-hidden"
-      style={{ backgroundColor: DARKEST_NAVY, "--tally-radius-lg": "24px" } as React.CSSProperties}
+      className={cn("flex h-full flex-col overflow-hidden", IOS_CHROME_CLASS)}
+      style={{ "--tally-radius-lg": "24px" } as React.CSSProperties}
     >
-      {/* Seamless chrome: header + nav as one dark block (no border between them) */}
+      {/* Seamless chrome: header + nav as one light block (no border between them) */}
       <div className="flex min-h-0 flex-1 flex-col">
         <header className="flex h-14 shrink-0 items-center gap-4 px-6">
         <div className="flex shrink-0 items-center gap-3">
@@ -1378,13 +2135,27 @@ function GlassVisionContent() {
             className="flex items-center transition-opacity hover:opacity-80"
           >
             <Image
-              src={partnerLogo === "energyco" ? "/EnergyCoLogo.png" : "/SumoLogo.png"}
+              src={partnerLogo === "energyco" ? "/EnergyCoLogoOnLight.png" : "/SumoLogo.png"}
               alt={partnerLogo === "energyco" ? "EnergyCo" : "Sumo"}
               width={620}
               height={120}
-              className={cn("h-8 w-auto", partnerLogo === "sumo" && "mix-blend-screen")}
+              className={cn(
+                "h-8 w-auto",
+                partnerLogo === "energyco" && "dark:hidden",
+                partnerLogo === "sumo" && "dark:mix-blend-screen"
+              )}
               priority
             />
+            {partnerLogo === "energyco" && (
+              <Image
+                src="/EnergyCoLogo.png"
+                alt=""
+                width={620}
+                height={120}
+                className="hidden h-8 w-auto dark:block"
+                unoptimized
+              />
+            )}
           </button>
         </div>
         <div className="flex flex-1 justify-center">
@@ -1392,15 +2163,18 @@ function GlassVisionContent() {
             <Icon
               name="search"
               size={20}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              className={cn("absolute left-3 top-1/2 -translate-y-1/2", IOS_CHROME_MUTED_CLASS)}
             />
             <input
               type="search"
               placeholder="Search Tally..."
-              className="h-10 w-full rounded-lg border-0 pl-10 pr-20 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#00D2A2]/50"
-            style={{ backgroundColor: DARK_NAVY }}
+              className={cn(
+                "h-10 w-full rounded-lg border-0 pl-10 pr-20 text-sm placeholder:text-[#8E8E93] focus:outline-none focus:ring-2 focus:ring-[#00D2A2]/50",
+                IOS_CHROME_INSET_CLASS,
+                IOS_CHROME_TEXT_CLASS
+              )}
             />
-            <kbd className="absolute right-2 top-1/2 -translate-y-1/2 rounded border border-white/20 bg-white/10 px-2 py-0.5 text-xs text-gray-400">
+            <kbd className={cn("absolute right-2 top-1/2 -translate-y-1/2 rounded border bg-black/[0.04] px-2 py-0.5 text-xs dark:bg-white/10", IOS_CHROME_BORDER_CLASS, IOS_CHROME_MUTED_CLASS)}>
               ⌘K
             </kbd>
           </div>
@@ -1424,7 +2198,7 @@ function GlassVisionContent() {
           </button>
           <button
             type="button"
-            className="relative rounded-lg p-2 text-gray-300 transition-colors hover:bg-white/10 hover:text-white"
+            className={cn("relative rounded-lg p-2 transition-colors", IOS_CHROME_ITEM_CLASS)}
             aria-label="Notifications"
           >
             <Icon name="notifications" size={22} />
@@ -1440,15 +2214,15 @@ function GlassVisionContent() {
               </AvatarFallback>
             </Avatar>
             <div className="hidden flex-col sm:flex">
-              <span className="text-sm font-medium text-white">{AGENT.name}</span>
-              <span className="text-xs text-gray-400">Agent</span>
+              <span className={cn("text-sm font-medium", IOS_CHROME_TEXT_CLASS)}>{AGENT.name}</span>
+              <span className={cn("text-xs", IOS_CHROME_MUTED_CLASS)}>Agent</span>
             </div>
           </div>
         </div>
       </header>
 
         <div className="flex flex-1 min-h-0">
-          {/* Collapsed nav — same dark block as header, no seam */}
+          {/* Collapsed nav — same light block as header, no seam */}
           <aside className="flex w-16 shrink-0 flex-col items-center min-h-0 py-4 transition-[width] duration-300">
           <nav className="flex flex-1 flex-col items-center gap-0.5 p-2 min-h-0 overflow-y-auto">
             {GLASS_NAV_ITEMS.map((item) => {
@@ -1457,8 +2231,7 @@ function GlassVisionContent() {
                 <div key={item.id} className="relative flex w-full justify-center">
                   {isActive && (
                     <span
-                      className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r"
-                      style={{ backgroundColor: secondaryColors.turquoise.hex }}
+                      className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r bg-[#2C365D] dark:bg-[#00D2A2]"
                       aria-hidden
                     />
                   )}
@@ -1466,10 +2239,8 @@ function GlassVisionContent() {
                     type="button"
                     onClick={() => setActiveNavId(item.id)}
                     className={cn(
-                      "group flex h-10 w-10 shrink-0 items-center justify-center rounded-lg py-2 text-sm font-normal transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D2A2]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-[#161B2E]",
-                      isActive
-                        ? "bg-white/10 text-[#00D2A2]"
-                        : "text-gray-400 hover:bg-white/10 hover:text-gray-100"
+                      "group flex h-10 w-10 shrink-0 items-center justify-center rounded-lg py-2 text-sm font-normal transition-colors focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00D2A2]/50 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-[#1C1C1E]",
+                      isActive ? IOS_CHROME_ACTIVE_CLASS : IOS_CHROME_ITEM_CLASS
                     )}
                     aria-label={item.label}
                     aria-pressed={isActive}
@@ -1480,8 +2251,8 @@ function GlassVisionContent() {
                       className={cn(
                         "shrink-0",
                         isActive
-                          ? "text-[#00D2A2]"
-                          : "text-gray-400 group-hover:text-gray-100"
+                          ? IOS_CHROME_ACTIVE_ICON_CLASS
+                          : "text-[#8E8E93] group-hover:text-[#1C1C1E] dark:group-hover:text-white"
                       )}
                     />
                   </button>
@@ -1489,13 +2260,13 @@ function GlassVisionContent() {
               );
             })}
           </nav>
-          <div className="relative shrink-0 border-t border-white/10 p-2 flex flex-col items-center gap-0.5">
+          <div className={cn("relative shrink-0 border-t p-2 flex flex-col items-center gap-0.5", IOS_CHROME_BORDER_CLASS)}>
             <button
               type="button"
               onClick={() => setDisplayOptionsOpen((v) => !v)}
               className={cn(
-                "group flex h-10 w-10 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-white/10 hover:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00D2A2]/50",
-                displayOptionsOpen && "bg-white/10 text-[#00D2A2]"
+                "group flex h-10 w-10 items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00D2A2]/50",
+                displayOptionsOpen ? IOS_CHROME_ACTIVE_CLASS : IOS_CHROME_ITEM_CLASS
               )}
               aria-label="Display options"
               aria-expanded={displayOptionsOpen}
@@ -1544,13 +2315,16 @@ function GlassVisionContent() {
             <button
               type="button"
               onClick={() => setIsExpanded((v) => !v)}
-              className="group flex h-10 w-10 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-white/10 hover:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00D2A2]/50"
+              className={cn(
+                "group flex h-10 w-10 items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00D2A2]/50",
+                IOS_CHROME_ITEM_CLASS
+              )}
               aria-label={isExpanded ? "Exit full screen" : "Enter full screen"}
             >
               <Icon name={isExpanded ? "close_fullscreen" : "open_in_full"} size={20} />
             </button>
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-white/10 hover:text-gray-100"
+              className={cn("flex h-10 w-10 items-center justify-center rounded-lg transition-colors", IOS_CHROME_ITEM_CLASS)}
               role="presentation"
             >
               <span className="text-xs font-medium">{AGENT.initials}</span>
@@ -1561,8 +2335,8 @@ function GlassVisionContent() {
           {/* Main content — light (default) / dark pane with glass panels */}
           <main
             className={cn(
-              "flex min-w-0 flex-1 overflow-hidden rounded-tl-[1.5rem]",
-              !controlPanelOpen && "rounded-tr-[1.5rem]",
+              "flex min-w-0 flex-1 overflow-hidden rounded-tl-xl",
+              !controlPanelOpen && "rounded-tr-xl",
               PANE_LIGHT,
               PANE_DARK
             )}
@@ -1699,6 +2473,135 @@ function GlassVisionContent() {
             {/* Scrollable content — glass background */}
             <div className="relative min-w-0 flex-1 overflow-y-auto bg-transparent">
         <div className="min-h-full w-full px-6 py-4">
+          {selectedAccount ? (
+          <Card className={cn("border-0", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
+            {(() => {
+              const typeMeta = getAccountTypeMeta(selectedAccount.type);
+              const balancePillGreen = selectedAccount.isCredit || selectedAccount.balance === "$0.00";
+              return (
+                <div className="sticky top-0 z-10 rounded-t-[inherit] bg-white/95 px-5 pt-4 backdrop-blur-md dark:bg-slate-900/90">
+                  <button
+                    type="button"
+                    onClick={handleAccountBack}
+                    className="mb-3 inline-flex items-center gap-1.5 rounded-lg px-1 py-1 text-sm font-medium text-[#2C365D] transition-colors hover:bg-gray-100 dark:text-[#00D2A2] dark:hover:bg-white/[0.06]"
+                  >
+                    <Icon name="arrow_back" size={18} />
+                    Service addresses
+                  </button>
+                  <div className="flex items-start justify-between gap-3.5">
+                    <div className="flex min-w-0 flex-1 items-start gap-3.5">
+                        <AccountFuelIcons fuel={selectedAccount.fuel} size={22} className="pt-0.5" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">
+                            {selectedAccount.address}
+                          </p>
+                          <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs">
+                            <span className="text-gray-500 dark:text-slate-500">NMI: {selectedAccount.nmi}</span>
+                            {selectedAccount.accNumber && (
+                              <span className="text-gray-500 dark:text-slate-500">ACC#: {selectedAccount.accNumber}</span>
+                            )}
+                            <span className={cn("rounded-lg px-2 py-0.5 font-medium", typeMeta.iconBg)}>
+                              {selectedAccount.type}
+                            </span>
+                          </div>
+                          {selectedAccount.tags && selectedAccount.tags.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {selectedAccount.tags.map((tag) => (
+                                <span
+                                  key={tag.label}
+                                  className={cn(
+                                    "rounded-lg px-2 py-0.5 text-xs font-medium",
+                                    tag.variant === "hardship"
+                                      ? "text-red-700 dark:text-red-300"
+                                      : "border border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+                                  )}
+                                >
+                                  {tag.label}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <span
+                          className={cn(
+                            "rounded-lg px-2 py-0.5 text-xs font-medium",
+                            selectedAccount.status === "CLOSED"
+                              ? "bg-gray-50 text-gray-400 dark:bg-slate-700/30 dark:text-slate-500"
+                              : "bg-gray-100 text-gray-600 dark:bg-slate-600/40 dark:text-slate-400"
+                          )}
+                        >
+                          {selectedAccount.status}
+                        </span>
+                        <span
+                          className={cn(
+                            "rounded-lg px-2 py-1 text-sm font-medium",
+                            balancePillGreen
+                              ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300"
+                              : "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300"
+                          )}
+                        >
+                          {selectedAccount.balance}
+                        </span>
+                        {selectedAccount.ciDetailHref && (
+                          <Link
+                            href={selectedAccount.ciDetailHref}
+                            className="inline-flex items-center gap-1 rounded-lg bg-[#2C365D] px-3 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90 dark:bg-[#00D2A2] dark:text-[#0B1220]"
+                          >
+                            View
+                            <Icon name="open_in_new" size={14} />
+                          </Link>
+                        )}
+                      </div>
+                  </div>
+                  <Tabs value={accountTab} onValueChange={setAccountTab} className="mt-4">
+                    <TabsList className="h-auto w-full justify-start gap-0 rounded-none border-b border-gray-200 bg-transparent p-0 text-gray-500 shadow-none dark:border-white/10 dark:bg-transparent">
+                      <TabsTrigger
+                        value="overview"
+                        className="-mb-px rounded-none border-b-2 border-transparent bg-transparent px-4 py-2.5 text-sm font-medium text-gray-500 shadow-none hover:bg-transparent hover:text-gray-800 data-[state=active]:border-[#2C365D] data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:text-[#2C365D] data-[state=active]:shadow-none dark:text-slate-400 dark:hover:text-slate-200 dark:data-[state=active]:border-[#00D2A2] dark:data-[state=active]:bg-transparent dark:data-[state=active]:text-[#00D2A2]"
+                      >
+                        Overview
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="activity"
+                        className="-mb-px rounded-none border-b-2 border-transparent bg-transparent px-4 py-2.5 text-sm font-medium text-gray-500 shadow-none hover:bg-transparent hover:text-gray-800 data-[state=active]:border-[#2C365D] data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:text-[#2C365D] data-[state=active]:shadow-none dark:text-slate-400 dark:hover:text-slate-200 dark:data-[state=active]:border-[#00D2A2] dark:data-[state=active]:bg-transparent dark:data-[state=active]:text-[#00D2A2]"
+                      >
+                        Account Activity
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="bill-compare"
+                        className="-mb-px rounded-none border-b-2 border-transparent bg-transparent px-4 py-2.5 text-sm font-medium text-gray-500 shadow-none hover:bg-transparent hover:text-gray-800 data-[state=active]:border-[#2C365D] data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:text-[#2C365D] data-[state=active]:shadow-none dark:text-slate-400 dark:hover:text-slate-200 dark:data-[state=active]:border-[#00D2A2] dark:data-[state=active]:bg-transparent dark:data-[state=active]:text-[#00D2A2]"
+                      >
+                        Bill Compare
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                </div>
+              );
+            })()}
+
+            <CardContent className="px-5 pb-5 pt-5">
+            <Tabs value={accountTab} onValueChange={setAccountTab} className="space-y-5">
+              <TabsContent value="overview" className="mt-0">
+                <AccountOverviewDetails acc={selectedAccount} />
+              </TabsContent>
+              <TabsContent value="activity" className="mt-0">
+                <AccountActivityPanel acc={selectedAccount} />
+              </TabsContent>
+              <TabsContent value="bill-compare" className="mt-0">
+                <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
+                  <CardContent className="p-0">
+                    <BillCompareTable
+                      caption={`Choose any 3 invoices to compare for NMI ${selectedAccount.nmi}`}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+            </CardContent>
+          </Card>
+          ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
             <div className="mb-6 flex justify-center">
               <TabsList className="h-10 flex-nowrap gap-1 rounded-xl bg-gray-100/90 p-1 backdrop-blur-md border border-gray-200/80 dark:bg-white/[0.06] dark:border-white/[0.08]">
@@ -1850,7 +2753,6 @@ function GlassVisionContent() {
                     />
                   </button>
                   {!collapsedAccountSections.has(section.type) && sectionAccounts.map((acc) => {
-                const typeIcon = acc.type === "Residential" ? "home" : acc.type === "Commercial" ? "business" : "store";
                 const typeIconBg =
                   acc.type === "Residential"
                     ? "bg-sky-100 text-sky-700 dark:bg-sky-500/25 dark:text-sky-300"
@@ -1858,32 +2760,31 @@ function GlassVisionContent() {
                       ? "bg-violet-100 text-violet-700 dark:bg-violet-500/25 dark:text-violet-300"
                       : "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300";
                 const balancePillGreen = acc.isCredit || acc.balance === "$0.00";
-                const accountCharts = getAccountChartData(acc.address);
-                const isSelected = selectedAccountAddress === acc.address;
                 return (
                   <React.Fragment key={acc.address}>
                     <Card
                       id={`account-${acc.address.replace(/\W/g, "-")}`}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Open account ${acc.address}`}
                       className={cn(
                         "scroll-mt-4 cursor-pointer overflow-hidden border-0 transition-all duration-200",
                         GLASS_CARD_LIGHT,
                         GLASS_CARD_DARK,
-                        "hover:shadow-lg hover:shadow-[#00D2A2]/10",
-                        isSelected && "ring-1 ring-[#00D2A2]/25 shadow-[0_0_20px_rgba(0,210,162,0.12)] dark:ring-[#00D2A2]/20"
+                        "hover:shadow-lg hover:shadow-[#00D2A2]/10"
                       )}
                       onClick={() => handleAccountClick(acc.address)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleAccountClick(acc.address);
+                        }
+                      }}
                     >
                       <CardContent className="px-5 py-4 pt-4">
                         <div className="flex items-center justify-between gap-3.5">
                           <div className="flex min-w-0 flex-1 items-center gap-3.5">
-                            <div
-                              className={cn(
-                                "flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]",
-                                typeIconBg
-                              )}
-                            >
-                              <Icon name={typeIcon} size={18} />
-                            </div>
+                            <AccountFuelIcons fuel={acc.fuel} size={22} />
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">
                                 {acc.address}
@@ -1904,9 +2805,6 @@ function GlassVisionContent() {
                                   )}
                                 >
                                   {acc.type}
-                                </span>
-                                <span className="rounded-lg bg-gray-100 px-2 py-0.5 font-medium text-gray-600 dark:bg-slate-600/40 dark:text-slate-400">
-                                  <FuelLabel fuel={acc.fuel} iconSize={14} />
                                 </span>
                               </div>
                               {acc.tags && acc.tags.length > 0 && (
@@ -1960,317 +2858,13 @@ function GlassVisionContent() {
                               </Link>
                             )}
                             <Icon
-                              name={isSelected ? "expand_less" : "chevron_right"}
+                              name="chevron_right"
                               size={20}
                               className="text-gray-500 dark:text-slate-500"
                             />
                           </div>
                         </div>
                       </CardContent>
-                      {isSelected && (
-                        <div
-                          className="space-y-6 border-t border-gray-200/80 px-5 pb-5 pt-5 dark:border-white/10"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                      <CardContent className="p-5 pt-5 pb-5">
-                        <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">Plan</p>
-                        <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.plan ?? "—"}</p>
-                        {acc.planRef && <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-500">{acc.planRef}</p>}
-                      </CardContent>
-                    </Card>
-                    <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                      <CardContent className="p-5 pt-5 pb-5">
-                        <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">Best offer</p>
-                        <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.bestOffer ?? "—"}</p>
-                      </CardContent>
-                    </Card>
-                    <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                      <CardContent className="p-5 pt-5 pb-5">
-                        <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">Billing</p>
-                        <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.billing ?? "—"}</p>
-                        {acc.billingTo && <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-500">{acc.billingTo}</p>}
-                      </CardContent>
-                    </Card>
-                    <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                      <CardContent className="p-5 pt-5 pb-5">
-                        <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">{acc.scheduledRead ? "Next scheduled read" : "Commenced"}</p>
-                        <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.scheduledRead ?? acc.commenced ?? "—"}</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                      <CardContent className="p-5 pt-5 pb-5">
-                        <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill Information</h3>
-                        {acc.billPeriod && (
-                          <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">{acc.billPeriod}</p>
-                        )}
-                        <Tabs defaultValue="overview" className="mt-4">
-                          <TabsList className="mb-4 h-10 gap-1 rounded-lg bg-gray-100/90 p-1 backdrop-blur-md border border-gray-200/80 dark:bg-white/[0.06] dark:border-white/[0.08]">
-                            <TabsTrigger value="overview" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                              Overview
-                            </TabsTrigger>
-                            <TabsTrigger value="load" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                              Load Disagg
-                            </TabsTrigger>
-                            <TabsTrigger value="usage" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                              Usage
-                            </TabsTrigger>
-                          </TabsList>
-                          <TabsContent value="overview" className="mt-0">
-                            <div className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
-                              {acc.isClosed ? (
-                                <>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Final invoice</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalInvoice ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Allocated</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Posted</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Closed on</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.closedOn ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Final read</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalRead ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Washup</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
-                                  </div>
-                                </>
-                              ) : (
-                                <>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Invoice amount</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.invoiceAmount ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Allocated</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Posted</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Due</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.due ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Charges</span>
-                                    <span
-                                      className={cn(
-                                        "font-medium",
-                                        (acc.charges?.includes("−") || acc.charges?.includes("-")) && acc.charges?.includes("CR")
-                                          ? "text-emerald-600 dark:text-emerald-400"
-                                          : "text-gray-900 dark:text-slate-100"
-                                      )}
-                                    >
-                                      {acc.charges ?? "—"}
-                                    </span>
-                                  </div>
-                                  {acc.demandCharge && (
-                                    <div className="flex justify-between gap-4">
-                                      <span className="text-gray-500 dark:text-slate-500">Demand charge</span>
-                                      <span className="font-medium text-gray-900 dark:text-slate-100">{acc.demandCharge}</span>
-                                    </div>
-                                  )}
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Washup</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          </TabsContent>
-                          <TabsContent value="load" className="mt-0">
-                            {acc.type === "Commercial" ? (
-                              <CommercialLoadDisaggChart data={accountCharts.loadDisagg} />
-                            ) : (
-                              <>
-                                <p className="mb-3 text-xs text-gray-500 dark:text-slate-400">
-                                  Estimated breakdown by equipment category ({accountCharts.loadDisaggUnit ?? "kWh"})
-                                </p>
-                                <div className="space-y-2.5">
-                                  {accountCharts.loadDisagg.map((item) => {
-                                    const maxKWh = accountCharts.loadDisagg[0].kWh;
-                                    const pct = Math.round((item.kWh / maxKWh) * 100);
-                                    return (
-                                      <div key={item.category} className="group">
-                                        <div className="mb-1 flex items-center justify-between text-xs">
-                                          <span className="flex items-center gap-1.5 font-medium text-gray-700 dark:text-slate-300">
-                                            <span
-                                              className="inline-block h-2 w-2 rounded-full"
-                                              style={{ backgroundColor: item.fill }}
-                                            />
-                                            {item.category}
-                                          </span>
-                                          <span className="tabular-nums text-gray-500 dark:text-slate-400">
-                                            {item.kWh} {accountCharts.loadDisaggUnit ?? "kWh"}
-                                          </span>
-                                        </div>
-                                        <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
-                                          <div
-                                            className="h-full rounded-full transition-all duration-700 ease-out group-hover:opacity-80"
-                                            style={{
-                                              width: `${pct}%`,
-                                              backgroundColor: item.fill,
-                                            }}
-                                          />
-                                        </div>
-                                    </div>
-                                    );
-                                  })}
-                                </div>
-                                <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-2 dark:border-white/[0.06]">
-                                  <span className="text-xs font-medium text-gray-700 dark:text-slate-300">Total estimated</span>
-                                  <span className="text-xs font-semibold tabular-nums text-gray-900 dark:text-slate-100">
-                                    {accountCharts.loadDisagg.reduce((s, d) => s + d.kWh, 0)} {accountCharts.loadDisaggUnit ?? "kWh"}
-                                  </span>
-                                </div>
-                              </>
-                            )}
-                          </TabsContent>
-                          <TabsContent value="usage" className="mt-0">
-                            <AccountUsageChartLegend
-                              data={accountCharts.usage}
-                              billVsPrevious={acc.billVsPrevious}
-                              billVsPreviousUp={acc.billVsPreviousUp}
-                            />
-                            <AccountUsageBarChart
-                              data={accountCharts.usage}
-                              gradientId={`gradUsage-${acc.nmi.replace(/\s/g, "")}`}
-                            />
-                          </TabsContent>
-                        </Tabs>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                      <CardContent className="p-5 pt-5 pb-5">
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill vs Previous</h3>
-                          <button
-                            type="button"
-                            className="rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-[#00D2A2]/10 hover:text-[#008f6f] dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-[#00D2A2]/20 dark:hover:text-[#00D2A2]"
-                          >
-                            Latest bill
-                          </button>
-                        </div>
-                        {acc.billVsPrevious && acc.billVsPrevious !== "—" ? (
-                          <div
-                            className={cn(
-                              "mt-4 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium",
-                              acc.billVsPreviousUp
-                                ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"
-                                : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
-                            )}
-                          >
-                            <Icon
-                              name={acc.billVsPreviousUp ? "trending_up" : "trending_down"}
-                              size={18}
-                            />
-                            {acc.billVsPrevious}
-                          </div>
-                        ) : null}
-                        {/* Legend */}
-                        <div className="mt-4 flex items-center gap-4">
-                          <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                            <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: CHART_TEAL }} />
-                            Current
-                          </span>
-                          <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                            <span className="inline-block h-2 w-2 rounded-full bg-gray-300 dark:bg-slate-500" />
-                            Previous
-                          </span>
-                        </div>
-
-                        <div className="mt-2 h-52 w-full">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <ComposedChart
-                              data={accountCharts.billVsPrevious}
-                              margin={{ top: 12, right: 12, bottom: 4, left: -8 }}
-                            >
-                              <defs>
-                                <linearGradient
-                                  id={`bill-area-${acc.nmi.replace(/\s/g, "")}`}
-                                  x1="0"
-                                  y1="0"
-                                  x2="0"
-                                  y2="1"
-                                >
-                                  <stop offset="0%" stopColor={CHART_TEAL} stopOpacity={0.25} />
-                                  <stop offset="100%" stopColor={CHART_TEAL} stopOpacity={0.02} />
-                                </linearGradient>
-                              </defs>
-                              <CartesianGrid
-                                strokeDasharray="3 3"
-                                stroke="#E5E7EB"
-                                strokeOpacity={0.5}
-                                vertical={false}
-                              />
-                              <XAxis
-                                dataKey="month"
-                                tick={{ fontSize: 11, fill: "#9CA3AF" }}
-                                axisLine={false}
-                                tickLine={false}
-                                dy={6}
-                              />
-                              <YAxis
-                                domain={[0, 160]}
-                                ticks={[0, 80, 160]}
-                                tick={{ fontSize: 11, fill: "#9CA3AF" }}
-                                axisLine={false}
-                                tickLine={false}
-                                width={32}
-                              />
-                              <Tooltip
-                                content={<ChartTooltip />}
-                                cursor={{ stroke: "#00D2A2", strokeWidth: 1, strokeDasharray: "4 4", strokeOpacity: 0.4 }}
-                              />
-                              <Area
-                                type="natural"
-                                dataKey="current"
-                                name="Current"
-                                stroke={CHART_TEAL}
-                                strokeWidth={2.5}
-                                fill={`url(#bill-area-${acc.nmi.replace(/\s/g, "")})`}
-                                dot={false}
-                                activeDot={{ r: 5, fill: CHART_TEAL, stroke: "#fff", strokeWidth: 2 }}
-                                animationDuration={800}
-                                animationEasing="ease-out"
-                              />
-                              <Line
-                                type="natural"
-                                dataKey="previous"
-                                name="Previous"
-                                stroke="#D1D5DB"
-                                strokeWidth={1.5}
-                                strokeDasharray="6 3"
-                                dot={false}
-                                activeDot={{ r: 4, fill: "#D1D5DB", stroke: "#fff", strokeWidth: 2 }}
-                                animationDuration={800}
-                                animationEasing="ease-out"
-                              />
-                            </ComposedChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-                        </div>
-                      )}
                     </Card>
                   </React.Fragment>
                 );
@@ -2311,7 +2905,6 @@ function GlassVisionContent() {
                   {!collapsedAccountSections.has(section.type) && (
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {sectionAccounts.map((acc) => {
-                const typeIcon = acc.type === "Residential" ? "home" : acc.type === "Commercial" ? "business" : "store";
                 const typeIconBg =
                   acc.type === "Residential"
                     ? "bg-sky-100 text-sky-700 dark:bg-sky-500/25 dark:text-sky-300"
@@ -2319,40 +2912,38 @@ function GlassVisionContent() {
                       ? "bg-violet-100 text-violet-700 dark:bg-violet-500/25 dark:text-violet-300"
                       : "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300";
                 const balancePillGreen = acc.isCredit || acc.balance === "$0.00";
-                const accountCharts = getAccountChartData(acc.address);
                 const sparkline = ACCOUNT_USAGE_SPARKLINES[acc.address] ?? [];
                 const trendPct = acc.billVsPrevious && acc.billVsPrevious !== "—" ? acc.billVsPrevious : null;
-                const isSelected = selectedAccountAddress === acc.address;
 
                 return (
                   <Card
                     key={acc.address}
                     id={`card-account-${acc.address.replace(/\W/g, "-")}`}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Open account ${acc.address}`}
                     className={cn(
                       "cursor-pointer overflow-hidden border-0 transition-all duration-200",
                       GLASS_CARD_LIGHT,
                       GLASS_CARD_DARK,
                       "hover:shadow-lg hover:shadow-[#00D2A2]/10",
-                      acc.isClosed && "opacity-70",
-                      isSelected && "col-span-full ring-1 ring-[#00D2A2]/25 shadow-[0_0_20px_rgba(0,210,162,0.12)] dark:ring-[#00D2A2]/20"
+                      acc.isClosed && "opacity-70"
                     )}
                     onClick={() => handleAccountClick(acc.address)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleAccountClick(acc.address);
+                      }
+                    }}
                   >
                     <CardContent className="p-0">
-                      <div className={cn(isSelected ? "flex gap-6" : "")}>
-                        {/* Card summary — keeps its column width when expanded */}
-                        <div className={cn(isSelected ? "w-72 shrink-0" : "")}>
+                      <div>
+                        <div>
                           {/* Header */}
                           <div className="px-4 pb-2 pt-4">
                             <div className="mb-2 flex items-start justify-between">
-                              <div
-                                className={cn(
-                                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
-                                  typeIconBg
-                                )}
-                              >
-                                <Icon name={typeIcon} size={17} />
-                              </div>
+                              <AccountFuelIcons fuel={acc.fuel} size={19} className="w-8" />
                               <div className="flex items-center gap-2">
                                 <span
                                   className={cn(
@@ -2374,9 +2965,7 @@ function GlassVisionContent() {
                                     <Icon name="open_in_new" size={12} />
                                   </Link>
                                 )}
-                                {isSelected && (
-                                  <Icon name="expand_less" size={18} className="text-gray-400 dark:text-slate-500" />
-                                )}
+                                <Icon name="chevron_right" size={16} className="text-gray-400 dark:text-slate-500" />
                               </div>
                             </div>
                             <p className="text-xs font-semibold leading-snug text-gray-900 dark:text-slate-100">
@@ -2392,9 +2981,6 @@ function GlassVisionContent() {
                           <div className="flex flex-wrap items-center gap-1 px-4 pb-2">
                             <span className={cn("rounded-md px-1.5 py-0.5 text-[10px] font-medium", typeIconBg)}>
                               {acc.type}
-                            </span>
-                            <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-medium text-gray-600 dark:bg-slate-600/40 dark:text-slate-400">
-                              <FuelLabel fuel={acc.fuel} iconSize={12} />
                             </span>
                             {acc.tags?.map((tag) => (
                               <span
@@ -2504,240 +3090,6 @@ function GlassVisionContent() {
                           </div>
                         </div>
 
-                        {/* Expanded detail panel */}
-                        {isSelected && (
-                          <div
-                            className="flex-1 space-y-6 border-l border-gray-200/80 px-5 py-5 dark:border-white/10"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                              <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                                <CardContent className="p-5 pt-5 pb-5">
-                                  <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">Plan</p>
-                                  <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.plan ?? "—"}</p>
-                                  {acc.planRef && <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-500">{acc.planRef}</p>}
-                                </CardContent>
-                              </Card>
-                              <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                                <CardContent className="p-5 pt-5 pb-5">
-                                  <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">Best offer</p>
-                                  <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.bestOffer ?? "—"}</p>
-                                </CardContent>
-                              </Card>
-                              <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                                <CardContent className="p-5 pt-5 pb-5">
-                                  <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">Billing</p>
-                                  <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.billing ?? "—"}</p>
-                                  {acc.billingTo && <p className="mt-0.5 text-xs text-gray-500 dark:text-slate-500">{acc.billingTo}</p>}
-                                </CardContent>
-                              </Card>
-                              <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                                <CardContent className="p-5 pt-5 pb-5">
-                                  <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-slate-500">{acc.scheduledRead ? "Next scheduled read" : "Commenced"}</p>
-                                  <p className="mt-1 font-semibold text-gray-900 dark:text-slate-100">{acc.scheduledRead ?? acc.commenced ?? "—"}</p>
-                                </CardContent>
-                              </Card>
-                            </div>
-
-                            <div className="grid gap-6 lg:grid-cols-2">
-                              <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                                <CardContent className="p-5 pt-5 pb-5">
-                                  <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill Information</h3>
-                                  {acc.billPeriod && (
-                                    <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">{acc.billPeriod}</p>
-                                  )}
-                                  <Tabs defaultValue="overview" className="mt-4">
-                                    <TabsList className="mb-4 h-10 gap-1 rounded-lg bg-gray-100/90 p-1 backdrop-blur-md border border-gray-200/80 dark:bg-white/[0.06] dark:border-white/[0.08]">
-                                      <TabsTrigger value="overview" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                                        Overview
-                                      </TabsTrigger>
-                                      <TabsTrigger value="load" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                                        Load Disagg
-                                      </TabsTrigger>
-                                      <TabsTrigger value="usage" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                                        Usage
-                                      </TabsTrigger>
-                                    </TabsList>
-                                    <TabsContent value="overview" className="mt-0">
-                                      <div className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
-                                        {acc.isClosed ? (
-                                          <>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Final invoice</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalInvoice ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Allocated</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Posted</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Closed on</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.closedOn ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Final read</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalRead ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Washup</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
-                                            </div>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Invoice amount</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.invoiceAmount ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Allocated</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Posted</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Due</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.due ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Charges</span>
-                                              <span className={cn(
-                                                "font-medium",
-                                                (acc.charges?.includes("−") || acc.charges?.includes("-")) && acc.charges?.includes("CR")
-                                                  ? "text-emerald-600 dark:text-emerald-400"
-                                                  : "text-gray-900 dark:text-slate-100"
-                                              )}>
-                                                {acc.charges ?? "—"}
-                                              </span>
-                                            </div>
-                                            {acc.demandCharge && (
-                                              <div className="flex justify-between gap-4">
-                                                <span className="text-gray-500 dark:text-slate-500">Demand charge</span>
-                                                <span className="font-medium text-gray-900 dark:text-slate-100">{acc.demandCharge}</span>
-                                              </div>
-                                            )}
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Washup</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
-                                            </div>
-                                          </>
-                                        )}
-                                      </div>
-                                    </TabsContent>
-                                    <TabsContent value="load" className="mt-0">
-                                      {acc.type === "Commercial" ? (
-                                        <CommercialLoadDisaggChart data={accountCharts.loadDisagg} />
-                                      ) : (
-                                        <>
-                                          <p className="mb-3 text-xs text-gray-500 dark:text-slate-400">
-                                            Estimated breakdown by equipment category ({accountCharts.loadDisaggUnit ?? "kWh"})
-                                          </p>
-                                          <div className="space-y-2.5">
-                                            {accountCharts.loadDisagg.map((item) => {
-                                              const maxKWh = accountCharts.loadDisagg[0].kWh;
-                                              const pct = Math.round((item.kWh / maxKWh) * 100);
-                                              return (
-                                                <div key={item.category} className="group">
-                                                  <div className="mb-1 flex items-center justify-between text-xs">
-                                                    <span className="flex items-center gap-1.5 font-medium text-gray-700 dark:text-slate-300">
-                                                      <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: item.fill }} />
-                                                      {item.category}
-                                                    </span>
-                                                    <span className="tabular-nums text-gray-500 dark:text-slate-400">
-                                                      {item.kWh} {accountCharts.loadDisaggUnit ?? "kWh"}
-                                                    </span>
-                                                  </div>
-                                                  <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
-                                                    <div
-                                                      className="h-full rounded-full transition-all duration-700 ease-out group-hover:opacity-80"
-                                                      style={{ width: `${pct}%`, backgroundColor: item.fill }}
-                                                    />
-                                                  </div>
-                                                </div>
-                                              );
-                                            })}
-                                          </div>
-                                          <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-2 dark:border-white/[0.06]">
-                                            <span className="text-xs font-medium text-gray-700 dark:text-slate-300">Total estimated</span>
-                                            <span className="text-xs font-semibold tabular-nums text-gray-900 dark:text-slate-100">
-                                              {accountCharts.loadDisagg.reduce((s, d) => s + d.kWh, 0)} {accountCharts.loadDisaggUnit ?? "kWh"}
-                                            </span>
-                                          </div>
-                                        </>
-                                      )}
-                                    </TabsContent>
-                                    <TabsContent value="usage" className="mt-0">
-                                      <AccountUsageChartLegend
-                                        data={accountCharts.usage}
-                                        billVsPrevious={acc.billVsPrevious}
-                                        billVsPreviousUp={acc.billVsPreviousUp}
-                                      />
-                                      <AccountUsageBarChart
-                                        data={accountCharts.usage}
-                                        gradientId={`cardGradUsage-${acc.nmi.replace(/\s/g, "")}`}
-                                      />
-                                    </TabsContent>
-                                  </Tabs>
-                                </CardContent>
-                              </Card>
-
-                              <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                                <CardContent className="p-5 pt-5 pb-5">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill vs Previous</h3>
-                                  </div>
-                                  {acc.billVsPrevious && acc.billVsPrevious !== "—" ? (
-                                    <div
-                                      className={cn(
-                                        "mt-4 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium",
-                                        acc.billVsPreviousUp
-                                          ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"
-                                          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
-                                      )}
-                                    >
-                                      <Icon name={acc.billVsPreviousUp ? "trending_up" : "trending_down"} size={18} />
-                                      {acc.billVsPrevious}
-                                    </div>
-                                  ) : null}
-                                  <div className="mt-4 flex items-center gap-4">
-                                    <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                                      <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: CHART_TEAL }} />
-                                      Current
-                                    </span>
-                                    <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                                      <span className="inline-block h-2 w-2 rounded-full bg-gray-300 dark:bg-slate-500" />
-                                      Previous
-                                    </span>
-                                  </div>
-                                  <div className="mt-2 h-52 w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                      <ComposedChart data={accountCharts.billVsPrevious} margin={{ top: 12, right: 12, bottom: 4, left: -8 }}>
-                                        <defs>
-                                          <linearGradient id={`card-bill-area-${acc.nmi.replace(/\s/g, "")}`} x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stopColor={CHART_TEAL} stopOpacity={0.25} />
-                                            <stop offset="100%" stopColor={CHART_TEAL} stopOpacity={0.02} />
-                                          </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" strokeOpacity={0.5} vertical={false} />
-                                        <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} dy={6} />
-                                        <YAxis domain={[0, 160]} ticks={[0, 80, 160]} tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={32} />
-                                        <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#00D2A2", strokeWidth: 1, strokeDasharray: "4 4", strokeOpacity: 0.4 }} />
-                                        <Area type="natural" dataKey="current" name="Current" stroke={CHART_TEAL} strokeWidth={2.5} fill={`url(#card-bill-area-${acc.nmi.replace(/\s/g, "")})`} dot={false} activeDot={{ r: 5, fill: CHART_TEAL, stroke: "#fff", strokeWidth: 2 }} animationDuration={800} animationEasing="ease-out" />
-                                        <Line type="natural" dataKey="previous" name="Previous" stroke="#D1D5DB" strokeWidth={1.5} strokeDasharray="6 3" dot={false} activeDot={{ r: 4, fill: "#D1D5DB", stroke: "#fff", strokeWidth: 2 }} animationDuration={800} animationEasing="ease-out" />
-                                      </ComposedChart>
-                                    </ResponsiveContainer>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -3020,72 +3372,7 @@ function GlassVisionContent() {
               {/* Bill comparison card */}
               <Card className={cn("overflow-hidden border-0", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
                 <CardContent className="p-0">
-                  {/* Bill headers */}
-                  <div className="grid grid-cols-3 gap-px">
-                    {BILL_COMPARE_BILLS.map((bill) => (
-                      <div key={bill.id} className="p-4">
-                        <div className="mb-2 flex items-center gap-2">
-                          <span className="text-sm font-semibold text-gray-900 dark:text-slate-100">{bill.label}</span>
-                          <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">{bill.status}</span>
-                          <button
-                            type="button"
-                            className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-red-50 text-red-600 transition-colors hover:bg-red-100 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
-                            aria-label="Download PDF"
-                          >
-                            <Icon name="picture_as_pdf" size={16} />
-                          </button>
-                        </div>
-                        <p className="text-xs text-gray-500 dark:text-slate-400">{bill.period}</p>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Expand/Collapse all + Data rows */}
-                  <div className="flex items-center justify-end px-4 py-1.5">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (expandedBillRows.size === BILL_COMPARE_ROWS.length) {
-                          setExpandedBillRows(new Set());
-                        } else {
-                          setExpandedBillRows(new Set(BILL_COMPARE_ROWS.map((r) => r.label)));
-                        }
-                      }}
-                      className="flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 dark:text-slate-500 dark:hover:bg-white/[0.04] dark:hover:text-slate-300"
-                    >
-                      <Icon name={expandedBillRows.size === BILL_COMPARE_ROWS.length ? "unfold_less" : "unfold_more"} size={14} />
-                      {expandedBillRows.size === BILL_COMPARE_ROWS.length ? "Collapse all" : "Expand all"}
-                    </button>
-                  </div>
-                  <div className="divide-y divide-gray-100 dark:divide-white/[0.06]">
-                    {BILL_COMPARE_ROWS.map((row) => {
-                      const isExpanded = expandedBillRows.has(row.label);
-                      return (
-                        <div key={row.label}>
-                          <button
-                            type="button"
-                            onClick={() => toggleBillRow(row.label)}
-                            className="flex w-full items-center gap-2 px-4 py-2.5 text-left transition-colors hover:bg-gray-50/60 dark:hover:bg-white/[0.02]"
-                          >
-                            <span className="flex-1 text-xs font-medium text-gray-500 dark:text-slate-400">{row.label}</span>
-                            <Icon name={isExpanded ? "expand_less" : "expand_more"} size={18} className="shrink-0 text-gray-400 dark:text-slate-500" />
-                          </button>
-                          {isExpanded && (
-                            <div className="grid grid-cols-3 gap-px border-t border-gray-50 bg-gray-50/50 px-4 py-3 dark:border-white/[0.03] dark:bg-white/[0.02]">
-                              {row.values.map((val, i) => (
-                                <div key={i}>
-                                  <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">{val}</p>
-                                  {row.detail && i === 0 && (
-                                    <p className="mt-1 text-[10px] leading-relaxed text-gray-500 dark:text-slate-500">{row.detail}</p>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <BillCompareTable caption="Choose any 3 invoices to compare" />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -3095,6 +3382,7 @@ function GlassVisionContent() {
               </div>
             </TabsContent>
           </Tabs>
+          )}
         </div>
             </div>
           </main>
@@ -3102,7 +3390,8 @@ function GlassVisionContent() {
             {/* Right-hand control panel */}
             <aside
               className={cn(
-                "dark shrink-0 overflow-hidden bg-[#161B2E] transition-[width,padding] duration-300 ease-in-out",
+                "shrink-0 overflow-hidden transition-[width,padding] duration-300 ease-in-out",
+                IOS_CHROME_CLASS,
                 controlPanelOpen ? "w-80 p-3" : "w-14 py-4"
               )}
               aria-label="Insight panel"
@@ -3124,15 +3413,15 @@ function GlassVisionContent() {
                         className={cn(
                           "group relative flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
                           activePanelTab === tab
-                            ? "bg-emerald-500/15 text-emerald-300"
-                            : "text-slate-400 hover:bg-white/10 hover:text-slate-100"
+                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300"
+                            : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 dark:text-slate-400 dark:hover:bg-white/10 dark:hover:text-slate-100"
                         )}
                       >
                         <Icon name={PANEL_TAB_ICONS[tab]} size={20} />
                         {tab === "Adora" ? (
                           <span
                             aria-hidden
-                            className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]"
+                            className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)] dark:bg-emerald-400 dark:shadow-[0_0_6px_rgba(52,211,153,0.8)]"
                           />
                         ) : null}
                       </button>
@@ -3146,8 +3435,8 @@ function GlassVisionContent() {
                     className={cn(
                       "group relative mt-auto flex h-10 w-10 items-center justify-center rounded-lg transition-colors",
                       companionOpen
-                        ? "bg-orange-500/15 text-orange-300"
-                        : "text-slate-400 hover:bg-orange-500/10 hover:text-orange-300"
+                        ? "bg-orange-50 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300"
+                        : "text-gray-500 hover:bg-orange-50 hover:text-orange-600 dark:text-slate-400 dark:hover:bg-orange-500/10 dark:hover:text-orange-300"
                     )}
                   >
                     <CompanionCompactIcon />
@@ -3156,7 +3445,7 @@ function GlassVisionContent() {
               ) : (
               <div
                 className={cn(
-                  "flex h-full min-w-[290px] flex-col overflow-hidden rounded-2xl",
+                  "flex h-full min-w-[290px] flex-col overflow-hidden rounded-xl",
                   GLASS_CARD_LIGHT,
                   GLASS_CARD_DARK
                 )}

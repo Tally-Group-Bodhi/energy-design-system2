@@ -112,11 +112,14 @@ const navigationSections = [
     title: "Pages",
     items: [
       { label: "Tally+ Small Market", href: "/pages/small-market" },
+      { label: "Tally+ Small Market V1.5", href: "/pages/small-market-v1-5" },
       { label: "Tally+ Large Market", href: "/pages/tally-large-market" },
+      { label: "Tally+ Large Market V1.5", href: "/pages/tally-large-market-v1-5" },
       // Hidden for now — pages remain reachable by URL
       // { label: "Glass Vision", href: "/pages/glass-vision" },
       // { label: "Glass Vision – Demo Version", href: "/pages/glass-vision-demo-version" },
       { label: "Glass Vision Demo V2", href: "/pages/glass-vision-demo-v2" },
+      { label: "Glass Vision Demo V2.2", href: "/pages/glass-vision-demo-v2-2" },
       // { label: "Glass Vision – LM", href: "/pages/glass-vision-lm" },
       // { label: "Glass Vision LM 2", href: "/pages/glass-vision-lm-2" },
       { label: "Glass Vision LM 2 – Demo Version", href: "/pages/glass-vision-lm-2-demo-version" },
@@ -153,7 +156,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0"
           rel="stylesheet"
         />
       </head>
