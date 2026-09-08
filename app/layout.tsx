@@ -132,6 +132,7 @@ const navigationSections = [
       // { label: "Tally Digital", href: "/pages/tally-digital" },
       { label: "EOS", href: "/pages/eos" },
       { label: "EOS Glass", href: "/pages/eos-glass" },
+      { label: "Demo OpCon", href: "/pages/demo-opcon" },
       { label: "C&I Portal", href: "/pages/ci-portal" },
     ],
   },

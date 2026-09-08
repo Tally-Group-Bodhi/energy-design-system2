@@ -112,6 +112,13 @@ const pages = [
     tags: ["Large Market", "Glass", "Operations", "Exceptions", "Dashboard"],
   },
   {
+    title: "Demo OpCon",
+    description: "Operational control dashboard for transfer pipeline health, work queues, movement, and switching performance",
+    href: "/pages/demo-opcon",
+    icon: "conversion_path",
+    tags: ["Glass", "Operations", "Pipeline", "Dashboard", "Demo"],
+  },
+  {
     title: "Glass Vision LM 2 – Demo Version",
     description: "Working copy of Glass Vision LM 2 for demo iterations",
     href: "/pages/glass-vision-lm-2-demo-version",

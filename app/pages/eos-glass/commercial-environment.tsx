@@ -4768,9 +4768,9 @@ function CommercialEnvironmentContent({
           {/* ────── Main pane: dashboard with radial glow ────── */}
           <main
             className={cn(
-              "flex min-w-0 flex-1 overflow-hidden rounded-tl-[1.5rem] text-slate-700 dark:text-slate-100",
+              "flex min-w-0 flex-1 overflow-hidden rounded-tl-xl text-slate-700 dark:text-slate-100",
               // Mirror the left-nav curve on the right when the insight rail is collapsed
-              aiRailCollapsed && "xl:rounded-tr-[1.5rem]"
+              aiRailCollapsed && "xl:rounded-tr-xl"
             )}
             style={{
               background: isLight

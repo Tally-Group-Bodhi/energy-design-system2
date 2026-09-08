@@ -1,6 +1,7 @@
 "use client";
 
 import React, { Suspense, useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -682,6 +683,43 @@ function AccountUsageChartLegend({
   );
 }
 
+const FUEL_META: Record<string, { icon: string; className: string }> = {
+  Electricity: { icon: "bolt", className: "text-sky-500 dark:text-sky-400" },
+  Electric: { icon: "bolt", className: "text-sky-500 dark:text-sky-400" },
+  Gas: { icon: "local_fire_department", className: "text-orange-500 dark:text-orange-400" },
+  Solar: { icon: "solar_power", className: "text-amber-500 dark:text-amber-400" },
+};
+
+function AccountFuelIcons({
+  fuel,
+  size = 20,
+  className,
+}: {
+  fuel: string;
+  size?: number;
+  className?: string;
+}) {
+  const parts = fuel.split(" + ");
+  return (
+    <span
+      role="img"
+      title={fuel}
+      aria-label={fuel}
+      className={cn("flex w-9 shrink-0 flex-col items-center justify-center gap-0.5", className)}
+    >
+      {parts.map((part) => {
+        const meta = FUEL_META[part] ?? FUEL_META.Electric;
+        return <Icon key={part} name={meta.icon} size={size} filled className={meta.className} />;
+      })}
+    </span>
+  );
+}
+
+const HEADLINE_TABS_LIST =
+  "h-auto w-full justify-start rounded-none border-b border-gray-200 bg-transparent p-0 shadow-none dark:border-white/10 dark:bg-transparent";
+const HEADLINE_TAB_TRIGGER_SM =
+  "-mb-px rounded-none border-b-2 border-transparent bg-transparent px-0 pb-2 pt-0 text-[13px] font-medium text-gray-500 shadow-none hover:bg-transparent hover:text-gray-800 data-[state=active]:border-[#2C365D] data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:text-[#2C365D] data-[state=active]:shadow-none dark:text-slate-400 dark:hover:text-slate-200 dark:data-[state=active]:border-[#00D2A2] dark:data-[state=active]:bg-transparent dark:data-[state=active]:text-[#00D2A2]";
+
 /* ========== Light mode (default) ========== */
 const PANE_LIGHT = "bg-gray-100";
 const GLASS_PANEL_LIGHT =
@@ -797,7 +835,7 @@ const ACCOUNTS: AccountRecord[] = [
     nmi: "0311011200060424105902",
     accNumber: "000011420512",
     type: "Residential",
-    fuel: "Electric",
+    fuel: "Electric + Solar",
     status: "OPEN",
     balance: "−¥2,450 Credit",
     isCredit: true,
@@ -1079,6 +1117,328 @@ const ACCOUNT_SECTIONS: {
     iconBg: "bg-violet-100 text-violet-700 dark:bg-violet-500/25 dark:text-violet-300",
   },
 ];
+
+function AccountBillPanels({ acc, chartId }: { acc: AccountRecord; chartId: string }) {
+  const accountCharts = getAccountChartData(acc.address);
+  const [invoicePreviewOpen, setInvoicePreviewOpen] = useState(false);
+
+  const chargesRows = acc.isClosed ? (
+    <>
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Final invoice</span>
+        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalInvoice ?? "—"}</span>
+      </div>
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Allocated</span>
+        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
+      </div>
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Posted</span>
+        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
+      </div>
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Closed on</span>
+        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.closedOn ?? "—"}</span>
+      </div>
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Final read</span>
+        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalRead ?? "—"}</span>
+      </div>
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Washup</span>
+        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
+      </div>
+    </>
+  ) : (
+    <>
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Invoice amount</span>
+        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.invoiceAmount ?? "—"}</span>
+      </div>
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Allocated</span>
+        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
+      </div>
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Posted</span>
+        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
+      </div>
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Due</span>
+        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.due ?? "—"}</span>
+      </div>
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Charges</span>
+        <span
+          className={cn(
+            "font-medium",
+            (acc.charges?.includes("−") || acc.charges?.includes("-")) && acc.charges?.includes("CR")
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-gray-900 dark:text-slate-100"
+          )}
+        >
+          {acc.charges ?? "—"}
+        </span>
+      </div>
+      {acc.demandCharge && (
+        <div className="flex justify-between gap-4">
+          <span className="text-gray-500 dark:text-slate-500">Demand charge</span>
+          <span className="font-medium text-gray-900 dark:text-slate-100">{acc.demandCharge}</span>
+        </div>
+      )}
+      <div className="flex justify-between gap-4">
+        <span className="text-gray-500 dark:text-slate-500">Washup</span>
+        <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
+      </div>
+    </>
+  );
+
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
+        <Tabs defaultValue="charges">
+          <TabsList className={cn(HEADLINE_TABS_LIST, "mx-density-xl flex w-auto gap-5 pt-4")}>
+            <TabsTrigger value="charges" className={HEADLINE_TAB_TRIGGER_SM}>
+              Charges
+            </TabsTrigger>
+            <TabsTrigger value="load" className={HEADLINE_TAB_TRIGGER_SM}>
+              Load
+            </TabsTrigger>
+            <TabsTrigger value="usage" className={HEADLINE_TAB_TRIGGER_SM}>
+              Usage
+            </TabsTrigger>
+          </TabsList>
+          <CardContent className="p-5 pt-4 pb-5">
+            <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill Information</h3>
+            {acc.billPeriod && (
+              <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">{acc.billPeriod}</p>
+            )}
+            <TabsContent value="charges" className="mt-4">
+              <div className="space-y-3 text-sm text-gray-700 dark:text-slate-300">{chargesRows}</div>
+            </TabsContent>
+            <TabsContent value="load" className="mt-4">
+              {acc.type === "Commercial" ? (
+                <CommercialLoadDisaggChart data={accountCharts.loadDisagg} />
+              ) : (
+                <>
+                  <p className="mb-3 text-xs text-gray-500 dark:text-slate-400">
+                    Estimated breakdown by equipment category ({accountCharts.loadDisaggUnit ?? "kWh"})
+                  </p>
+                  <div className="space-y-2.5">
+                    {accountCharts.loadDisagg.map((item) => {
+                      const maxKWh = accountCharts.loadDisagg[0].kWh;
+                      const pct = Math.round((item.kWh / maxKWh) * 100);
+                      return (
+                        <div key={item.category} className="group">
+                          <div className="mb-1 flex items-center justify-between text-xs">
+                            <span className="flex items-center gap-1.5 font-medium text-gray-700 dark:text-slate-300">
+                              <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: item.fill }} />
+                              {item.category}
+                            </span>
+                            <span className="tabular-nums text-gray-500 dark:text-slate-400">
+                              {item.kWh} {accountCharts.loadDisaggUnit ?? "kWh"}
+                            </span>
+                          </div>
+                          <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
+                            <div
+                              className="h-full rounded-full transition-all duration-700 ease-out group-hover:opacity-80"
+                              style={{ width: `${pct}%`, backgroundColor: item.fill }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-2 dark:border-white/[0.06]">
+                    <span className="text-xs font-medium text-gray-700 dark:text-slate-300">Total estimated</span>
+                    <span className="text-xs font-semibold tabular-nums text-gray-900 dark:text-slate-100">
+                      {accountCharts.loadDisagg.reduce((s, d) => s + d.kWh, 0)} {accountCharts.loadDisaggUnit ?? "kWh"}
+                    </span>
+                  </div>
+                </>
+              )}
+            </TabsContent>
+            <TabsContent value="usage" className="mt-4">
+              <AccountUsageChartLegend
+                data={accountCharts.usage}
+                billVsPrevious={acc.billVsPrevious}
+                billVsPreviousUp={acc.billVsPreviousUp}
+              />
+              <AccountUsageBarChart data={accountCharts.usage} gradientId={`gradUsage-${chartId}`} />
+            </TabsContent>
+          </CardContent>
+        </Tabs>
+      </Card>
+
+      <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
+        <Tabs defaultValue="invoice-pdf">
+          <TabsList className={cn(HEADLINE_TABS_LIST, "mx-density-xl flex w-auto gap-5 pt-4")}>
+            <TabsTrigger value="invoice-pdf" className={HEADLINE_TAB_TRIGGER_SM}>
+              Invoice PDF
+            </TabsTrigger>
+            <TabsTrigger value="bill-vs-previous" className={HEADLINE_TAB_TRIGGER_SM}>
+              Bill vs Previous
+            </TabsTrigger>
+          </TabsList>
+          <CardContent className="p-5 pt-4 pb-5">
+            <TabsContent value="invoice-pdf" className="mt-0">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Latest invoice</h3>
+                  <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
+                    {acc.billPeriod ?? "Latest billing period"}
+                  </p>
+                </div>
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-2 py-1 text-xs font-medium text-red-600 dark:bg-red-500/10 dark:text-red-300">
+                  <Icon name="picture_as_pdf" size={15} filled />
+                  3 pages
+                </span>
+              </div>
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <div className="rounded-xl border border-gray-200/80 bg-white p-3 dark:border-white/10 dark:bg-white/[0.04]">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">Amount due</p>
+                  <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-slate-100">
+                    {acc.invoiceAmount ?? acc.finalInvoice ?? "—"}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200/80 bg-white p-3 dark:border-white/10 dark:bg-white/[0.04]">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:text-slate-500">Due date</p>
+                  <p className="mt-1 text-sm font-semibold text-gray-900 dark:text-slate-100">
+                    {acc.due ?? acc.closedOn ?? "—"}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-3 space-y-2 rounded-xl border border-gray-200/80 bg-white p-3 text-xs dark:border-white/10 dark:bg-white/[0.04]">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-gray-500 dark:text-slate-400">Account</span>
+                  <span className="font-medium text-gray-900 dark:text-slate-100">{acc.accNumber ?? acc.nmi}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-gray-500 dark:text-slate-400">Service</span>
+                  <span className="font-medium text-gray-900 dark:text-slate-100">{acc.fuel}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-gray-500 dark:text-slate-400">Charges</span>
+                  <span className="font-medium text-gray-900 dark:text-slate-100">{acc.charges ?? "—"}</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInvoicePreviewOpen(true)}
+                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#2C365D] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#222a49] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2C365D] focus-visible:ring-offset-2 dark:bg-[#00D2A2] dark:text-[#102c25] dark:hover:bg-[#00bc91]"
+              >
+                <Icon name="open_in_full" size={17} />
+                View full invoice PDF
+              </button>
+            </TabsContent>
+            <TabsContent value="bill-vs-previous" className="mt-0">
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill vs Previous</h3>
+                <span className="rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                  Latest bill
+                </span>
+              </div>
+              {acc.billVsPrevious && acc.billVsPrevious !== "—" ? (
+                <div
+                  className={cn(
+                    "mt-4 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium",
+                    acc.billVsPreviousUp
+                      ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"
+                      : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
+                  )}
+                >
+                  <Icon name={acc.billVsPreviousUp ? "trending_up" : "trending_down"} size={18} />
+                  {acc.billVsPrevious}
+                </div>
+              ) : null}
+              <div className="mt-4 flex items-center gap-4">
+                <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                  <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: CHART_TEAL }} />
+                  Current
+                </span>
+                <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
+                  <span className="inline-block h-2 w-2 rounded-full bg-gray-300 dark:bg-slate-500" />
+                  Previous
+                </span>
+              </div>
+              <div className="mt-2 h-52 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <ComposedChart data={accountCharts.billVsPrevious} margin={{ top: 12, right: 12, bottom: 4, left: -8 }}>
+                    <defs>
+                      <linearGradient id={`bill-area-${chartId}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={CHART_TEAL} stopOpacity={0.25} />
+                        <stop offset="100%" stopColor={CHART_TEAL} stopOpacity={0.02} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" strokeOpacity={0.5} vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} dy={6} />
+                    <YAxis domain={[0, 160]} ticks={[0, 80, 160]} tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={32} />
+                    <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#00D2A2", strokeWidth: 1, strokeDasharray: "4 4", strokeOpacity: 0.4 }} />
+                    <Area
+                      type="natural"
+                      dataKey="current"
+                      name="Current"
+                      stroke={CHART_TEAL}
+                      strokeWidth={2.5}
+                      fill={`url(#bill-area-${chartId})`}
+                      dot={false}
+                      activeDot={{ r: 5, fill: CHART_TEAL, stroke: "#fff", strokeWidth: 2 }}
+                      animationDuration={800}
+                      animationEasing="ease-out"
+                    />
+                    <Line
+                      type="natural"
+                      dataKey="previous"
+                      name="Previous"
+                      stroke="#D1D5DB"
+                      strokeWidth={1.5}
+                      strokeDasharray="6 3"
+                      dot={false}
+                      activeDot={{ r: 4, fill: "#D1D5DB", stroke: "#fff", strokeWidth: 2 }}
+                      animationDuration={800}
+                      animationEasing="ease-out"
+                    />
+                  </ComposedChart>
+                </ResponsiveContainer>
+              </div>
+            </TabsContent>
+          </CardContent>
+        </Tabs>
+      </Card>
+
+      {invoicePreviewOpen &&
+        createPortal(
+          <Dialog open={invoicePreviewOpen} onOpenChange={setInvoicePreviewOpen}>
+            <DialogContent className="!flex h-[92vh] w-[95vw] !max-w-[1200px] !flex-col gap-0 overflow-hidden !rounded-xl !border-gray-200 !bg-white p-0 dark:!border-slate-700 dark:!bg-slate-900">
+              <div className="flex items-center justify-between border-b border-gray-200 px-5 py-4 pr-14 dark:border-slate-700">
+                <div className="min-w-0">
+                  <DialogTitle className="truncate dark:text-slate-100">Invoice PDF</DialogTitle>
+                  <DialogDescription className="mt-1 truncate dark:text-slate-400">
+                    {acc.address} · {acc.billPeriod ?? "Latest billing period"}
+                  </DialogDescription>
+                </div>
+                <a
+                  href="/sample-invoice.pdf"
+                  download
+                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+                >
+                  <Icon name="download" size={16} />
+                  Download
+                </a>
+              </div>
+              <iframe
+                src="/sample-invoice.pdf"
+                title={`Invoice PDF for ${acc.address}`}
+                className="min-h-0 w-full flex-1 bg-gray-100 dark:bg-slate-950"
+              />
+              <DialogClose />
+            </DialogContent>
+          </Dialog>,
+          document.body
+        )}
+    </div>
+  );
+}
 
 const ACCOUNT_USAGE_SPARKLINES: Record<string, number[]> = {
   "3-14-2 SHIBUYA, SHIBUYA-KU, TOKYO 150-0002": [305, 298, 312, 305, 318, 328, 338, 412],
@@ -1567,7 +1927,8 @@ function ResidentialEnvironmentContent({
           {/* Main content — light (default) / dark pane with glass panels */}
           <main
             className={cn(
-              "flex min-w-0 flex-1 overflow-hidden rounded-tl-[1.5rem]",
+              "flex min-w-0 flex-1 overflow-hidden rounded-tl-xl",
+              !controlPanelOpen && "rounded-tr-xl",
               PANE_LIGHT,
               PANE_DARK
             )}
@@ -1855,7 +2216,6 @@ function ResidentialEnvironmentContent({
                     />
                   </button>
                   {!collapsedAccountSections.has(section.type) && sectionAccounts.map((acc) => {
-                const typeIcon = acc.type === "Residential" ? "home" : acc.type === "Commercial" ? "business" : "store";
                 const typeIconBg =
                   acc.type === "Residential"
                     ? "bg-sky-100 text-sky-700 dark:bg-sky-500/25 dark:text-sky-300"
@@ -1863,7 +2223,6 @@ function ResidentialEnvironmentContent({
                       ? "bg-violet-100 text-violet-700 dark:bg-violet-500/25 dark:text-violet-300"
                       : "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300";
                 const balancePillGreen = acc.isCredit || acc.balance === "¥0";
-                const accountCharts = getAccountChartData(acc.address);
                 const isSelected = selectedAccountAddress === acc.address;
                 return (
                   <React.Fragment key={acc.address}>
@@ -1881,14 +2240,7 @@ function ResidentialEnvironmentContent({
                       <CardContent className="px-5 py-4 pt-4">
                         <div className="flex items-center justify-between gap-3.5">
                           <div className="flex min-w-0 flex-1 items-center gap-3.5">
-                            <div
-                              className={cn(
-                                "flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]",
-                                typeIconBg
-                              )}
-                            >
-                              <Icon name={typeIcon} size={18} />
-                            </div>
+                            <AccountFuelIcons fuel={acc.fuel} size={22} />
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-semibold text-gray-900 dark:text-slate-100">
                                 {acc.address}
@@ -1909,9 +2261,6 @@ function ResidentialEnvironmentContent({
                                   )}
                                 >
                                   {acc.type}
-                                </span>
-                                <span className="rounded-lg bg-gray-100 px-2 py-0.5 font-medium text-gray-600 dark:bg-slate-600/40 dark:text-slate-400">
-                                  {acc.fuel}
                                 </span>
                               </div>
                               {acc.tags && acc.tags.length > 0 && (
@@ -2006,274 +2355,7 @@ function ResidentialEnvironmentContent({
                     </Card>
                   </div>
 
-                  <div className="grid gap-6 lg:grid-cols-2">
-                    <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                      <CardContent className="p-5 pt-5 pb-5">
-                        <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill Information</h3>
-                        {acc.billPeriod && (
-                          <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">{acc.billPeriod}</p>
-                        )}
-                        <Tabs defaultValue="overview" className="mt-4">
-                          <TabsList className="mb-4 h-10 gap-1 rounded-lg bg-gray-100/90 p-1 backdrop-blur-md border border-gray-200/80 dark:bg-white/[0.06] dark:border-white/[0.08]">
-                            <TabsTrigger value="overview" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                              Overview
-                            </TabsTrigger>
-                            <TabsTrigger value="load" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                              Load Disagg
-                            </TabsTrigger>
-                            <TabsTrigger value="usage" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                              Usage
-                            </TabsTrigger>
-                          </TabsList>
-                          <TabsContent value="overview" className="mt-0">
-                            <div className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
-                              {acc.isClosed ? (
-                                <>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Final invoice</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalInvoice ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Allocated</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Posted</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Closed on</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.closedOn ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Final read</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalRead ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Washup</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
-                                  </div>
-                                </>
-                              ) : (
-                                <>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Invoice amount</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.invoiceAmount ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Allocated</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Posted</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Due</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.due ?? "—"}</span>
-                                  </div>
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Charges</span>
-                                    <span
-                                      className={cn(
-                                        "font-medium",
-                                        (acc.charges?.includes("−") || acc.charges?.includes("-")) && acc.charges?.includes("CR")
-                                          ? "text-emerald-600 dark:text-emerald-400"
-                                          : "text-gray-900 dark:text-slate-100"
-                                      )}
-                                    >
-                                      {acc.charges ?? "—"}
-                                    </span>
-                                  </div>
-                                  {acc.demandCharge && (
-                                    <div className="flex justify-between gap-4">
-                                      <span className="text-gray-500 dark:text-slate-500">Demand charge</span>
-                                      <span className="font-medium text-gray-900 dark:text-slate-100">{acc.demandCharge}</span>
-                                    </div>
-                                  )}
-                                  <div className="flex justify-between gap-4">
-                                    <span className="text-gray-500 dark:text-slate-500">Washup</span>
-                                    <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          </TabsContent>
-                          <TabsContent value="load" className="mt-0">
-                            {acc.type === "Commercial" ? (
-                              <CommercialLoadDisaggChart data={accountCharts.loadDisagg} />
-                            ) : (
-                              <>
-                                <p className="mb-3 text-xs text-gray-500 dark:text-slate-400">
-                                  Estimated breakdown by equipment category ({accountCharts.loadDisaggUnit ?? "kWh"})
-                                </p>
-                                <div className="space-y-2.5">
-                                  {accountCharts.loadDisagg.map((item) => {
-                                    const maxKWh = accountCharts.loadDisagg[0].kWh;
-                                    const pct = Math.round((item.kWh / maxKWh) * 100);
-                                    return (
-                                      <div key={item.category} className="group">
-                                        <div className="mb-1 flex items-center justify-between text-xs">
-                                          <span className="flex items-center gap-1.5 font-medium text-gray-700 dark:text-slate-300">
-                                            <span
-                                              className="inline-block h-2 w-2 rounded-full"
-                                              style={{ backgroundColor: item.fill }}
-                                            />
-                                            {item.category}
-                                          </span>
-                                          <span className="tabular-nums text-gray-500 dark:text-slate-400">
-                                            {item.kWh} {accountCharts.loadDisaggUnit ?? "kWh"}
-                                          </span>
-                                        </div>
-                                        <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
-                                          <div
-                                            className="h-full rounded-full transition-all duration-700 ease-out group-hover:opacity-80"
-                                            style={{
-                                              width: `${pct}%`,
-                                              backgroundColor: item.fill,
-                                            }}
-                                          />
-                                        </div>
-                                    </div>
-                                    );
-                                  })}
-                                </div>
-                                <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-2 dark:border-white/[0.06]">
-                                  <span className="text-xs font-medium text-gray-700 dark:text-slate-300">Total estimated</span>
-                                  <span className="text-xs font-semibold tabular-nums text-gray-900 dark:text-slate-100">
-                                    {accountCharts.loadDisagg.reduce((s, d) => s + d.kWh, 0)} {accountCharts.loadDisaggUnit ?? "kWh"}
-                                  </span>
-                                </div>
-                              </>
-                            )}
-                          </TabsContent>
-                          <TabsContent value="usage" className="mt-0">
-                            <AccountUsageChartLegend
-                              data={accountCharts.usage}
-                              billVsPrevious={acc.billVsPrevious}
-                              billVsPreviousUp={acc.billVsPreviousUp}
-                            />
-                            <AccountUsageBarChart
-                              data={accountCharts.usage}
-                              gradientId={`gradUsage-${acc.nmi.replace(/\s/g, "")}`}
-                            />
-                          </TabsContent>
-                        </Tabs>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                      <CardContent className="p-5 pt-5 pb-5">
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill vs Previous</h3>
-                          <button
-                            type="button"
-                            className="rounded-lg border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-[#00D2A2]/10 hover:text-[#008f6f] dark:border-white/10 dark:bg-white/5 dark:text-slate-300 dark:hover:bg-[#00D2A2]/20 dark:hover:text-[#00D2A2]"
-                          >
-                            Latest bill
-                          </button>
-                        </div>
-                        {acc.billVsPrevious && acc.billVsPrevious !== "—" ? (
-                          <div
-                            className={cn(
-                              "mt-4 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium",
-                              acc.billVsPreviousUp
-                                ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"
-                                : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
-                            )}
-                          >
-                            <Icon
-                              name={acc.billVsPreviousUp ? "trending_up" : "trending_down"}
-                              size={18}
-                            />
-                            {acc.billVsPrevious}
-                          </div>
-                        ) : null}
-                        {/* Legend */}
-                        <div className="mt-4 flex items-center gap-4">
-                          <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                            <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: CHART_TEAL }} />
-                            Current
-                          </span>
-                          <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                            <span className="inline-block h-2 w-2 rounded-full bg-gray-300 dark:bg-slate-500" />
-                            Previous
-                          </span>
-                        </div>
-
-                        <div className="mt-2 h-52 w-full">
-                          <ResponsiveContainer width="100%" height="100%">
-                            <ComposedChart
-                              data={accountCharts.billVsPrevious}
-                              margin={{ top: 12, right: 12, bottom: 4, left: -8 }}
-                            >
-                              <defs>
-                                <linearGradient
-                                  id={`bill-area-${acc.nmi.replace(/\s/g, "")}`}
-                                  x1="0"
-                                  y1="0"
-                                  x2="0"
-                                  y2="1"
-                                >
-                                  <stop offset="0%" stopColor={CHART_TEAL} stopOpacity={0.25} />
-                                  <stop offset="100%" stopColor={CHART_TEAL} stopOpacity={0.02} />
-                                </linearGradient>
-                              </defs>
-                              <CartesianGrid
-                                strokeDasharray="3 3"
-                                stroke="#E5E7EB"
-                                strokeOpacity={0.5}
-                                vertical={false}
-                              />
-                              <XAxis
-                                dataKey="month"
-                                tick={{ fontSize: 11, fill: "#9CA3AF" }}
-                                axisLine={false}
-                                tickLine={false}
-                                dy={6}
-                              />
-                              <YAxis
-                                domain={[0, 160]}
-                                ticks={[0, 80, 160]}
-                                tick={{ fontSize: 11, fill: "#9CA3AF" }}
-                                axisLine={false}
-                                tickLine={false}
-                                width={32}
-                              />
-                              <Tooltip
-                                content={<ChartTooltip />}
-                                cursor={{ stroke: "#00D2A2", strokeWidth: 1, strokeDasharray: "4 4", strokeOpacity: 0.4 }}
-                              />
-                              <Area
-                                type="natural"
-                                dataKey="current"
-                                name="Current"
-                                stroke={CHART_TEAL}
-                                strokeWidth={2.5}
-                                fill={`url(#bill-area-${acc.nmi.replace(/\s/g, "")})`}
-                                dot={false}
-                                activeDot={{ r: 5, fill: CHART_TEAL, stroke: "#fff", strokeWidth: 2 }}
-                                animationDuration={800}
-                                animationEasing="ease-out"
-                              />
-                              <Line
-                                type="natural"
-                                dataKey="previous"
-                                name="Previous"
-                                stroke="#D1D5DB"
-                                strokeWidth={1.5}
-                                strokeDasharray="6 3"
-                                dot={false}
-                                activeDot={{ r: 4, fill: "#D1D5DB", stroke: "#fff", strokeWidth: 2 }}
-                                animationDuration={800}
-                                animationEasing="ease-out"
-                              />
-                            </ComposedChart>
-                          </ResponsiveContainer>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                  <AccountBillPanels acc={acc} chartId={acc.nmi.replace(/\s/g, "")} />
                         </div>
                       )}
                     </Card>
@@ -2316,7 +2398,6 @@ function ResidentialEnvironmentContent({
                   {!collapsedAccountSections.has(section.type) && (
                   <div className="grid gap-4 sm:grid-cols-2">
                   {sectionAccounts.map((acc) => {
-                const typeIcon = acc.type === "Residential" ? "home" : acc.type === "Commercial" ? "business" : "store";
                 const typeIconBg =
                   acc.type === "Residential"
                     ? "bg-sky-100 text-sky-700 dark:bg-sky-500/25 dark:text-sky-300"
@@ -2324,7 +2405,6 @@ function ResidentialEnvironmentContent({
                       ? "bg-violet-100 text-violet-700 dark:bg-violet-500/25 dark:text-violet-300"
                       : "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300";
                 const balancePillGreen = acc.isCredit || acc.balance === "¥0";
-                const accountCharts = getAccountChartData(acc.address);
                 const sparkline = ACCOUNT_USAGE_SPARKLINES[acc.address] ?? [];
                 const trendPct = acc.billVsPrevious && acc.billVsPrevious !== "—" ? acc.billVsPrevious : null;
                 const isSelected = selectedAccountAddress === acc.address;
@@ -2350,14 +2430,7 @@ function ResidentialEnvironmentContent({
                           {/* Header */}
                           <div className="px-5 pt-5 pb-3">
                             <div className="flex items-start justify-between mb-3">
-                              <div
-                                className={cn(
-                                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
-                                  typeIconBg
-                                )}
-                              >
-                                <Icon name={typeIcon} size={20} />
-                              </div>
+                              <AccountFuelIcons fuel={acc.fuel} size={19} className="w-10" />
                               <div className="flex items-center gap-2">
                                 <span
                                   className={cn(
@@ -2397,9 +2470,6 @@ function ResidentialEnvironmentContent({
                           <div className="flex flex-wrap items-center gap-1.5 px-5 pb-3">
                             <span className={cn("rounded-lg px-2 py-0.5 text-[11px] font-medium", typeIconBg)}>
                               {acc.type}
-                            </span>
-                            <span className="rounded-lg bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600 dark:bg-slate-600/40 dark:text-slate-400">
-                              {acc.fuel}
                             </span>
                             {acc.tags?.map((tag) => (
                               <span
@@ -2544,203 +2614,7 @@ function ResidentialEnvironmentContent({
                               </Card>
                             </div>
 
-                            <div className="grid gap-6 lg:grid-cols-2">
-                              <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                                <CardContent className="p-5 pt-5 pb-5">
-                                  <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill Information</h3>
-                                  {acc.billPeriod && (
-                                    <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">{acc.billPeriod}</p>
-                                  )}
-                                  <Tabs defaultValue="overview" className="mt-4">
-                                    <TabsList className="mb-4 h-10 gap-1 rounded-lg bg-gray-100/90 p-1 backdrop-blur-md border border-gray-200/80 dark:bg-white/[0.06] dark:border-white/[0.08]">
-                                      <TabsTrigger value="overview" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                                        Overview
-                                      </TabsTrigger>
-                                      <TabsTrigger value="load" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                                        Load Disagg
-                                      </TabsTrigger>
-                                      <TabsTrigger value="usage" className="rounded-md px-3 py-1.5 text-sm text-gray-600 data-[state=active]:bg-white data-[state=active]:text-[#2C365D] dark:text-slate-400 dark:data-[state=active]:bg-[#00D2A2]/20 dark:data-[state=active]:text-[#00D2A2]">
-                                        Usage
-                                      </TabsTrigger>
-                                    </TabsList>
-                                    <TabsContent value="overview" className="mt-0">
-                                      <div className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
-                                        {acc.isClosed ? (
-                                          <>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Final invoice</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalInvoice ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Allocated</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Posted</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Closed on</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.closedOn ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Final read</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.finalRead ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Washup</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
-                                            </div>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Invoice amount</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.invoiceAmount ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Allocated</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.allocated ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Posted</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.posted ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Due</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.due ?? "—"}</span>
-                                            </div>
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Charges</span>
-                                              <span className={cn(
-                                                "font-medium",
-                                                (acc.charges?.includes("−") || acc.charges?.includes("-")) && acc.charges?.includes("CR")
-                                                  ? "text-emerald-600 dark:text-emerald-400"
-                                                  : "text-gray-900 dark:text-slate-100"
-                                              )}>
-                                                {acc.charges ?? "—"}
-                                              </span>
-                                            </div>
-                                            {acc.demandCharge && (
-                                              <div className="flex justify-between gap-4">
-                                                <span className="text-gray-500 dark:text-slate-500">Demand charge</span>
-                                                <span className="font-medium text-gray-900 dark:text-slate-100">{acc.demandCharge}</span>
-                                              </div>
-                                            )}
-                                            <div className="flex justify-between gap-4">
-                                              <span className="text-gray-500 dark:text-slate-500">Washup</span>
-                                              <span className="font-medium text-gray-900 dark:text-slate-100">{acc.washup ?? "—"}</span>
-                                            </div>
-                                          </>
-                                        )}
-                                      </div>
-                                    </TabsContent>
-                                    <TabsContent value="load" className="mt-0">
-                                      {acc.type === "Commercial" ? (
-                                        <CommercialLoadDisaggChart data={accountCharts.loadDisagg} />
-                                      ) : (
-                                        <>
-                                          <p className="mb-3 text-xs text-gray-500 dark:text-slate-400">
-                                            Estimated breakdown by equipment category ({accountCharts.loadDisaggUnit ?? "kWh"})
-                                          </p>
-                                          <div className="space-y-2.5">
-                                            {accountCharts.loadDisagg.map((item) => {
-                                              const maxKWh = accountCharts.loadDisagg[0].kWh;
-                                              const pct = Math.round((item.kWh / maxKWh) * 100);
-                                              return (
-                                                <div key={item.category} className="group">
-                                                  <div className="mb-1 flex items-center justify-between text-xs">
-                                                    <span className="flex items-center gap-1.5 font-medium text-gray-700 dark:text-slate-300">
-                                                      <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: item.fill }} />
-                                                      {item.category}
-                                                    </span>
-                                                    <span className="tabular-nums text-gray-500 dark:text-slate-400">
-                                                      {item.kWh} {accountCharts.loadDisaggUnit ?? "kWh"}
-                                                    </span>
-                                                  </div>
-                                                  <div className="h-2 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-white/[0.06]">
-                                                    <div
-                                                      className="h-full rounded-full transition-all duration-700 ease-out group-hover:opacity-80"
-                                                      style={{ width: `${pct}%`, backgroundColor: item.fill }}
-                                                    />
-                                                  </div>
-                                                </div>
-                                              );
-                                            })}
-                                          </div>
-                                          <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-2 dark:border-white/[0.06]">
-                                            <span className="text-xs font-medium text-gray-700 dark:text-slate-300">Total estimated</span>
-                                            <span className="text-xs font-semibold tabular-nums text-gray-900 dark:text-slate-100">
-                                              {accountCharts.loadDisagg.reduce((s, d) => s + d.kWh, 0)} {accountCharts.loadDisaggUnit ?? "kWh"}
-                                            </span>
-                                          </div>
-                                        </>
-                                      )}
-                                    </TabsContent>
-                                    <TabsContent value="usage" className="mt-0">
-                                      <AccountUsageChartLegend
-                                        data={accountCharts.usage}
-                                        billVsPrevious={acc.billVsPrevious}
-                                        billVsPreviousUp={acc.billVsPreviousUp}
-                                      />
-                                      <AccountUsageBarChart
-                                        data={accountCharts.usage}
-                                        gradientId={`cardGradUsage-${acc.nmi.replace(/\s/g, "")}`}
-                                      />
-                                    </TabsContent>
-                                  </Tabs>
-                                </CardContent>
-                              </Card>
-
-                              <Card className="overflow-hidden border-0 !bg-gray-50 shadow-none dark:!bg-slate-800/40">
-                                <CardContent className="p-5 pt-5 pb-5">
-                                  <div className="flex items-center justify-between gap-2">
-                                    <h3 className="text-sm font-semibold tracking-tight text-gray-900 dark:text-slate-100">Bill vs Previous</h3>
-                                  </div>
-                                  {acc.billVsPrevious && acc.billVsPrevious !== "—" ? (
-                                    <div
-                                      className={cn(
-                                        "mt-4 inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium",
-                                        acc.billVsPreviousUp
-                                          ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300"
-                                          : "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300"
-                                      )}
-                                    >
-                                      <Icon name={acc.billVsPreviousUp ? "trending_up" : "trending_down"} size={18} />
-                                      {acc.billVsPrevious}
-                                    </div>
-                                  ) : null}
-                                  <div className="mt-4 flex items-center gap-4">
-                                    <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                                      <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: CHART_TEAL }} />
-                                      Current
-                                    </span>
-                                    <span className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-slate-400">
-                                      <span className="inline-block h-2 w-2 rounded-full bg-gray-300 dark:bg-slate-500" />
-                                      Previous
-                                    </span>
-                                  </div>
-                                  <div className="mt-2 h-52 w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                      <ComposedChart data={accountCharts.billVsPrevious} margin={{ top: 12, right: 12, bottom: 4, left: -8 }}>
-                                        <defs>
-                                          <linearGradient id={`card-bill-area-${acc.nmi.replace(/\s/g, "")}`} x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="0%" stopColor={CHART_TEAL} stopOpacity={0.25} />
-                                            <stop offset="100%" stopColor={CHART_TEAL} stopOpacity={0.02} />
-                                          </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" strokeOpacity={0.5} vertical={false} />
-                                        <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} dy={6} />
-                                        <YAxis domain={[0, 160]} ticks={[0, 80, 160]} tick={{ fontSize: 11, fill: "#9CA3AF" }} axisLine={false} tickLine={false} width={32} />
-                                        <Tooltip content={<ChartTooltip />} cursor={{ stroke: "#00D2A2", strokeWidth: 1, strokeDasharray: "4 4", strokeOpacity: 0.4 }} />
-                                        <Area type="natural" dataKey="current" name="Current" stroke={CHART_TEAL} strokeWidth={2.5} fill={`url(#card-bill-area-${acc.nmi.replace(/\s/g, "")})`} dot={false} activeDot={{ r: 5, fill: CHART_TEAL, stroke: "#fff", strokeWidth: 2 }} animationDuration={800} animationEasing="ease-out" />
-                                        <Line type="natural" dataKey="previous" name="Previous" stroke="#D1D5DB" strokeWidth={1.5} strokeDasharray="6 3" dot={false} activeDot={{ r: 4, fill: "#D1D5DB", stroke: "#fff", strokeWidth: 2 }} animationDuration={800} animationEasing="ease-out" />
-                                      </ComposedChart>
-                                    </ResponsiveContainer>
-                                  </div>
-                                </CardContent>
-                              </Card>
-                            </div>
+                            <AccountBillPanels acc={acc} chartId={`card-${acc.nmi.replace(/\s/g, "")}`} />
                           </div>
                         )}
                       </div>
@@ -3124,7 +2998,7 @@ function ResidentialEnvironmentContent({
                   >
                     <span
                       className={cn(
-                        "block h-full w-full rounded-tr-[1.5rem]",
+                        "block h-full w-full rounded-tr-xl",
                         PANE_LIGHT,
                         PANE_DARK
                       )}
@@ -3177,7 +3051,7 @@ function ResidentialEnvironmentContent({
               ) : (
               <div
                 className={cn(
-                  "flex h-full min-w-[290px] flex-col overflow-hidden rounded-2xl",
+                  "flex h-full min-w-[290px] flex-col overflow-hidden rounded-xl",
                   GLASS_CARD_LIGHT,
                   GLASS_CARD_DARK
                 )}
