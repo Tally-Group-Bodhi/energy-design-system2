@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import {
   Bar,
   BarChart,
@@ -11,24 +10,12 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { Avatar, AvatarFallback } from "@/components/Avatar/Avatar";
 import { Card, CardContent } from "@/components/Card/Card";
 import Progress from "@/components/Progress/Progress";
 import Select from "@/components/Select/Select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/Tabs/Tabs";
 import { Icon } from "@/components/ui/icon";
-import { secondaryColors } from "@/lib/tokens/colors";
 import { cn } from "@/lib/utils";
-import {
-  IOS_CHROME_ACTIVE_CLASS,
-  IOS_CHROME_ACTIVE_ICON_CLASS,
-  IOS_CHROME_BORDER_CLASS,
-  IOS_CHROME_CLASS,
-  IOS_CHROME_INSET_CLASS,
-  IOS_CHROME_ITEM_CLASS,
-  IOS_CHROME_MUTED_CLASS,
-  IOS_CHROME_TEXT_CLASS,
-} from "@/app/pages/eos-glass/eos-glass-theme";
 
 /* ========== Glass surfaces (matches Glass Vision Demo V2.2) ========== */
 const PANE_LIGHT = "bg-gray-100";
@@ -44,16 +31,6 @@ const HEADLINE_TAB_TRIGGER_SM =
   "-mb-px rounded-none border-b-2 border-transparent bg-transparent px-0 pb-2 pt-0 text-[13px] font-medium text-gray-500 shadow-none hover:bg-transparent hover:text-gray-800 data-[state=active]:border-[#2C365D] data-[state=active]:bg-transparent data-[state=active]:font-semibold data-[state=active]:text-[#2C365D] data-[state=active]:shadow-none dark:text-slate-400 dark:hover:text-slate-200 dark:data-[state=active]:border-[#00D2A2] dark:data-[state=active]:bg-transparent dark:data-[state=active]:text-[#00D2A2]";
 
 const CHART_TEAL = "#00D2A2";
-const AGENT = { name: "Aiko Nakamura", initials: "AN" };
-
-const NAV_ITEMS = [
-  { id: "operations", label: "Operations", icon: "grid_view" },
-  { id: "transfers", label: "Transfers", icon: "swap_horiz" },
-  { id: "queues", label: "Work queues", icon: "check_box" },
-  { id: "customers", label: "Customers", icon: "group" },
-  { id: "reports", label: "Reports", icon: "description" },
-  { id: "analytics", label: "Analytics", icon: "insights" },
-];
 
 const FILTERS = [
   { label: "State", options: ["All states", "NSW", "VIC", "QLD", "SA"] },
@@ -207,7 +184,6 @@ function MetricCard({
 }
 
 export default function DemoOpConPage() {
-  const [activeNavId, setActiveNavId] = useState("operations");
   const [filterValues, setFilterValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(FILTERS.map((filter) => [filter.label, filter.options[0]]))
   );
@@ -219,135 +195,10 @@ export default function DemoOpConPage() {
 
   return (
     <div
-      className={cn("flex h-full flex-col overflow-hidden", IOS_CHROME_CLASS)}
+      className={cn("min-h-full", PANE_LIGHT, PANE_DARK)}
       style={{ "--tally-radius-lg": "24px" } as React.CSSProperties}
     >
-      {/* Seamless chrome: header + nav as one light block (no border between them) */}
-      <div className="flex min-h-0 flex-1 flex-col">
-        <header className="flex h-14 shrink-0 items-center gap-4 px-6">
-          <div className="flex shrink-0 items-center gap-3">
-            <Image src="/TallyPlus.svg" alt="Tally+" width={620} height={120} className="h-8 w-auto dark:hidden" priority />
-            <Image src="/TallyPlus_Reversed.svg" alt="" width={620} height={120} className="hidden h-8 w-auto dark:block" />
-          </div>
-          <div className="flex flex-1 justify-center">
-            <div className="relative w-full max-w-md">
-              <Icon
-                name="search"
-                size={20}
-                className={cn("absolute left-3 top-1/2 -translate-y-1/2", IOS_CHROME_MUTED_CLASS)}
-              />
-              <input
-                type="search"
-                placeholder="Search Tally..."
-                className={cn(
-                  "h-10 w-full rounded-lg border-0 pl-10 pr-20 text-sm placeholder:text-[#8E8E93] focus:outline-none focus:ring-2 focus:ring-[#00D2A2]/50",
-                  IOS_CHROME_INSET_CLASS,
-                  IOS_CHROME_TEXT_CLASS
-                )}
-              />
-              <kbd
-                className={cn(
-                  "absolute right-2 top-1/2 -translate-y-1/2 rounded border bg-black/[0.04] px-2 py-0.5 text-xs dark:bg-white/10",
-                  IOS_CHROME_BORDER_CLASS,
-                  IOS_CHROME_MUTED_CLASS
-                )}
-              >
-                ⌘K
-              </kbd>
-            </div>
-          </div>
-          <div className="flex shrink-0 items-center gap-3">
-            <button
-              type="button"
-              className={cn("relative rounded-lg p-2 transition-colors", IOS_CHROME_ITEM_CLASS)}
-              aria-label="Notifications"
-            >
-              <Icon name="notifications" size={22} />
-              <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#E8560A]" aria-hidden />
-            </button>
-            <div className="flex items-center gap-3">
-              <Avatar className="h-9 w-9 border-2 border-[#00D2A2]/30">
-                <AvatarFallback
-                  className="text-xs font-medium text-white"
-                  style={{ backgroundColor: secondaryColors.turquoise.hex }}
-                >
-                  {AGENT.initials}
-                </AvatarFallback>
-              </Avatar>
-              <div className="hidden flex-col sm:flex">
-                <span className={cn("text-sm font-medium", IOS_CHROME_TEXT_CLASS)}>{AGENT.name}</span>
-                <span className={cn("text-xs", IOS_CHROME_MUTED_CLASS)}>Operations</span>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <div className="flex min-h-0 flex-1">
-          {/* Collapsed nav — same light block as header, no seam */}
-          <aside className="flex min-h-0 w-16 shrink-0 flex-col items-center py-4">
-            <nav className="flex min-h-0 flex-1 flex-col items-center gap-0.5 overflow-y-auto p-2">
-              {NAV_ITEMS.map((item) => {
-                const isActive = activeNavId === item.id;
-                return (
-                  <div key={item.id} className="relative flex w-full justify-center">
-                    {isActive && (
-                      <span
-                        className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r bg-[#2C365D] dark:bg-[#00D2A2]"
-                        aria-hidden
-                      />
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => setActiveNavId(item.id)}
-                      className={cn(
-                        "group flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00D2A2]/50",
-                        isActive ? IOS_CHROME_ACTIVE_CLASS : IOS_CHROME_ITEM_CLASS
-                      )}
-                      aria-label={item.label}
-                      aria-pressed={isActive}
-                    >
-                      <Icon
-                        name={item.icon}
-                        size={20}
-                        className={cn(
-                          "shrink-0",
-                          isActive
-                            ? IOS_CHROME_ACTIVE_ICON_CLASS
-                            : "text-[#8E8E93] group-hover:text-[#1C1C1E] dark:group-hover:text-white"
-                        )}
-                      />
-                    </button>
-                  </div>
-                );
-              })}
-            </nav>
-            <div className={cn("flex shrink-0 flex-col items-center gap-0.5 border-t p-2", IOS_CHROME_BORDER_CLASS)}>
-              <button
-                type="button"
-                className={cn("flex h-10 w-10 items-center justify-center rounded-lg transition-colors", IOS_CHROME_ITEM_CLASS)}
-                aria-label="Display options"
-              >
-                <Icon name="display_settings" size={20} />
-              </button>
-              <div
-                className={cn("flex h-10 w-10 items-center justify-center rounded-lg", IOS_CHROME_ITEM_CLASS)}
-                role="presentation"
-              >
-                <span className="text-xs font-medium">{AGENT.initials}</span>
-              </div>
-            </div>
-          </aside>
-
-          {/* Main content — light (default) / dark pane with glass panels */}
-          <main
-            className={cn(
-              "flex min-w-0 flex-1 flex-col overflow-hidden rounded-tl-xl rounded-tr-xl",
-              PANE_LIGHT,
-              PANE_DARK
-            )}
-          >
-            <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-              <div className="mx-auto max-w-[1600px] space-y-5">
+      <div className="mx-auto max-w-[1600px] space-y-5 px-5 py-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h1 className="text-xl font-semibold tracking-tight text-gray-900 dark:text-slate-100">
@@ -737,10 +588,6 @@ export default function DemoOpConPage() {
                   <Icon name="info" size={15} />
                   All counts are based on eligible accounts. Pending transactions within 14 days remain on the on-track path.
                 </p>
-              </div>
-            </div>
-          </main>
-        </div>
       </div>
     </div>
   );
