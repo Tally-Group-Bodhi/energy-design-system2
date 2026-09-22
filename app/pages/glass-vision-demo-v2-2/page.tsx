@@ -561,6 +561,253 @@ const BROADBAND_PLANS = [
   },
 ];
 
+/* ────────── Per-site X-Sell ────────── */
+
+type XSellOfferAction =
+  | "broadband"
+  | "solar"
+  | "battery"
+  | "gas"
+  | "cleaning"
+  | "removals"
+  | "demand"
+  | "renewal";
+
+type XSellOutcomeStatus = "interested" | "quote_sent" | "declined" | "callback";
+
+type XSellActiveService = {
+  icon: "bolt" | "local_fire_department" | "solar_power" | "wifi";
+  iconBg: string;
+  service: string;
+  provider: string;
+  plan: string;
+  status: "Connected";
+};
+
+type XSellOffer = {
+  id: string;
+  icon: "wifi" | "solar_power" | "battery_charging_full" | "local_fire_department" | "cleaning_services" | "local_shipping" | "analytics" | "handshake";
+  iconBg: string;
+  service: string | null;
+  headline: string;
+  sub: string;
+  badge?: string | null;
+  action: XSellOfferAction | null;
+  category: "available" | "mimo";
+  why?: string;
+};
+
+type SiteXSellProfile = {
+  activeServices: XSellActiveService[];
+  offers: XSellOffer[];
+};
+
+type XSellOutcome = {
+  siteAddress: string;
+  offerId: string;
+  planName?: string;
+  status: XSellOutcomeStatus;
+  note: string;
+};
+
+function siteSuburb(address: string): string {
+  const withState = address.match(/,\s*([^,]+?)\s+(?:VIC|NSW|QLD|SA|WA|TAS|NT|ACT)\b/i);
+  if (withState?.[1]) return withState[1].trim();
+  const noComma = address.match(/\s([A-Za-z][A-Za-z ]+?)\s+(?:VIC|NSW|QLD|SA|WA|TAS|NT|ACT)\b/i);
+  if (noComma?.[1]) return noComma[1].trim();
+  return address.split(",")[0]?.trim() ?? address;
+}
+
+function buildSiteXSell(account: AccountRecord): SiteXSellProfile {
+  const hasGas = /\bGas\b/i.test(account.fuel);
+  const hasSolar = /\bSolar\b/i.test(account.fuel);
+  const hasElec = /\bElectricity\b/i.test(account.fuel) || !hasGas;
+  const isCommercial = account.type === "Commercial";
+  const isResidential = account.type === "Residential";
+  const provider = isCommercial ? "Marubeni Power Retail" : "EnergyCo";
+
+  const activeServices: XSellActiveService[] = [];
+  if (hasElec) {
+    activeServices.push({
+      icon: "bolt",
+      iconBg: "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300",
+      service: "Electricity",
+      provider,
+      plan: account.plan ?? (isCommercial ? "C&I Retail Flex 2025" : "HomeDeal Extra"),
+      status: "Connected",
+    });
+  }
+  if (hasGas) {
+    activeServices.push({
+      icon: "local_fire_department",
+      iconBg: "bg-orange-100 text-orange-700 dark:bg-orange-500/25 dark:text-orange-300",
+      service: "Gas",
+      provider: isCommercial ? "Energy Co" : "Energy Co",
+      plan: hasElec ? "Dual fuel saver" : (account.plan ?? "Online saver plan 2024"),
+      status: "Connected",
+    });
+  }
+  if (hasSolar) {
+    activeServices.push({
+      icon: "solar_power",
+      iconBg: "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300",
+      service: "Solar",
+      provider: "EnergyCo Solar",
+      plan: "Feed-in tariff active",
+      status: "Connected",
+    });
+  }
+
+  const offers: XSellOffer[] = [];
+
+  if (isCommercial) {
+    if (hasElec) {
+      offers.push({
+        id: "demand",
+        icon: "analytics",
+        iconBg: "bg-violet-100 text-violet-700 dark:bg-violet-500/25 dark:text-violet-300",
+        service: "Demand",
+        headline: "Demand charge review available",
+        sub: "Potential savings on kW peaks",
+        badge: "Priority",
+        action: "demand",
+        category: "available",
+        why: "Site has demand exposure on the current C&I plan.",
+      });
+    }
+    if (!hasSolar && hasElec) {
+      offers.push({
+        id: "solar",
+        icon: "solar_power",
+        iconBg: "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300",
+        service: "Solar",
+        headline: "Commercial solar assessment",
+        sub: "Site survey from $0",
+        action: "solar",
+        category: "available",
+        why: "Roof and load profile look suitable for a solar assessment.",
+      });
+    }
+    offers.push({
+      id: "renewal",
+      icon: "handshake",
+      iconBg: "bg-sky-100 text-sky-700 dark:bg-sky-500/25 dark:text-sky-300",
+      service: "Contract",
+      headline: "Contract renewal discussion",
+      sub: account.bestOffer === "Review recommended" ? "Review recommended this period" : "Open for early renewal",
+      badge: account.bestOffer === "Review recommended" ? "Review" : null,
+      action: "renewal",
+      category: "available",
+      why: "Renewal window is open for this commercial site.",
+    });
+    return { activeServices, offers };
+  }
+
+  offers.push({
+    id: "broadband",
+    icon: "wifi",
+    iconBg: "bg-sky-100 text-sky-700 dark:bg-sky-500/25 dark:text-sky-300",
+    service: "Broadband",
+    headline: `${BROADBAND_PLANS.length} broadband plans available`,
+    sub: "Plans from $55/month",
+    action: "broadband",
+    category: "available",
+    why: "No broadband product on this service address.",
+  });
+
+  if (!hasSolar && hasElec) {
+    offers.push({
+      id: "solar",
+      icon: "solar_power",
+      iconBg: "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300",
+      service: "Solar",
+      headline: "7 Exclusive Solar offers available",
+      sub: "Offers starting at $4,500",
+      action: "solar",
+      category: "available",
+      why: "Site does not currently have solar generation.",
+    });
+  }
+
+  if (isResidential) {
+    offers.push({
+      id: "battery",
+      icon: "battery_charging_full",
+      iconBg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/25 dark:text-emerald-300",
+      service: null,
+      headline: "2026 Home battery subsidies available",
+      sub: hasSolar ? "Eligible with existing solar" : "Check eligibility",
+      badge: "New",
+      action: "battery",
+      category: "available",
+      why: hasSolar
+        ? "Existing solar makes battery storage a strong fit."
+        : "Federal and state battery subsidies are open for this postcode.",
+    });
+  }
+
+  if (!hasGas && hasElec) {
+    offers.push({
+      id: "gas",
+      icon: "local_fire_department",
+      iconBg: "bg-orange-100 text-orange-700 dark:bg-orange-500/25 dark:text-orange-300",
+      service: "Gas",
+      headline: "Add gas dual-fuel discount",
+      sub: "Save on supply when bundled",
+      action: "gas",
+      category: "available",
+      why: "Electricity-only site — dual-fuel discount may apply.",
+    });
+  }
+
+  if (isResidential || account.type === "Small Business") {
+    offers.push(
+      {
+        id: "cleaning",
+        icon: "cleaning_services",
+        iconBg: "bg-violet-100 text-violet-700 dark:bg-violet-500/25 dark:text-violet-300",
+        service: "Cleaning",
+        headline: "3 cleaning services available",
+        sub: "Starting at $650",
+        action: "cleaning",
+        category: "mimo",
+      },
+      {
+        id: "removals",
+        icon: "local_shipping",
+        iconBg: "bg-sky-100 text-sky-700 dark:bg-sky-500/25 dark:text-sky-300",
+        service: "Removals",
+        headline: "11 removal services available",
+        sub: "From $1,200",
+        action: "removals",
+        category: "mimo",
+      }
+    );
+  }
+
+  return { activeServices, offers };
+}
+
+function offerOutcomeKey(siteAddress: string, offerId: string) {
+  return `${siteAddress}::${offerId}`;
+}
+
+function isOfferResolved(status: XSellOutcomeStatus | undefined) {
+  return status === "interested" || status === "quote_sent" || status === "declined";
+}
+
+function getOpenOffers(account: AccountRecord, outcomes: Record<string, XSellOutcome>, options?: { includeMimo?: boolean }) {
+  const includeMimo = options?.includeMimo ?? false;
+  return buildSiteXSell(account).offers.filter((offer) => {
+    if (!includeMimo && offer.category === "mimo") return false;
+    return !isOfferResolved(outcomes[offerOutcomeKey(account.address, offer.id)]?.status);
+  });
+}
+
+function getOpenOfferCount(account: AccountRecord, outcomes: Record<string, XSellOutcome>) {
+  return getOpenOffers(account, outcomes).length;
+}
+
 const TASK_CATEGORIES = [
   { name: "Account Tasks", count: null, icon: "group" as const, hot: false },
   { name: "Financial Tasks", count: 26, icon: "attach_money" as const, hot: true },
@@ -1163,7 +1410,11 @@ function getAccountTypeMeta(type: AccountRecord["type"]) {
   return { icon: "store" as const, iconBg: "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300" };
 }
 
-function AccountOverviewDetails({ acc }: { acc: AccountRecord }) {
+function AccountOverviewDetails({
+  acc,
+}: {
+  acc: AccountRecord;
+}) {
   const accountCharts = getAccountChartData(acc.address);
   const [invoicePreviewOpen, setInvoicePreviewOpen] = useState(false);
 
@@ -1944,7 +2195,10 @@ function GlassVisionContent() {
   const [callDemoStep, setCallDemoStep] = useState<CallDemoStep>("waiting");
   const [callSummaryModalOpen, setCallSummaryModalOpen] = useState(false);
   const demoTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [xSellView, setXSellView] = useState<string | null>(null);
+  const [xSellView, setXSellView] = useState<XSellOfferAction | null>(null);
+  const [xSellSelectedPlan, setXSellSelectedPlan] = useState<string | null>(null);
+  const [xSellOutcomes, setXSellOutcomes] = useState<Record<string, XSellOutcome>>({});
+  const [xSellConfirmFlash, setXSellConfirmFlash] = useState<string | null>(null);
   const [partnerLogo, setPartnerLogo] = useState<"energyco" | "sumo">("energyco");
   const [billCompareView, setBillCompareView] = useState<"table" | "chart">("table");
   const [serviceAddressView, setServiceAddressView] = useState<"list" | "card">("list");
@@ -1964,6 +2218,9 @@ function GlassVisionContent() {
   const handleAccountClick = useCallback((address: string) => {
     setSelectedAccountAddress(address);
     setAccountTab("overview");
+    setXSellView(null);
+    setXSellSelectedPlan(null);
+    setXSellConfirmFlash(null);
     setControlPanelOpen((open) => {
       if (controlPanelBeforeAccountRef.current === null) {
         controlPanelBeforeAccountRef.current = open;
@@ -1974,10 +2231,29 @@ function GlassVisionContent() {
     if (account) syncAccountQuery(account.nmi);
   }, [syncAccountQuery]);
 
+  const openSiteXSell = useCallback((address: string, offerAction: XSellOfferAction | null = null) => {
+    setSelectedAccountAddress(address);
+    setAccountTab("overview");
+    setActiveTab("overview");
+    setControlPanelOpen(true);
+    setActivePanelTab("X-Sell");
+    setXSellView(offerAction);
+    setXSellSelectedPlan(null);
+    setXSellConfirmFlash(null);
+    if (controlPanelBeforeAccountRef.current === null) {
+      controlPanelBeforeAccountRef.current = true;
+    }
+    const account = ACCOUNTS.find((item) => item.address === address);
+    if (account) syncAccountQuery(account.nmi);
+  }, [syncAccountQuery]);
+
   const handleAccountBack = useCallback(() => {
     setSelectedAccountAddress(null);
     setAccountTab("overview");
     setActiveTab("overview");
+    setXSellView(null);
+    setXSellSelectedPlan(null);
+    setXSellConfirmFlash(null);
     if (controlPanelBeforeAccountRef.current !== null) {
       setControlPanelOpen(controlPanelBeforeAccountRef.current);
       controlPanelBeforeAccountRef.current = null;
@@ -1988,6 +2264,54 @@ function GlassVisionContent() {
   const selectedAccount = selectedAccountAddress
     ? ACCOUNTS.find((account) => account.address === selectedAccountAddress) ?? null
     : null;
+
+  const selectedSiteXSell = selectedAccount ? buildSiteXSell(selectedAccount) : null;
+  const selectedSiteOpenOffers = selectedAccount
+    ? getOpenOffers(selectedAccount, xSellOutcomes)
+    : [];
+  const sitesWithOpenOffers = ACCOUNTS.map((account) => ({
+    account,
+    openOffers: getOpenOffers(account, xSellOutcomes),
+  })).filter((row) => row.openOffers.length > 0);
+  const totalOpenOffers = sitesWithOpenOffers.reduce((sum, row) => sum + row.openOffers.length, 0);
+
+  const logXSellOutcome = useCallback(
+    (siteAddress: string, offerId: string, status: XSellOutcomeStatus, planName?: string) => {
+      const suburb = siteSuburb(siteAddress);
+      const planPart = planName ? ` (${planName})` : "";
+      const statusLabel =
+        status === "interested"
+          ? "Customer interested"
+          : status === "quote_sent"
+            ? "Quote sent"
+            : status === "callback"
+              ? "Callback requested"
+              : "Customer declined";
+      const note = `${statusLabel} in ${offerId}${planPart} at ${suburb}.`;
+      setXSellOutcomes((prev) => ({
+        ...prev,
+        [offerOutcomeKey(siteAddress, offerId)]: {
+          siteAddress,
+          offerId,
+          planName,
+          status,
+          note,
+        },
+      }));
+      setXSellConfirmFlash(
+        status === "declined"
+          ? "Declined — opportunity closed for this call."
+          : status === "callback"
+            ? "Callback logged — follow-up task created."
+            : "Interest logged against this site."
+      );
+      setXSellSelectedPlan(null);
+      setXSellView(null);
+    },
+    []
+  );
+
+  const xSellWrapNotes = Object.values(xSellOutcomes).map((outcome) => outcome.note);
 
   const toggleAccountSection = useCallback((type: AccountRecord["type"]) => {
     setCollapsedAccountSections((previous) => {
@@ -2010,6 +2334,10 @@ function GlassVisionContent() {
     setCallDemoStep("waiting");
     setSelectedAccountAddress(null);
     setAccountTab("overview");
+    setXSellView(null);
+    setXSellSelectedPlan(null);
+    setXSellConfirmFlash(null);
+    setXSellOutcomes({});
     if (controlPanelBeforeAccountRef.current !== null) {
       setControlPanelOpen(controlPanelBeforeAccountRef.current);
       controlPanelBeforeAccountRef.current = null;
@@ -2555,7 +2883,40 @@ function GlassVisionContent() {
                         )}
                       </div>
                   </div>
-                  <Tabs value={accountTab} onValueChange={setAccountTab} className="mt-4">
+                  {/* Cross-sell strip — site-level cue, above content tabs */}
+                  <button
+                    type="button"
+                    onClick={() => openSiteXSell(selectedAccount.address)}
+                    className="mt-3 flex w-full items-center gap-2.5 rounded-lg border border-orange-300 bg-orange-50 px-3 py-2 text-left transition-colors hover:bg-orange-100/80 dark:border-orange-500/35 dark:bg-orange-500/10 dark:hover:bg-orange-500/15"
+                  >
+                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-orange-500 text-white">
+                      <Icon name="add_shopping_cart" size={15} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-semibold text-orange-950 dark:text-orange-50">
+                        {selectedSiteOpenOffers.length > 0
+                          ? `${selectedSiteOpenOffers.length} ${selectedSiteOpenOffers.length === 1 ? "opportunity" : "opportunities"}`
+                          : "Offers available"}
+                        {selectedSiteOpenOffers.length > 0 ? (
+                          <span className="font-normal text-orange-800/85 dark:text-orange-200/80">
+                            {" · "}
+                            {selectedSiteOpenOffers
+                              .slice(0, 3)
+                              .map((offer) => offer.service ?? offer.headline.split(" ").slice(0, 3).join(" "))
+                              .join(" · ")}
+                            {selectedSiteOpenOffers.length > 3
+                              ? ` · +${selectedSiteOpenOffers.length - 3} more`
+                              : ""}
+                          </span>
+                        ) : null}
+                      </p>
+                    </div>
+                    <span className="inline-flex shrink-0 items-center gap-0.5 text-[12px] font-semibold text-orange-800 dark:text-orange-200">
+                      View
+                      <Icon name="chevron_right" size={14} />
+                    </span>
+                  </button>
+                  <Tabs value={accountTab} onValueChange={setAccountTab} className="mt-3">
                     <TabsList className="h-auto w-full justify-start gap-0 rounded-none border-b border-gray-200 bg-transparent p-0 text-gray-500 shadow-none dark:border-white/10 dark:bg-transparent">
                       <TabsTrigger
                         value="overview"
@@ -2806,6 +3167,22 @@ function GlassVisionContent() {
                                 >
                                   {acc.type}
                                 </span>
+                                {(() => {
+                                  const offerCount = getOpenOfferCount(acc, xSellOutcomes);
+                                  if (offerCount === 0 || acc.isClosed) return null;
+                                  return (
+                                    <button
+                                      type="button"
+                                      onClick={(event) => {
+                                        event.stopPropagation();
+                                        openSiteXSell(acc.address);
+                                      }}
+                                      className="rounded-lg bg-orange-100 px-2 py-0.5 font-medium text-orange-800 transition-colors hover:bg-orange-200 dark:bg-orange-500/20 dark:text-orange-300 dark:hover:bg-orange-500/30"
+                                    >
+                                      {offerCount} {offerCount === 1 ? "offer" : "offers"}
+                                    </button>
+                                  );
+                                })()}
                               </div>
                               {acc.tags && acc.tags.length > 0 && (
                                 <div className="mt-2 flex flex-wrap gap-2">
@@ -2982,6 +3359,22 @@ function GlassVisionContent() {
                             <span className={cn("rounded-md px-1.5 py-0.5 text-[10px] font-medium", typeIconBg)}>
                               {acc.type}
                             </span>
+                            {(() => {
+                              const offerCount = getOpenOfferCount(acc, xSellOutcomes);
+                              if (offerCount === 0 || acc.isClosed) return null;
+                              return (
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    openSiteXSell(acc.address);
+                                  }}
+                                  className="rounded-md bg-orange-100 px-1.5 py-0.5 text-[10px] font-medium text-orange-800 transition-colors hover:bg-orange-200 dark:bg-orange-500/20 dark:text-orange-300 dark:hover:bg-orange-500/30"
+                                >
+                                  {offerCount} {offerCount === 1 ? "offer" : "offers"}
+                                </button>
+                              );
+                            })()}
                             {acc.tags?.map((tag) => (
                               <span
                                 key={tag.label}
@@ -3405,7 +3798,10 @@ function GlassVisionContent() {
                         type="button"
                         onClick={() => {
                           setActivePanelTab(tab);
-                          if (tab !== "X-Sell") setXSellView(null);
+                          if (tab !== "X-Sell") {
+                            setXSellView(null);
+                            setXSellSelectedPlan(null);
+                          }
                           setControlPanelOpen(true);
                         }}
                         aria-label={`Open ${tab}`}
@@ -3423,6 +3819,14 @@ function GlassVisionContent() {
                             aria-hidden
                             className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)] dark:bg-emerald-400 dark:shadow-[0_0_6px_rgba(52,211,153,0.8)]"
                           />
+                        ) : null}
+                        {tab === "X-Sell" && totalOpenOffers > 0 ? (
+                          <span
+                            aria-hidden
+                            className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-orange-500 px-1 text-[9px] font-bold text-white"
+                          >
+                            {totalOpenOffers > 9 ? "9+" : totalOpenOffers}
+                          </span>
                         ) : null}
                       </button>
                     ))}
@@ -3460,7 +3864,10 @@ function GlassVisionContent() {
                         type="button"
                         onClick={() => {
                           setActivePanelTab(tab);
-                          if (tab !== "X-Sell") setXSellView(null);
+                          if (tab !== "X-Sell") {
+                            setXSellView(null);
+                            setXSellSelectedPlan(null);
+                          }
                         }}
                         className={cn(
                           "whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-medium transition-all",
@@ -3470,6 +3877,11 @@ function GlassVisionContent() {
                         )}
                       >
                         {tab}
+                        {tab === "X-Sell" && totalOpenOffers > 0 ? (
+                          <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-orange-100 px-1 text-[9px] font-semibold text-orange-800 dark:bg-orange-500/20 dark:text-orange-300">
+                            {totalOpenOffers}
+                          </span>
+                        ) : null}
                       </button>
                     ))}
                   </div>
@@ -3633,90 +4045,246 @@ function GlassVisionContent() {
                   </>
                 )}
 
-                {activePanelTab === "X-Sell" && xSellView === null && (
+                {activePanelTab === "X-Sell" && xSellView === null && !xSellSelectedPlan && (
                   <div className="flex-1 space-y-5 overflow-y-auto px-3.5 py-3.5">
-                    {/* Active Services */}
-                    <div>
-                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">Active Services</p>
-                      <div className="space-y-2">
-                        {([
-                          { icon: "bolt" as const, iconBg: "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300", service: "Electricity", provider: "EnergyCo", plan: "HomeDeal Extra", status: "Connected" },
-                          { icon: "local_fire_department" as const, iconBg: "bg-orange-100 text-orange-700 dark:bg-orange-500/25 dark:text-orange-300", service: "Gas", provider: "Energy Co", plan: "Online saver plan 2024", status: "Connected" },
-                        ]).map((s) => (
-                          <button key={s.service} type="button" className={cn("flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.04]", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
-                            <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", s.iconBg)}>
-                              <Icon name={s.icon} size={16} />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-medium text-gray-500 dark:text-slate-400">{s.service}</span>
-                                <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">{s.status}</span>
-                              </div>
-                              <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{s.provider}</p>
-                              <p className="text-[11px] text-gray-500 dark:text-slate-500">{s.plan}</p>
-                            </div>
-                            <Icon name="chevron_right" size={16} className="mt-2 shrink-0 text-gray-300 dark:text-slate-600" />
+                    {xSellConfirmFlash && (
+                      <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50/80 px-3 py-2.5 dark:border-emerald-500/25 dark:bg-emerald-500/10">
+                        <Icon name="check_circle" size={16} className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[12px] font-semibold text-emerald-800 dark:text-emerald-300">{xSellConfirmFlash}</p>
+                          <button
+                            type="button"
+                            onClick={() => setXSellConfirmFlash(null)}
+                            className="mt-1 text-[10px] font-medium text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400"
+                          >
+                            Dismiss
                           </button>
-                        ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
-                    {/* Services available to this site */}
-                    <div>
-                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">Services available to this site</p>
-                      <div className="space-y-2">
-                        {([
-                          { icon: "wifi" as const, iconBg: "bg-sky-100 text-sky-700 dark:bg-sky-500/25 dark:text-sky-300", service: "Broadband", headline: "6 broadband plans available", sub: "Plans from $68/month", badge: null, action: "broadband" },
-                          { icon: "solar_power" as const, iconBg: "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300", service: "Solar", headline: "7 Exclusive Solar offers available", sub: "Offers starting at $4,500", badge: null, action: null },
-                          { icon: "battery_charging_full" as const, iconBg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/25 dark:text-emerald-300", service: null, headline: "2026 Home battery subsidies available", sub: "Check eligibility", badge: "New", action: null },
-                        ]).map((s) => (
-                          <button key={s.headline} type="button" onClick={() => s.action && setXSellView(s.action)} className={cn("flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.04]", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
-                            <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", s.iconBg)}>
-                              <Icon name={s.icon} size={16} />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                {s.service && <span className="text-xs font-medium text-gray-500 dark:text-slate-400">{s.service}</span>}
-                                {s.badge && <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">{s.badge}</span>}
+                    {!selectedAccount ? (
+                      /* Customer-level rollup */
+                      <>
+                        <div>
+                          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                            Cross-sell across sites
+                          </p>
+                          <p className="text-[12px] leading-relaxed text-gray-600 dark:text-slate-400">
+                            {totalOpenOffers === 0
+                              ? "No open opportunities on this customer right now."
+                              : `${totalOpenOffers} open ${totalOpenOffers === 1 ? "opportunity" : "opportunities"} across ${sitesWithOpenOffers.length} ${sitesWithOpenOffers.length === 1 ? "site" : "sites"}.`}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          {sitesWithOpenOffers.map(({ account, openOffers }) => (
+                            <div
+                              key={account.address}
+                              className={cn("overflow-hidden rounded-xl", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => openSiteXSell(account.address)}
+                                className="flex w-full items-center gap-2.5 border-b border-gray-100/80 px-3 py-2.5 text-left transition-colors hover:bg-gray-50 dark:border-white/[0.06] dark:hover:bg-white/[0.04]"
+                              >
+                                <AccountFuelIcons fuel={account.fuel} size={16} className="w-7" />
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate text-[13px] font-semibold text-gray-900 dark:text-slate-100">
+                                    {siteSuburb(account.address)}
+                                  </p>
+                                  <p className="truncate text-[10px] text-gray-500 dark:text-slate-500">{account.address}</p>
+                                </div>
+                                <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-semibold text-orange-800 dark:bg-orange-500/20 dark:text-orange-300">
+                                  {openOffers.length} {openOffers.length === 1 ? "offer" : "offers"}
+                                </span>
+                                <Icon name="chevron_right" size={16} className="shrink-0 text-gray-300 dark:text-slate-600" />
+                              </button>
+                              <div className="space-y-0.5 p-1.5">
+                                {openOffers.slice(0, 3).map((offer) => (
+                                  <button
+                                    key={offer.id}
+                                    type="button"
+                                    onClick={() => openSiteXSell(account.address, offer.action)}
+                                    className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.04]"
+                                  >
+                                    <div className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-lg", offer.iconBg)}>
+                                      <Icon name={offer.icon} size={14} />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <p className="truncate text-[12px] font-medium text-gray-900 dark:text-slate-100">{offer.headline}</p>
+                                      <p className="truncate text-[10px] text-gray-500 dark:text-slate-500">{offer.sub}</p>
+                                    </div>
+                                  </button>
+                                ))}
+                                {openOffers.length > 3 && (
+                                  <p className="px-2 pb-1 text-[10px] text-gray-400 dark:text-slate-500">
+                                    +{openOffers.length - 3} more on this site
+                                  </p>
+                                )}
                               </div>
-                              <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{s.headline}</p>
-                              <p className="text-[11px] text-gray-500 dark:text-slate-500">{s.sub}</p>
                             </div>
-                            <Icon name="chevron_right" size={16} className="mt-2 shrink-0 text-gray-300 dark:text-slate-600" />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      /* Site-scoped X-Sell */
+                      <>
+                        <div className={cn("rounded-xl px-3 py-2.5", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                            Site
+                          </p>
+                          <p className="mt-0.5 text-[13px] font-semibold text-gray-900 dark:text-slate-100">
+                            {siteSuburb(selectedAccount.address)}
+                          </p>
+                          <p className="truncate text-[10px] text-gray-500 dark:text-slate-500">{selectedAccount.address}</p>
+                          <p className="mt-1 text-[10px] text-gray-400 dark:text-slate-500">
+                            NMI {selectedAccount.nmi}
+                            {selectedAccount.accNumber ? ` · ACC# ${selectedAccount.accNumber}` : ""}
+                          </p>
+                        </div>
 
-                    {/* MIMO Services */}
-                    <div>
-                      <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">MIMO Services</p>
-                      <div className="space-y-2">
-                        {([
-                          { icon: "cleaning_services" as const, iconBg: "bg-violet-100 text-violet-700 dark:bg-violet-500/25 dark:text-violet-300", service: "Cleaning", headline: "3 cleaning services available", sub: "Starting at $650" },
-                          { icon: "local_shipping" as const, iconBg: "bg-sky-100 text-sky-700 dark:bg-sky-500/25 dark:text-sky-300", service: "Removals", headline: "11 removal services available", sub: "From $1200" },
-                        ]).map((s) => (
-                          <button key={s.service} type="button" className={cn("flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.04]", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
-                            <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", s.iconBg)}>
-                              <Icon name={s.icon} size={16} />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-medium text-gray-500 dark:text-slate-400">{s.service}</span>
+                        <div>
+                          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">Active Services</p>
+                          <div className="space-y-2">
+                            {(selectedSiteXSell?.activeServices ?? []).map((s) => (
+                              <div key={s.service} className={cn("flex w-full items-start gap-3 rounded-xl p-3 text-left", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
+                                <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", s.iconBg)}>
+                                  <Icon name={s.icon} size={16} />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs font-medium text-gray-500 dark:text-slate-400">{s.service}</span>
+                                    <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">{s.status}</span>
+                                  </div>
+                                  <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{s.provider}</p>
+                                  <p className="text-[11px] text-gray-500 dark:text-slate-500">{s.plan}</p>
+                                </div>
                               </div>
-                              <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{s.headline}</p>
-                              <p className="text-[11px] text-gray-500 dark:text-slate-500">{s.sub}</p>
+                            ))}
+                            {(selectedSiteXSell?.activeServices.length ?? 0) === 0 && (
+                              <p className="text-[12px] text-gray-500 dark:text-slate-500">No active services recorded for this site.</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div>
+                          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">Services available to this site</p>
+                          <div className="space-y-2">
+                            {(selectedSiteXSell?.offers.filter((o) => o.category === "available") ?? []).map((s) => {
+                              const outcome = xSellOutcomes[offerOutcomeKey(selectedAccount.address, s.id)];
+                              const resolved = isOfferResolved(outcome?.status);
+                              return (
+                                <button
+                                  key={s.id}
+                                  type="button"
+                                  disabled={resolved}
+                                  onClick={() => {
+                                    if (s.action && !resolved) {
+                                      setXSellConfirmFlash(null);
+                                      setXSellView(s.action);
+                                      setXSellSelectedPlan(null);
+                                    }
+                                  }}
+                                  className={cn(
+                                    "flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors",
+                                    GLASS_CARD_LIGHT,
+                                    GLASS_CARD_DARK,
+                                    resolved ? "opacity-60" : "hover:bg-gray-50 dark:hover:bg-white/[0.04]"
+                                  )}
+                                >
+                                  <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", s.iconBg)}>
+                                    <Icon name={s.icon} size={16} />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      {s.service && <span className="text-xs font-medium text-gray-500 dark:text-slate-400">{s.service}</span>}
+                                      {s.badge && !resolved && (
+                                        <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">{s.badge}</span>
+                                      )}
+                                      {outcome && (
+                                        <span className={cn(
+                                          "rounded-full px-1.5 py-0.5 text-[9px] font-semibold",
+                                          outcome.status === "declined"
+                                            ? "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-slate-400"
+                                            : "bg-orange-100 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300"
+                                        )}>
+                                          {outcome.status === "interested"
+                                            ? "Interest logged"
+                                            : outcome.status === "quote_sent"
+                                              ? "Quote sent"
+                                              : outcome.status === "callback"
+                                                ? "Callback"
+                                                : "Declined"}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{s.headline}</p>
+                                    <p className="text-[11px] text-gray-500 dark:text-slate-500">{s.sub}</p>
+                                    {s.why && !resolved && (
+                                      <p className="mt-1 text-[10px] leading-relaxed text-gray-400 dark:text-slate-500">{s.why}</p>
+                                    )}
+                                  </div>
+                                  {!resolved && <Icon name="chevron_right" size={16} className="mt-2 shrink-0 text-gray-300 dark:text-slate-600" />}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {(selectedSiteXSell?.offers.some((o) => o.category === "mimo") ?? false) && (
+                          <div>
+                            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">MIMO Services</p>
+                            <div className="space-y-2">
+                              {(selectedSiteXSell?.offers.filter((o) => o.category === "mimo") ?? []).map((s) => {
+                                const outcome = xSellOutcomes[offerOutcomeKey(selectedAccount.address, s.id)];
+                                const resolved = isOfferResolved(outcome?.status);
+                                return (
+                                  <button
+                                    key={s.id}
+                                    type="button"
+                                    disabled={resolved}
+                                    onClick={() => {
+                                      if (s.action && !resolved) {
+                                        setXSellConfirmFlash(null);
+                                        setXSellView(s.action);
+                                      }
+                                    }}
+                                    className={cn(
+                                      "flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors",
+                                      GLASS_CARD_LIGHT,
+                                      GLASS_CARD_DARK,
+                                      resolved ? "opacity-60" : "hover:bg-gray-50 dark:hover:bg-white/[0.04]"
+                                    )}
+                                  >
+                                    <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", s.iconBg)}>
+                                      <Icon name={s.icon} size={16} />
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex items-center gap-2">
+                                        {s.service && <span className="text-xs font-medium text-gray-500 dark:text-slate-400">{s.service}</span>}
+                                        {outcome && (
+                                          <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[9px] font-semibold text-orange-800 dark:bg-orange-500/20 dark:text-orange-300">
+                                            Logged
+                                          </span>
+                                        )}
+                                      </div>
+                                      <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{s.headline}</p>
+                                      <p className="text-[11px] text-gray-500 dark:text-slate-500">{s.sub}</p>
+                                    </div>
+                                    {!resolved && <Icon name="chevron_right" size={16} className="mt-2 shrink-0 text-gray-300 dark:text-slate-600" />}
+                                  </button>
+                                );
+                              })}
                             </div>
-                            <Icon name="chevron_right" size={16} className="mt-2 shrink-0 text-gray-300 dark:text-slate-600" />
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
                 )}
 
                 {/* Broadband Plans drill-down */}
-                {activePanelTab === "X-Sell" && xSellView === "broadband" && (
+                {activePanelTab === "X-Sell" && xSellView === "broadband" && !xSellSelectedPlan && selectedAccount && (
                   <div className="flex flex-1 flex-col overflow-y-auto">
                     <div className="flex items-center gap-2 border-b border-gray-100/60 px-3.5 py-3 dark:border-white/[0.04]">
                       <button
@@ -3727,9 +4295,12 @@ function GlassVisionContent() {
                       >
                         <Icon name="arrow_back" size={16} />
                       </button>
-                      <span className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">
-                        ({BROADBAND_PLANS.length}) Broadband Plans
-                      </span>
+                      <div className="min-w-0 flex-1">
+                        <span className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">
+                          ({BROADBAND_PLANS.length}) Broadband Plans
+                        </span>
+                        <p className="truncate text-[10px] text-gray-500 dark:text-slate-500">{siteSuburb(selectedAccount.address)}</p>
+                      </div>
                     </div>
                     <div className="space-y-2.5 px-3.5 py-3.5">
                       {BROADBAND_PLANS.map((plan) => (
@@ -3760,7 +4331,7 @@ function GlassVisionContent() {
                               ))}
                             </div>
                             <p className="mb-2.5 text-[11px] leading-relaxed text-gray-600 dark:text-slate-400">{plan.description}</p>
-                            <div className="flex flex-wrap gap-x-3 gap-y-1">
+                            <div className="mb-3 flex flex-wrap gap-x-3 gap-y-1">
                               {plan.features.map((f) => (
                                 <div key={f} className="flex items-center gap-1 text-[10px]">
                                   <Icon name="check_circle" size={13} className="text-emerald-500" />
@@ -3768,12 +4339,155 @@ function GlassVisionContent() {
                                 </div>
                               ))}
                             </div>
+                            <button
+                              type="button"
+                              onClick={() => setXSellSelectedPlan(plan.name)}
+                              className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#2C365D] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#2C365D]/90 dark:bg-[#00D2A2] dark:text-gray-900 dark:hover:bg-[#00D2A2]/90"
+                            >
+                              Offer to customer
+                            </button>
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
+
+                {/* Broadband confirm outcome */}
+                {activePanelTab === "X-Sell" && xSellView === "broadband" && xSellSelectedPlan && selectedAccount && (() => {
+                  const plan = BROADBAND_PLANS.find((p) => p.name === xSellSelectedPlan);
+                  if (!plan) return null;
+                  return (
+                    <div className="flex flex-1 flex-col overflow-y-auto">
+                      <div className="flex items-center gap-2 border-b border-gray-100/60 px-3.5 py-3 dark:border-white/[0.04]">
+                        <button
+                          type="button"
+                          onClick={() => setXSellSelectedPlan(null)}
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-white/[0.06] dark:hover:text-slate-200"
+                          aria-label="Back to plans"
+                        >
+                          <Icon name="arrow_back" size={16} />
+                        </button>
+                        <span className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">Confirm offer</span>
+                      </div>
+                      <div className="space-y-3 px-3.5 py-3.5">
+                        <div className={cn("rounded-xl p-3.5", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
+                          <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">Plan</p>
+                          <p className="mt-1 text-[15px] font-bold text-gray-900 dark:text-slate-100">{plan.name}</p>
+                          <p className="mt-0.5 text-[12px] text-gray-600 dark:text-slate-400">
+                            {plan.cost} · {plan.speed} · {plan.data}
+                          </p>
+                          <p className="mt-2 text-[11px] text-gray-500 dark:text-slate-500">
+                            Offering at {siteSuburb(selectedAccount.address)}
+                          </p>
+                        </div>
+                        <p className="text-[12px] leading-relaxed text-gray-600 dark:text-slate-400">
+                          Log the customer&apos;s response. Interest and quotes are saved to this site and included in the call wrap.
+                        </p>
+                        <div className="space-y-2">
+                          <button
+                            type="button"
+                            onClick={() => logXSellOutcome(selectedAccount.address, "broadband", "interested", plan.name)}
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#2C365D] px-3 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#2C365D]/90 dark:bg-[#00D2A2] dark:text-gray-900 dark:hover:bg-[#00D2A2]/90"
+                          >
+                            <Icon name="thumb_up" size={14} />
+                            Customer interested
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => logXSellOutcome(selectedAccount.address, "broadband", "quote_sent", plan.name)}
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200 dark:hover:bg-white/[0.08]"
+                          >
+                            <Icon name="send" size={14} />
+                            Send quote
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => logXSellOutcome(selectedAccount.address, "broadband", "callback", plan.name)}
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200 dark:hover:bg-white/[0.08]"
+                          >
+                            <Icon name="schedule" size={14} />
+                            Call back later
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => logXSellOutcome(selectedAccount.address, "broadband", "declined", plan.name)}
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-semibold text-gray-500 transition-colors hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/[0.06]"
+                          >
+                            Not interested
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Generic offer detail for non-broadband actions */}
+                {activePanelTab === "X-Sell" && xSellView && xSellView !== "broadband" && selectedAccount && (() => {
+                  const offer = selectedSiteXSell?.offers.find((o) => o.action === xSellView);
+                  if (!offer) return null;
+                  return (
+                    <div className="flex flex-1 flex-col overflow-y-auto">
+                      <div className="flex items-center gap-2 border-b border-gray-100/60 px-3.5 py-3 dark:border-white/[0.04]">
+                        <button
+                          type="button"
+                          onClick={() => setXSellView(null)}
+                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-white/[0.06] dark:hover:text-slate-200"
+                          aria-label="Back to X-Sell"
+                        >
+                          <Icon name="arrow_back" size={16} />
+                        </button>
+                        <span className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">
+                          {offer.service ?? "Offer"}
+                        </span>
+                      </div>
+                      <div className="space-y-3 px-3.5 py-3.5">
+                        <div className={cn("rounded-xl p-3.5", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
+                          <div className="mb-2 flex items-center gap-2.5">
+                            <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg", offer.iconBg)}>
+                              <Icon name={offer.icon} size={18} />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{offer.headline}</p>
+                              <p className="text-[11px] text-gray-500 dark:text-slate-500">{offer.sub}</p>
+                            </div>
+                          </div>
+                          {offer.why && (
+                            <p className="text-[11px] leading-relaxed text-gray-600 dark:text-slate-400">{offer.why}</p>
+                          )}
+                          <p className="mt-2 text-[10px] text-gray-400 dark:text-slate-500">
+                            Site: {siteSuburb(selectedAccount.address)}
+                          </p>
+                        </div>
+                        <div className="space-y-2">
+                          <button
+                            type="button"
+                            onClick={() => logXSellOutcome(selectedAccount.address, offer.id, "interested")}
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#2C365D] px-3 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-[#2C365D]/90 dark:bg-[#00D2A2] dark:text-gray-900 dark:hover:bg-[#00D2A2]/90"
+                          >
+                            <Icon name="thumb_up" size={14} />
+                            Customer interested
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => logXSellOutcome(selectedAccount.address, offer.id, "callback")}
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-xs font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/[0.04] dark:text-slate-200 dark:hover:bg-white/[0.08]"
+                          >
+                            <Icon name="schedule" size={14} />
+                            Call back later
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => logXSellOutcome(selectedAccount.address, offer.id, "declined")}
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-semibold text-gray-500 transition-colors hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/[0.06]"
+                          >
+                            Not interested
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
               </div>
               )}
@@ -3837,6 +4551,9 @@ function GlassVisionContent() {
                 {CALL_WRAP_SUMMARY_POINTS.map((point) => (
                   <li key={point}>{point}</li>
                 ))}
+                {xSellWrapNotes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
               </ul>
             </div>
 
@@ -3874,3 +4591,4 @@ function GlassVisionContent() {
     </div>
   );
 }
+
