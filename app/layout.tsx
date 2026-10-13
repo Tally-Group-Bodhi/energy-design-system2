@@ -115,6 +115,7 @@ const navigationSections = [
       { label: "Tally+ Small Market V1.5", href: "/pages/small-market-v1-5" },
       { label: "Tally+ Large Market", href: "/pages/tally-large-market" },
       { label: "Tally+ Large Market V1.5", href: "/pages/tally-large-market-v1-5" },
+      { label: "Large Market Widget Dashboard", href: "/pages/large-market-widget-dashboard" },
       // Hidden for now — pages remain reachable by URL
       // { label: "Glass Vision", href: "/pages/glass-vision" },
       // { label: "Glass Vision – Demo Version", href: "/pages/glass-vision-demo-version" },
@@ -134,6 +135,7 @@ const navigationSections = [
       { label: "EOS Glass", href: "/pages/eos-glass" },
       { label: "Demo OpCon", href: "/pages/demo-opcon" },
       { label: "C&I Portal", href: "/pages/ci-portal" },
+      { label: "US Glass", href: "/pages/us-glass" },
     ],
   },
 ];

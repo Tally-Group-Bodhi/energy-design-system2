@@ -49,6 +49,13 @@ const pages = [
     tags: ["Glass chrome", "Tabs", "Cards", "Control Panel"],
   },
   {
+    title: "Large Market Widget Dashboard",
+    description: "Viewport-fitting Large Market chrome with draggable, resizable chart widgets (xs–xl)",
+    href: "/pages/large-market-widget-dashboard",
+    icon: "dashboard_customize",
+    tags: ["Widgets", "Charts", "Drag & Drop", "Large Market"],
+  },
+  {
     title: "Forms",
     description: "Form examples demonstrating input fields, validation, and form layouts",
     href: "/pages/forms",
@@ -174,6 +181,14 @@ const pages = [
     href: "/pages/ci-portal",
     icon: "factory",
     tags: ["C&I", "Client brands", "Dashboard", "Charts", "Billing"],
+  },
+  {
+    title: "US Glass",
+    description:
+      "US Report Studio in Glass chrome: Texas revenue detail, billing review, and customer base analytics",
+    href: "/pages/us-glass",
+    icon: "analytics",
+    tags: ["Glass", "Report Studio", "Charts", "Finance", "US"],
   },
 ];
 

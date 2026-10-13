@@ -567,6 +567,9 @@ type XSellOfferAction =
   | "broadband"
   | "solar"
   | "battery"
+  | "hot_water"
+  | "heating"
+  | "cooking"
   | "gas"
   | "cleaning"
   | "removals"
@@ -584,17 +587,40 @@ type XSellActiveService = {
   status: "Connected";
 };
 
+type XSellLineItem = {
+  label: string;
+  amount: string;
+};
+
+type XSellUpgradeDetail = {
+  spec: string;
+  savingLabel: "SAVING" | "EXTRA COST";
+  saving: string;
+  savingTone: "positive" | "negative" | "neutral";
+  upfront: string;
+  payback: string;
+  rebateBadge: string | null;
+  summary: string;
+  product: string;
+  features?: string[];
+  equipment: XSellLineItem[];
+  installation: XSellLineItem[];
+  rebates: XSellLineItem[];
+  co2e: string;
+};
+
 type XSellOffer = {
   id: string;
-  icon: "wifi" | "solar_power" | "battery_charging_full" | "local_fire_department" | "cleaning_services" | "local_shipping" | "analytics" | "handshake";
+  icon: "wifi" | "solar_power" | "battery_charging_full" | "local_fire_department" | "cleaning_services" | "local_shipping" | "analytics" | "handshake" | "water_drop" | "mode_fan" | "skillet";
   iconBg: string;
   service: string | null;
   headline: string;
   sub: string;
   badge?: string | null;
   action: XSellOfferAction | null;
-  category: "available" | "mimo";
+  category: "available" | "mimo" | "upgrade";
   why?: string;
+  upgrade?: XSellUpgradeDetail;
 };
 
 type SiteXSellProfile = {
@@ -642,7 +668,7 @@ function buildSiteXSell(account: AccountRecord): SiteXSellProfile {
       icon: "local_fire_department",
       iconBg: "bg-orange-100 text-orange-700 dark:bg-orange-500/25 dark:text-orange-300",
       service: "Gas",
-      provider: isCommercial ? "Energy Co" : "Energy Co",
+      provider: "Energy Co",
       plan: hasElec ? "Dual fuel saver" : (account.plan ?? "Online saver plan 2024"),
       status: "Connected",
     });
@@ -684,8 +710,23 @@ function buildSiteXSell(account: AccountRecord): SiteXSellProfile {
         headline: "Commercial solar assessment",
         sub: "Site survey from $0",
         action: "solar",
-        category: "available",
+        category: "upgrade",
         why: "Roof and load profile look suitable for a solar assessment.",
+        upgrade: {
+          spec: "98 kW",
+          savingLabel: "SAVING",
+          saving: "$18,400/yr",
+          savingTone: "positive",
+          upfront: "$142,000",
+          payback: "6.2 yrs",
+          rebateBadge: "$24,800 in rebates",
+          summary: "Save $18,400/yr on energy.",
+          product: "Commercial rooftop array — 98 kW",
+          equipment: [{ label: "PV modules + inverter package", amount: "$118,200.00" }],
+          installation: [{ label: "Commercial install & commissioning", amount: "$48,600.00" }],
+          rebates: [{ label: "STC + state incentives", amount: "-$24,800.00" }],
+          co2e: "86 t CO₂e avoided per year",
+        },
       });
     }
     offers.push({
@@ -703,6 +744,148 @@ function buildSiteXSell(account: AccountRecord): SiteXSellProfile {
     return { activeServices, offers };
   }
 
+  // Energy upgrades — card layout matches CSR X-Sell reference
+  if (!hasSolar && hasElec) {
+    offers.push({
+      id: "solar",
+      icon: "solar_power",
+      iconBg: "bg-amber-400 text-white",
+      service: "Solar",
+      headline: "Solar",
+      sub: "9.98 kW",
+      action: "solar",
+      category: "upgrade",
+      upgrade: {
+        spec: "9.98 kW",
+        savingLabel: "SAVING",
+        saving: "$1,394/yr",
+        savingTone: "positive",
+        upfront: "$8,841",
+        payback: "5.4 yrs",
+        rebateBadge: "$3,583 in rebates",
+        summary: "Save $1,394/yr on energy.",
+        product: "9.98 kW rooftop solar system",
+        features: ["SUNGROW 8kW single-phase solar inverter"],
+        equipment: [{ label: "9.98 kW solar system", amount: "$8,624.00" }],
+        installation: [{ label: "Solar installation", amount: "$3,800.00" }],
+        rebates: [
+          { label: "STC rebate", amount: "-$2,183.00" },
+          { label: "State solar rebate", amount: "-$1,400.00" },
+        ],
+        co2e: "1.8 t CO₂e avoided per year",
+      },
+    });
+  }
+
+  if (isResidential) {
+    offers.push({
+      id: "battery",
+      icon: "battery_charging_full",
+      iconBg: "bg-emerald-500 text-white",
+      service: "Battery",
+      headline: "Battery",
+      sub: "12.8 kWh",
+      action: "battery",
+      category: "upgrade",
+      upgrade: {
+        spec: "12.8 kWh",
+        savingLabel: "SAVING",
+        saving: "$5/yr",
+        savingTone: "neutral",
+        upfront: "$9,544",
+        payback: "—",
+        rebateBadge: "$3,219 in rebates",
+        summary: "Battery available — little to no bill change",
+        product: "Sungrow SBR128",
+        equipment: [{ label: "Sungrow SBR128", amount: "$9,763.00" }],
+        installation: [{ label: "Battery installation", amount: "$3,000.00" }],
+        rebates: [{ label: "Cheaper Home Batteries Program", amount: "-$3,219.00" }],
+        co2e: "0.01 t CO₂e avoided per year",
+      },
+    });
+
+    offers.push({
+      id: "hot_water",
+      icon: "water_drop",
+      iconBg: "bg-sky-500 text-white",
+      service: "Hot water",
+      headline: "Hot water",
+      sub: "220 L",
+      action: "hot_water",
+      category: "upgrade",
+      upgrade: {
+        spec: "220 L",
+        savingLabel: "SAVING",
+        saving: "$905/yr",
+        savingTone: "positive",
+        upfront: "$1,821",
+        payback: "1.9 yrs",
+        rebateBadge: "$2,269 in rebates",
+        summary: "Save $905/yr on energy",
+        product: "Emerald All-In-One Pro Heat Pump - 220L",
+        equipment: [{ label: "Emerald All-In-One Pro Heat Pump - 220L", amount: "$2,090.00" }],
+        installation: [{ label: "Hot water installation", amount: "$2,000.00" }],
+        rebates: [
+          { label: "STC rebate", amount: "-$666.00" },
+          { label: "VEEC rebate", amount: "-$1,603.00" },
+        ],
+        co2e: "0.26 t CO₂e avoided per year",
+      },
+    });
+
+    offers.push({
+      id: "heating",
+      icon: "mode_fan",
+      iconBg: "bg-blue-500 text-white",
+      service: "Heating & cooling",
+      headline: "Heating & cooling",
+      sub: "7 kW",
+      action: "heating",
+      category: "upgrade",
+      upgrade: {
+        spec: "7 kW",
+        savingLabel: "SAVING",
+        saving: "$412/yr",
+        savingTone: "positive",
+        upfront: "$3,240",
+        payback: "4.8 yrs",
+        rebateBadge: "$1,120 in rebates",
+        summary: "Save $412/yr on energy",
+        product: "Daikin Cora 7.1 kW reverse cycle",
+        equipment: [{ label: "Daikin Cora 7.1 kW", amount: "$2,860.00" }],
+        installation: [{ label: "Split system installation", amount: "$1,500.00" }],
+        rebates: [{ label: "VEEC rebate", amount: "-$1,120.00" }],
+        co2e: "0.48 t CO₂e avoided per year",
+      },
+    });
+
+    offers.push({
+      id: "cooking",
+      icon: "skillet",
+      iconBg: "bg-violet-500 text-white",
+      service: "Cooking",
+      headline: "Cooking",
+      sub: "Induction",
+      action: "cooking",
+      category: "upgrade",
+      upgrade: {
+        spec: "Induction",
+        savingLabel: "EXTRA COST",
+        saving: "$301/yr",
+        savingTone: "negative",
+        upfront: "$1,890",
+        payback: "—",
+        rebateBadge: "$450 in rebates",
+        summary: "Induction upgrade — small bill increase, stronger safety",
+        product: "Bosch Serie 6 induction cooktop",
+        equipment: [{ label: "Bosch Serie 6 induction", amount: "$1,640.00" }],
+        installation: [{ label: "Cooktop install & circuit", amount: "$700.00" }],
+        rebates: [{ label: "Electrification rebate", amount: "-$450.00" }],
+        co2e: "0.12 t CO₂e avoided per year",
+      },
+    });
+  }
+
   offers.push({
     id: "broadband",
     icon: "wifi",
@@ -715,38 +898,7 @@ function buildSiteXSell(account: AccountRecord): SiteXSellProfile {
     why: "No broadband product on this service address.",
   });
 
-  if (!hasSolar && hasElec) {
-    offers.push({
-      id: "solar",
-      icon: "solar_power",
-      iconBg: "bg-amber-100 text-amber-700 dark:bg-amber-500/25 dark:text-amber-300",
-      service: "Solar",
-      headline: "7 Exclusive Solar offers available",
-      sub: "Offers starting at $4,500",
-      action: "solar",
-      category: "available",
-      why: "Site does not currently have solar generation.",
-    });
-  }
-
-  if (isResidential) {
-    offers.push({
-      id: "battery",
-      icon: "battery_charging_full",
-      iconBg: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/25 dark:text-emerald-300",
-      service: null,
-      headline: "2026 Home battery subsidies available",
-      sub: hasSolar ? "Eligible with existing solar" : "Check eligibility",
-      badge: "New",
-      action: "battery",
-      category: "available",
-      why: hasSolar
-        ? "Existing solar makes battery storage a strong fit."
-        : "Federal and state battery subsidies are open for this postcode.",
-    });
-  }
-
-  if (!hasGas && hasElec) {
+  if (!hasGas && hasElec && !isResidential) {
     offers.push({
       id: "gas",
       icon: "local_fire_department",
@@ -806,6 +958,160 @@ function getOpenOffers(account: AccountRecord, outcomes: Record<string, XSellOut
 
 function getOpenOfferCount(account: AccountRecord, outcomes: Record<string, XSellOutcome>) {
   return getOpenOffers(account, outcomes).length;
+}
+
+function EnergyUpgradeCard({
+  offer,
+  resolved,
+  outcomeLabel,
+  onInterested,
+  onQuote,
+  onDecline,
+}: {
+  offer: XSellOffer;
+  resolved?: boolean;
+  outcomeLabel?: string | null;
+  onInterested?: () => void;
+  onQuote?: () => void;
+  onDecline?: () => void;
+}) {
+  const u = offer.upgrade;
+  if (!u) return null;
+
+  return (
+    <div
+      className={cn(
+        "overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-white/[0.1] dark:bg-white/[0.04]",
+        resolved && "opacity-70"
+      )}
+    >
+      <div className="space-y-3 p-3.5">
+        <div className="flex items-start gap-2.5">
+          <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", offer.iconBg)}>
+            <Icon name={offer.icon} size={16} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-[14px] font-bold leading-tight text-gray-900 dark:text-slate-100">
+                  {offer.service ?? offer.headline}
+                  {u.spec ? (
+                    <span className="ml-1.5 text-[12px] font-normal text-gray-500 dark:text-slate-400">{u.spec}</span>
+                  ) : null}
+                </p>
+              </div>
+              {u.rebateBadge ? (
+                <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                  {u.rebateBadge}
+                </span>
+              ) : null}
+            </div>
+            {outcomeLabel ? (
+              <span className="mt-1 inline-flex rounded-full bg-orange-100 px-1.5 py-0.5 text-[9px] font-semibold text-orange-800 dark:bg-orange-500/20 dark:text-orange-300">
+                {outcomeLabel}
+              </span>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-gray-200/90 dark:border-white/[0.08]">
+          {([
+            [u.savingLabel, u.saving, u.savingTone],
+            ["UPFRONT", u.upfront, "neutral"],
+            ["PAYBACK", u.payback, "neutral"],
+          ] as const).map(([label, value, tone]) => (
+            <div
+              key={label}
+              className={cn(
+                "px-2 py-2 text-center",
+                label === "SAVING" && tone === "positive"
+                  ? "bg-emerald-50 dark:bg-emerald-500/10"
+                  : "bg-gray-50 dark:bg-white/[0.03]"
+              )}
+            >
+              <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">{label}</p>
+              <p
+                className={cn(
+                  "mt-0.5 text-[13px] font-bold",
+                  tone === "positive"
+                    ? "text-emerald-700 dark:text-emerald-300"
+                    : tone === "negative"
+                      ? "text-red-600 dark:text-red-400"
+                      : "text-gray-900 dark:text-slate-100"
+                )}
+              >
+                {value}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <p className="text-[11px] text-gray-600 dark:text-slate-400">{u.summary}</p>
+
+        <div className="flex items-start gap-1.5 text-[12px] font-medium text-gray-900 dark:text-slate-100">
+          <Icon name="check_circle" size={15} className="mt-0.5 shrink-0 text-emerald-500" />
+          <span>{u.product}</span>
+        </div>
+
+        {u.features?.map((feature) => (
+          <div key={feature} className="flex items-start gap-1.5 text-[11px] text-gray-600 dark:text-slate-400">
+            <Icon name="check_circle" size={14} className="mt-0.5 shrink-0 text-emerald-500" />
+            <span>{feature}</span>
+          </div>
+        ))}
+
+        <div className="space-y-2.5 border-t border-gray-100 pt-2.5 dark:border-white/[0.06]">
+          {([
+            ["EQUIPMENT", u.equipment],
+            ["INSTALLATION", u.installation],
+            ["REBATES & INCENTIVES", u.rebates],
+          ] as const).map(([section, items]) => (
+            <div key={section} className="space-y-1">
+              <p className="text-[9px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">{section}</p>
+              {items.map((item) => (
+                <div key={item.label} className="flex items-start justify-between gap-3 text-[11px]">
+                  <span className="min-w-0 text-gray-600 dark:text-slate-400">{item.label}</span>
+                  <span className="shrink-0 font-semibold text-gray-900 dark:text-slate-100">{item.amount}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        <p className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400">{u.co2e}</p>
+
+        {!resolved && onInterested ? (
+          <div className="flex gap-1.5 border-t border-gray-100 pt-2.5 dark:border-white/[0.06]">
+            <button
+              type="button"
+              onClick={onInterested}
+              className="flex-1 rounded-lg bg-[#2C365D] px-2 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-[#2C365D]/90 dark:bg-[#00D2A2] dark:text-gray-900"
+            >
+              Interested
+            </button>
+            {onQuote ? (
+              <button
+                type="button"
+                onClick={onQuote}
+                className="rounded-lg border border-gray-200 px-2 py-1.5 text-[11px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-white/10 dark:text-slate-200 dark:hover:bg-white/[0.06]"
+              >
+                Quote
+              </button>
+            ) : null}
+            {onDecline ? (
+              <button
+                type="button"
+                onClick={onDecline}
+                className="rounded-lg px-2 py-1.5 text-[11px] font-medium text-gray-500 transition-colors hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-white/[0.06]"
+              >
+                Decline
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 const TASK_CATEGORIES = [
@@ -4127,157 +4433,161 @@ function GlassVisionContent() {
                         </div>
                       </>
                     ) : (
-                      /* Site-scoped X-Sell */
+                      /* Site-scoped X-Sell — energy upgrade cards */
                       <>
-                        <div className={cn("rounded-xl px-3 py-2.5", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
-                            Site
-                          </p>
-                          <p className="mt-0.5 text-[13px] font-semibold text-gray-900 dark:text-slate-100">
-                            {siteSuburb(selectedAccount.address)}
-                          </p>
-                          <p className="truncate text-[10px] text-gray-500 dark:text-slate-500">{selectedAccount.address}</p>
-                          <p className="mt-1 text-[10px] text-gray-400 dark:text-slate-500">
-                            NMI {selectedAccount.nmi}
-                            {selectedAccount.accNumber ? ` · ACC# ${selectedAccount.accNumber}` : ""}
-                          </p>
-                        </div>
+                        {(() => {
+                          const upgradeOffers = selectedSiteXSell?.offers.filter((o) => o.category === "upgrade") ?? [];
+                          const otherOffers = selectedSiteXSell?.offers.filter((o) => o.category === "available") ?? [];
+                          const mimoOffers = selectedSiteXSell?.offers.filter((o) => o.category === "mimo") ?? [];
+                          const openUpgrades = upgradeOffers.filter(
+                            (o) => !isOfferResolved(xSellOutcomes[offerOutcomeKey(selectedAccount.address, o.id)]?.status)
+                          );
 
-                        <div>
-                          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">Active Services</p>
-                          <div className="space-y-2">
-                            {(selectedSiteXSell?.activeServices ?? []).map((s) => (
-                              <div key={s.service} className={cn("flex w-full items-start gap-3 rounded-xl p-3 text-left", GLASS_CARD_LIGHT, GLASS_CARD_DARK)}>
-                                <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", s.iconBg)}>
-                                  <Icon name={s.icon} size={16} />
+                          return (
+                            <>
+                              {upgradeOffers.length > 0 && (
+                                <div>
+                                  <p className="mb-2.5 text-[13px] font-semibold text-gray-900 dark:text-slate-100">
+                                    ({openUpgrades.length}) Energy upgrades
+                                  </p>
+                                  <div className="space-y-3">
+                                    {upgradeOffers.map((offer) => {
+                                      const outcome = xSellOutcomes[offerOutcomeKey(selectedAccount.address, offer.id)];
+                                      const resolved = isOfferResolved(outcome?.status);
+                                      const outcomeLabel = outcome
+                                        ? outcome.status === "interested"
+                                          ? "Interest logged"
+                                          : outcome.status === "quote_sent"
+                                            ? "Quote sent"
+                                            : outcome.status === "callback"
+                                              ? "Callback"
+                                              : "Declined"
+                                        : null;
+                                      return (
+                                        <EnergyUpgradeCard
+                                          key={offer.id}
+                                          offer={offer}
+                                          resolved={resolved}
+                                          outcomeLabel={outcomeLabel}
+                                          onInterested={() =>
+                                            logXSellOutcome(selectedAccount.address, offer.id, "interested", offer.upgrade?.product)
+                                          }
+                                          onQuote={() =>
+                                            logXSellOutcome(selectedAccount.address, offer.id, "quote_sent", offer.upgrade?.product)
+                                          }
+                                          onDecline={() =>
+                                            logXSellOutcome(selectedAccount.address, offer.id, "declined", offer.upgrade?.product)
+                                          }
+                                        />
+                                      );
+                                    })}
+                                  </div>
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs font-medium text-gray-500 dark:text-slate-400">{s.service}</span>
-                                    <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">{s.status}</span>
+                              )}
+
+                              {otherOffers.length > 0 && (
+                                <div>
+                                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                                    Other offers
+                                  </p>
+                                  <div className="space-y-2">
+                                    {otherOffers.map((s) => {
+                                      const outcome = xSellOutcomes[offerOutcomeKey(selectedAccount.address, s.id)];
+                                      const resolved = isOfferResolved(outcome?.status);
+                                      return (
+                                        <button
+                                          key={s.id}
+                                          type="button"
+                                          disabled={resolved}
+                                          onClick={() => {
+                                            if (s.action && !resolved) {
+                                              setXSellConfirmFlash(null);
+                                              setXSellView(s.action);
+                                              setXSellSelectedPlan(null);
+                                            }
+                                          }}
+                                          className={cn(
+                                            "flex w-full items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left transition-colors dark:border-white/[0.1] dark:bg-white/[0.04]",
+                                            resolved ? "opacity-60" : "hover:bg-gray-50 dark:hover:bg-white/[0.06]"
+                                          )}
+                                        >
+                                          <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", s.iconBg)}>
+                                            <Icon name={s.icon} size={16} />
+                                          </div>
+                                          <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                              {s.service && (
+                                                <span className="text-xs font-medium text-gray-500 dark:text-slate-400">{s.service}</span>
+                                              )}
+                                              {outcome && (
+                                                <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[9px] font-semibold text-orange-800 dark:bg-orange-500/20 dark:text-orange-300">
+                                                  {outcome.status === "interested"
+                                                    ? "Interest logged"
+                                                    : outcome.status === "quote_sent"
+                                                      ? "Quote sent"
+                                                      : outcome.status === "callback"
+                                                        ? "Callback"
+                                                        : "Declined"}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{s.headline}</p>
+                                            <p className="text-[11px] text-gray-500 dark:text-slate-500">{s.sub}</p>
+                                          </div>
+                                          {!resolved && (
+                                            <Icon name="chevron_right" size={16} className="mt-2 shrink-0 text-gray-300 dark:text-slate-600" />
+                                          )}
+                                        </button>
+                                      );
+                                    })}
                                   </div>
-                                  <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{s.provider}</p>
-                                  <p className="text-[11px] text-gray-500 dark:text-slate-500">{s.plan}</p>
                                 </div>
-                              </div>
-                            ))}
-                            {(selectedSiteXSell?.activeServices.length ?? 0) === 0 && (
-                              <p className="text-[12px] text-gray-500 dark:text-slate-500">No active services recorded for this site.</p>
-                            )}
-                          </div>
-                        </div>
+                              )}
 
-                        <div>
-                          <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">Services available to this site</p>
-                          <div className="space-y-2">
-                            {(selectedSiteXSell?.offers.filter((o) => o.category === "available") ?? []).map((s) => {
-                              const outcome = xSellOutcomes[offerOutcomeKey(selectedAccount.address, s.id)];
-                              const resolved = isOfferResolved(outcome?.status);
-                              return (
-                                <button
-                                  key={s.id}
-                                  type="button"
-                                  disabled={resolved}
-                                  onClick={() => {
-                                    if (s.action && !resolved) {
-                                      setXSellConfirmFlash(null);
-                                      setXSellView(s.action);
-                                      setXSellSelectedPlan(null);
-                                    }
-                                  }}
-                                  className={cn(
-                                    "flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors",
-                                    GLASS_CARD_LIGHT,
-                                    GLASS_CARD_DARK,
-                                    resolved ? "opacity-60" : "hover:bg-gray-50 dark:hover:bg-white/[0.04]"
-                                  )}
-                                >
-                                  <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", s.iconBg)}>
-                                    <Icon name={s.icon} size={16} />
+                              {mimoOffers.length > 0 && (
+                                <div>
+                                  <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">
+                                    MIMO Services
+                                  </p>
+                                  <div className="space-y-2">
+                                    {mimoOffers.map((s) => {
+                                      const outcome = xSellOutcomes[offerOutcomeKey(selectedAccount.address, s.id)];
+                                      const resolved = isOfferResolved(outcome?.status);
+                                      return (
+                                        <button
+                                          key={s.id}
+                                          type="button"
+                                          disabled={resolved}
+                                          onClick={() => {
+                                            if (s.action && !resolved) {
+                                              setXSellConfirmFlash(null);
+                                              setXSellView(s.action);
+                                            }
+                                          }}
+                                          className={cn(
+                                            "flex w-full items-start gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left transition-colors dark:border-white/[0.1] dark:bg-white/[0.04]",
+                                            resolved ? "opacity-60" : "hover:bg-gray-50 dark:hover:bg-white/[0.06]"
+                                          )}
+                                        >
+                                          <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", s.iconBg)}>
+                                            <Icon name={s.icon} size={16} />
+                                          </div>
+                                          <div className="min-w-0 flex-1">
+                                            <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{s.headline}</p>
+                                            <p className="text-[11px] text-gray-500 dark:text-slate-500">{s.sub}</p>
+                                          </div>
+                                          {!resolved && (
+                                            <Icon name="chevron_right" size={16} className="mt-2 shrink-0 text-gray-300 dark:text-slate-600" />
+                                          )}
+                                        </button>
+                                      );
+                                    })}
                                   </div>
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                      {s.service && <span className="text-xs font-medium text-gray-500 dark:text-slate-400">{s.service}</span>}
-                                      {s.badge && !resolved && (
-                                        <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">{s.badge}</span>
-                                      )}
-                                      {outcome && (
-                                        <span className={cn(
-                                          "rounded-full px-1.5 py-0.5 text-[9px] font-semibold",
-                                          outcome.status === "declined"
-                                            ? "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-slate-400"
-                                            : "bg-orange-100 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300"
-                                        )}>
-                                          {outcome.status === "interested"
-                                            ? "Interest logged"
-                                            : outcome.status === "quote_sent"
-                                              ? "Quote sent"
-                                              : outcome.status === "callback"
-                                                ? "Callback"
-                                                : "Declined"}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{s.headline}</p>
-                                    <p className="text-[11px] text-gray-500 dark:text-slate-500">{s.sub}</p>
-                                    {s.why && !resolved && (
-                                      <p className="mt-1 text-[10px] leading-relaxed text-gray-400 dark:text-slate-500">{s.why}</p>
-                                    )}
-                                  </div>
-                                  {!resolved && <Icon name="chevron_right" size={16} className="mt-2 shrink-0 text-gray-300 dark:text-slate-600" />}
-                                </button>
-                              );
-                            })}
-                          </div>
-                        </div>
-
-                        {(selectedSiteXSell?.offers.some((o) => o.category === "mimo") ?? false) && (
-                          <div>
-                            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:text-slate-500">MIMO Services</p>
-                            <div className="space-y-2">
-                              {(selectedSiteXSell?.offers.filter((o) => o.category === "mimo") ?? []).map((s) => {
-                                const outcome = xSellOutcomes[offerOutcomeKey(selectedAccount.address, s.id)];
-                                const resolved = isOfferResolved(outcome?.status);
-                                return (
-                                  <button
-                                    key={s.id}
-                                    type="button"
-                                    disabled={resolved}
-                                    onClick={() => {
-                                      if (s.action && !resolved) {
-                                        setXSellConfirmFlash(null);
-                                        setXSellView(s.action);
-                                      }
-                                    }}
-                                    className={cn(
-                                      "flex w-full items-start gap-3 rounded-xl p-3 text-left transition-colors",
-                                      GLASS_CARD_LIGHT,
-                                      GLASS_CARD_DARK,
-                                      resolved ? "opacity-60" : "hover:bg-gray-50 dark:hover:bg-white/[0.04]"
-                                    )}
-                                  >
-                                    <div className={cn("mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg", s.iconBg)}>
-                                      <Icon name={s.icon} size={16} />
-                                    </div>
-                                    <div className="min-w-0 flex-1">
-                                      <div className="flex items-center gap-2">
-                                        {s.service && <span className="text-xs font-medium text-gray-500 dark:text-slate-400">{s.service}</span>}
-                                        {outcome && (
-                                          <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[9px] font-semibold text-orange-800 dark:bg-orange-500/20 dark:text-orange-300">
-                                            Logged
-                                          </span>
-                                        )}
-                                      </div>
-                                      <p className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">{s.headline}</p>
-                                      <p className="text-[11px] text-gray-500 dark:text-slate-500">{s.sub}</p>
-                                    </div>
-                                    {!resolved && <Icon name="chevron_right" size={16} className="mt-2 shrink-0 text-gray-300 dark:text-slate-600" />}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
                       </>
                     )}
                   </div>
@@ -4426,6 +4736,53 @@ function GlassVisionContent() {
                 {activePanelTab === "X-Sell" && xSellView && xSellView !== "broadband" && selectedAccount && (() => {
                   const offer = selectedSiteXSell?.offers.find((o) => o.action === xSellView);
                   if (!offer) return null;
+                  const outcome = xSellOutcomes[offerOutcomeKey(selectedAccount.address, offer.id)];
+                  const resolved = isOfferResolved(outcome?.status);
+                  if (offer.upgrade) {
+                    return (
+                      <div className="flex flex-1 flex-col overflow-y-auto">
+                        <div className="flex items-center gap-2 border-b border-gray-100/60 px-3.5 py-3 dark:border-white/[0.04]">
+                          <button
+                            type="button"
+                            onClick={() => setXSellView(null)}
+                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-slate-400 dark:hover:bg-white/[0.06] dark:hover:text-slate-200"
+                            aria-label="Back to X-Sell"
+                          >
+                            <Icon name="arrow_back" size={16} />
+                          </button>
+                          <span className="text-[13px] font-semibold text-gray-900 dark:text-slate-100">
+                            {offer.service ?? "Energy upgrade"}
+                          </span>
+                        </div>
+                        <div className="px-3.5 py-3.5">
+                          <EnergyUpgradeCard
+                            offer={offer}
+                            resolved={resolved}
+                            outcomeLabel={
+                              outcome
+                                ? outcome.status === "interested"
+                                  ? "Interest logged"
+                                  : outcome.status === "quote_sent"
+                                    ? "Quote sent"
+                                    : outcome.status === "callback"
+                                      ? "Callback"
+                                      : "Declined"
+                                : null
+                            }
+                            onInterested={() =>
+                              logXSellOutcome(selectedAccount.address, offer.id, "interested", offer.upgrade?.product)
+                            }
+                            onQuote={() =>
+                              logXSellOutcome(selectedAccount.address, offer.id, "quote_sent", offer.upgrade?.product)
+                            }
+                            onDecline={() =>
+                              logXSellOutcome(selectedAccount.address, offer.id, "declined", offer.upgrade?.product)
+                            }
+                          />
+                        </div>
+                      </div>
+                    );
+                  }
                   return (
                     <div className="flex flex-1 flex-col overflow-y-auto">
                       <div className="flex items-center gap-2 border-b border-gray-100/60 px-3.5 py-3 dark:border-white/[0.04]">
