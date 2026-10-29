@@ -2040,7 +2040,7 @@ function ViewSwitcher({
               "-mb-px flex shrink-0 items-center whitespace-nowrap border-b-2 transition-colors",
               compact
                 ? "gap-1.5 px-4 py-2.5 text-sm"
-                : "gap-[clamp(0.375rem,0.9cqi,0.625rem)] px-[clamp(0.375rem,1.8cqi,1.5rem)] pb-3 pt-1 text-[clamp(1.125rem,2.6cqi,1.875rem)] font-semibold tracking-tight first:pl-0",
+                : "gap-[clamp(0.25rem,0.55cqi,0.5rem)] px-[clamp(0.5rem,1.1cqi,1rem)] pb-2 pt-1 text-[clamp(0.875rem,1.6cqi,1.25rem)] font-semibold tracking-tight first:pl-0",
               active
                 ? "border-[#00D2A2] font-semibold text-slate-900 dark:border-[#00D2A2] dark:text-slate-100"
                 : "border-transparent text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300",
@@ -2050,7 +2050,7 @@ function ViewSwitcher({
             {!compact && count !== undefined && (
               <span
                 className={cn(
-                  "rounded-full px-2 py-0.5 text-xs font-semibold tracking-normal",
+                  "rounded-full px-[clamp(0.375rem,0.45cqi,0.4375rem)] py-0.5 text-[clamp(0.625rem,0.75cqi,0.6875rem)] font-semibold tracking-normal",
                   countTone === "warning"
                     ? "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300"
                     : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
