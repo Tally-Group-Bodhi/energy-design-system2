@@ -232,6 +232,13 @@ const LEDGER = [
   },
 ];
 
+const DETAIL_CARDS = ["Summary", "Billing address"] as const;
+
+const INITIAL_DETAIL_OPEN: Record<(typeof DETAIL_CARDS)[number], boolean> = {
+  Summary: true,
+  "Billing address": true,
+};
+
 const AGING = [
   { label: "1–30", amount: "$0.00", color: "#F5B942" },
   { label: "31–60", amount: "$0.00", color: "#E8560A" },
@@ -311,6 +318,10 @@ function InvoiceDonut() {
 }
 
 export default function UsGlass2Page() {
+  const [detailOpen, setDetailOpen] = useState(INITIAL_DETAIL_OPEN);
+  const allDetailsOpen = DETAIL_CARDS.every((title) => detailOpen[title]);
+  const expandAllDetails = () => setDetailOpen({ Summary: true, "Billing address": true });
+  const collapseAllDetails = () => setDetailOpen({ Summary: false, "Billing address": false });
   const [screen, setScreen] = useState<Screen>("customer");
   const [mainTab, setMainTab] = useState<MainTab>("accounts");
   const [accountId, setAccountId] = useState(ACCOUNTS[0].id);
@@ -320,7 +331,7 @@ export default function UsGlass2Page() {
   const [expandedActivity, setExpandedActivity] = useState<string | null>(null);
   const [ledgerTab, setLedgerTab] = useState<LedgerTab>("ledger");
   const [ledgerKind, setLedgerKind] = useState<LedgerKind | "all">("all");
-  const [customerOpen, setCustomerOpen] = useState(false);
+  const [customerOpen, setCustomerOpen] = useState(true);
   const [controlPanelOpen, setControlPanelOpen] = useState(false);
   const [panelTab, setPanelTab] = useState<"Control Panel" | "X-Sell">("Control Panel");
   const [navCollapsed, setNavCollapsed] = useState(true);
@@ -744,11 +755,36 @@ export default function UsGlass2Page() {
                   </div>
 
                   <TabsContent value="details" className="mt-0">
-                    <div className="mb-density-lg">
+                    <div className="mb-density-lg flex flex-wrap items-center gap-density-md">
                       <h2 className="font-semibold text-gray-900 dark:text-slate-100" style={{ fontSize: "var(--tally-font-size-lg)" }}>Customer details</h2>
+                      <button
+                        type="button"
+                        onClick={allDetailsOpen ? collapseAllDetails : expandAllDetails}
+                        className="inline-flex items-center gap-density-sm font-medium text-gray-600 hover:text-gray-900 dark:text-slate-300 dark:hover:text-slate-100"
+                        style={{ fontSize: "var(--tally-font-size-sm)" }}
+                        aria-label={allDetailsOpen ? "Collapse all" : "Expand all"}
+                      >
+                        {allDetailsOpen ? (
+                          <>
+                            <Icon name="unfold_less" size={18} />
+                            Collapse all
+                          </>
+                        ) : (
+                          <>
+                            <Icon name="unfold_more" size={18} />
+                            Expand all
+                          </>
+                        )}
+                      </button>
                     </div>
                     <div className="space-y-density-xl">
-                    <CollapsibleCard title="Summary" showMenu={false} className={CARD}>
+                    <CollapsibleCard
+                      title="Summary"
+                      showMenu={false}
+                      className={CARD}
+                      open={detailOpen.Summary}
+                      onOpenChange={(open) => setDetailOpen((prev) => ({ ...prev, Summary: open }))}
+                    >
                       <div className="grid gap-density-xl sm:grid-cols-2 lg:grid-cols-3">
                         <Field label="Name" value={CUSTOMER.name} />
                         <Field label="First name" value={CUSTOMER.firstName} />
@@ -773,7 +809,13 @@ export default function UsGlass2Page() {
                         <Button size="sm" className={PRIMARY_BTN}>Edit</Button>
                       </div>
                     </CollapsibleCard>
-                    <CollapsibleCard title="Billing address" showMenu={false} className={CARD}>
+                    <CollapsibleCard
+                      title="Billing address"
+                      showMenu={false}
+                      className={CARD}
+                      open={detailOpen["Billing address"]}
+                      onOpenChange={(open) => setDetailOpen((prev) => ({ ...prev, "Billing address": open }))}
+                    >
                       <div className="grid gap-density-xl sm:grid-cols-2 lg:grid-cols-3">
                         <Field label="Postal addr 1" value="8287 Fake Mailbox Rd" />
                         <Field label="Postal addr 2" value="—" />
