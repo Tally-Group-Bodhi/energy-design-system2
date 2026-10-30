@@ -136,6 +136,7 @@ const navigationSections = [
       { label: "Demo OpCon", href: "/pages/demo-opcon" },
       { label: "C&I Portal", href: "/pages/ci-portal" },
       { label: "US Glass", href: "/pages/us-glass" },
+      { label: "US Glass 2", href: "/pages/us-glass-2" },
     ],
   },
 ];

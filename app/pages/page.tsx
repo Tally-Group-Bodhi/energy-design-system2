@@ -190,6 +190,14 @@ const pages = [
     icon: "analytics",
     tags: ["Glass", "Report Studio", "Charts", "Finance", "US"],
   },
+  {
+    title: "US Glass 2",
+    description:
+      "US Glass customer workspace: search, account, financial, and interaction views in Glass chrome",
+    href: "/pages/us-glass-2",
+    icon: "account_circle",
+    tags: ["Glass", "Customer", "Accounts", "US"],
+  },
 ];
 
 export default function PagesIndex() {
